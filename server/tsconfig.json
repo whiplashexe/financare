@@ -1,8 +1,5 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "target": "ESNext",
     "module": "preserve",
     "moduleResolution": "bundler",
