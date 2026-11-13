@@ -1,0 +1,457 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "28f9f2a6-9be3-4f55-9d65-3048585f797a",
+  "prevIds": [
+    "d0653e1e-15ef-400c-89d3-076631f163d3"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|tbl|public.refresh_token",
+        "n|tbl|public.refresh_token",
+        "e|tbl|public.refresh_token",
+        "n|rel|public.refresh_token",
+        "n|type|public.refresh_token",
+        "n|rel|public.refresh_token_pkey",
+        "n|rel|public.refresh_token_token_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_user_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_user_id_idx",
+        "n|idx|public.refresh_token_user_id_idx",
+        "e|idx|public.refresh_token_user_id_idx",
+        "n|rel|public.refresh_token_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_family_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_family_id_idx",
+        "n|idx|public.refresh_token_family_id_idx",
+        "e|idx|public.refresh_token_family_id_idx",
+        "n|rel|public.refresh_token_family_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.family_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_expires_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_expires_at_idx",
+        "n|idx|public.refresh_token_expires_at_idx",
+        "e|idx|public.refresh_token_expires_at_idx",
+        "n|rel|public.refresh_token_expires_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.expires_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "n|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "e|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "n|con|public.refresh_token.refresh_token_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.refresh_token.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "n|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "e|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "n|con|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.replaced_by",
+        "n|col|public.refresh_token.id",
+        "e|uniqueness|public.refresh_token.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "refresh_token",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'RTK' || lpad(nextval('user_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "user_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "family_id",
+        "type": "varchar(36)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "token_hash",
+        "type": "char(64)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "device_info",
+        "type": "varchar(255)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "revoked_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "replaced_by",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_user_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_family_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "family_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_expires_at_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "expires_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_replaced_by_refresh_token_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "replaced_by"
+        ],
+        "schemaTo": "public",
+        "tableTo": "refresh_token",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_token_hash_key",
+        "nameExplicit": false,
+        "columns": [
+          "token_hash"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "refresh_token",
+        "name": "refresh_token_id_format",
+        "value": "\"id\" ~ '^RTK[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    }
+  ]
+}
