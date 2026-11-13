@@ -11,7 +11,7 @@ REST API endpoint reference (Express). User flows and sequence diagrams are in [
 | Authentication | `Authorization: Bearer <access_token>` (JWT, 15 minutes). Endpoints marked 🔓 are public, the rest are 🔒 login required |
 | Amount | IDR integer without decimals (`1500000`) |
 | Date | ISO 8601 UTC for timestamps (`2026-11-13T01:00:00Z`); `YYYY-MM-DD` for pure dates (due date, plan date) |
-| ID | UUID |
+| ID | String with entity prefix and sequence number, e.g. `TRANS001` (see `erd.md`) |
 | Ownership | All data is scoped by the `user_id` from the token. Data belonging to other users returns `404` |
 | Pagination | `?cursor=<id>&limit=20` (max 100). The response includes `pagination.next_cursor` (null when exhausted) |
 | Idempotency | The `Idempotency-Key` header (UUID) is supported on `POST /transactions` and `POST .../confirm`; the same key within 24 hours returns the first result |
@@ -190,7 +190,7 @@ Request: `{ "platform": "ANDROID" | "IOS", "push_token": "..." }`. Response `201
 **Account object**
 | Field | Type | Description |
 |---|---|---|
-| `id` | uuid | |
+| `id` | string | |
 | `name` | string | Required, 1–50 characters |
 | `type` | enum | `BANK` / `EWALLET` / `CASH` |
 | `institution` | string? | Empty for Cash |
@@ -275,14 +275,14 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 | `name` | string | Yes | Max 100 characters |
 | `amount` | int | Yes | > 0 |
 | `date` | datetime | Yes | Must not be in the future; defaults to now |
-| `account_id` | uuid | Yes | An active account owned by the user. For transfers = source |
-| `to_account_id` | uuid | Transfer | Active account, not the same as the source |
+| `account_id` | string | Yes | An active account owned by the user. For transfers = source |
+| `to_account_id` | string | Transfer | Active account, not the same as the source |
 | `admin_fee` | int | No | Transfers only, ≥ 0. Created as a linked outcome (`parent_transaction_id`) |
-| `category_id` | uuid | No | Category type must match. Not applicable to transfers |
+| `category_id` | string | No | Category type must match. Not applicable to transfers |
 | `location` | string | No | |
 | `note` | string | No | |
 | `tags` | string[] | No | |
-| `plan_id` | uuid | No | ID of a recurring/one-time plan |
+| `plan_id` | string | No | ID of a recurring/one-time plan |
 | `images` | array | No | Max 5: `{ public_id, mime_type, size }` |
 | `source` | enum | Read-only | `MANUAL` / `AUTO` |
 
@@ -348,8 +348,8 @@ Response `200` transaction object. Errors: `404` if already permanently deleted;
 | `name` | string | Yes | |
 | `type` | enum | Yes | `INCOME` / `OUTCOME` |
 | `amount` | int | Yes | > 0 |
-| `account_id` | uuid | Yes | |
-| `category_id` | uuid | No | |
+| `account_id` | string | Yes | |
+| `category_id` | string | No | |
 | `frequency` | enum | Yes | `DAILY` / `WEEKLY` / `MONTHLY` / `YEARLY` |
 | `start_date` | date | Yes | Today or later |
 | `end_date` | date? | No | After `start_date` |
@@ -393,7 +393,7 @@ Response `200` plan object. On `resume`, `next_due_date` is calculated to the ne
 | `name` | string | Yes | |
 | `date` | date | Yes | Today or later |
 | `target_amount` | int | Yes | > 0 |
-| `source_account_id` | uuid? | No | Empty = use total balance |
+| `source_account_id` | string? | No | Empty = use total balance |
 | `location`, `note` | string? | No | |
 | `reminder_offsets` | int[] | Yes | Subset of `[1, 3, 7, 14]`, more than one allowed |
 | `status` | enum | Read-only | `PLANNED` / `DONE` / `MISSED` / `CANCELLED` |

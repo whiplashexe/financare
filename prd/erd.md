@@ -35,169 +35,383 @@ erDiagram
     ONE_TIME_PLAN |o--o{ REMINDER : schedules
 ```
 
-## 2. Entities and Attributes
+## 2. ID Format
 
-Conventions: primary keys are `uuid`; money is `bigint` (IDR, no decimals); timestamps are `timestamptz` stored in UTC; every table has `created_at` and `updated_at` unless noted. `PK` = primary key, `FK` = foreign key, `UK` = unique.
+Every primary key is a human-readable string made of an entity prefix and a zero-padded sequence number, for example `TRANS001`.
+
+| Entity | Prefix | Example |
+|---|---|---|
+| User | `USR` | `USR001` |
+| Account | `ACC` | `ACC001` |
+| Category | `CAT` | `CAT001` |
+| Transaction | `TRANS` | `TRANS001` |
+| TransactionImage | `IMG` | `IMG001` |
+| RecurringPlan | `RPLAN` | `RPLAN001` |
+| PlanOccurrence | `OCC` | `OCC001` |
+| OneTimePlan | `OPLAN` | `OPLAN001` |
+| Reminder | `RMD` | `RMD001` |
+| RefreshToken | `RTK` | `RTK001` |
+| PasswordResetToken | `PRT` | `PRT001` |
+| DeviceToken | `DVC` | `DVC001` |
+
+Rules:
+- Type: `varchar(20)`. Pattern: `^[A-Z]+[0-9]{3,}$`. Minimum 3 digits; the number simply grows past 999 (`TRANS1000`), it is not capped.
+- The number comes from one PostgreSQL sequence per table (for example `transaction_id_seq`). The ID is built in the database as `'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0')`, so concurrent inserts never collide. Gaps are allowed (failed inserts and rollbacks consume numbers).
+- The sequence is **global per table**, not per user. IDs are unique across all users.
+- IDs are never reused or edited after creation.
+- Sequential IDs are guessable. Safety relies on every query being scoped by `user_id` (another user's ID returns `404`), never on the ID being secret.
+- `IdempotencyKey.key` is the exception: it is the client-generated UUID from the `Idempotency-Key` header, stored as `varchar(64)`.
+
+## 3. Entity Diagram with Attributes
 
 ```mermaid
 erDiagram
     USER {
-        uuid id PK
+        string id PK
         string name
         string email UK
         string password_hash
-        string timezone "IANA, e.g. Asia/Makassar"
-        boolean hide_balance "default false"
-        time notif_send_time "default 08:00"
-        time quiet_hours_start "nullable"
-        time quiet_hours_end "nullable"
-        boolean push_enabled "default true"
-        boolean email_fallback "default false"
-        timestamptz deleted_at "set while account deletion runs"
+        string timezone
+        boolean hide_balance
+        time notif_send_time
+        time quiet_hours_start
+        time quiet_hours_end
+        boolean push_enabled
+        boolean email_fallback
+        timestamptz deleted_at
     }
 
     REFRESH_TOKEN {
-        uuid id PK
-        uuid user_id FK
-        uuid family_id "one login session"
-        string token_hash UK "SHA-256, never the raw token"
+        string id PK
+        string user_id FK
+        string family_id
+        string token_hash UK
         string device_info
         timestamptz expires_at
-        timestamptz revoked_at "nullable"
-        uuid replaced_by "nullable, next token in rotation"
+        timestamptz revoked_at
+        string replaced_by FK
     }
 
     PASSWORD_RESET_TOKEN {
-        uuid id PK
-        uuid user_id FK
+        string id PK
+        string user_id FK
         string token_hash UK
-        timestamptz expires_at "30 minutes"
-        timestamptz used_at "nullable"
+        timestamptz expires_at
+        timestamptz used_at
     }
 
     DEVICE_TOKEN {
-        uuid id PK
-        uuid user_id FK
-        string token UK "FCM or APNs"
-        enum platform "ANDROID, IOS"
+        string id PK
+        string user_id FK
+        string token UK
+        enum platform
         timestamptz last_seen_at
     }
 
     ACCOUNT {
-        uuid id PK
-        uuid user_id FK
+        string id PK
+        string user_id FK
         string name
-        enum type "BANK, EWALLET, CASH"
-        string institution "nullable"
-        bigint initial_balance "default 0"
-        string last4 "nullable, 4 digits"
-        string color "nullable"
-        string icon "nullable"
-        boolean include_in_total "default true"
-        enum status "ACTIVE, ARCHIVED"
+        enum type
+        string institution
+        bigint initial_balance
+        string last4
+        string color
+        string icon
+        boolean include_in_total
+        enum status
     }
 
     CATEGORY {
-        uuid id PK
-        uuid user_id FK
+        string id PK
+        string user_id FK
         string name
-        enum type "INCOME, OUTCOME"
-        string icon "nullable"
-        boolean is_default "seeded at register"
-        boolean is_fallback "the Other category, protected"
+        enum type
+        string icon
+        boolean is_default
+        boolean is_fallback
     }
 
     TRANSACTION {
-        uuid id PK
-        uuid user_id FK
-        uuid account_id FK "source account"
-        uuid to_account_id FK "nullable, TRANSFER only"
-        uuid category_id FK "nullable"
-        uuid parent_transaction_id FK "nullable, transfer admin fee"
-        uuid recurring_plan_id FK "nullable"
-        uuid one_time_plan_id FK "nullable"
-        enum type "INCOME, OUTCOME, TRANSFER"
-        string name "max 100"
-        bigint amount "greater than 0"
-        timestamptz date "not in the future"
-        string location "nullable"
-        text note "nullable"
+        string id PK
+        string user_id FK
+        string account_id FK
+        string to_account_id FK
+        string category_id FK
+        string parent_transaction_id FK
+        string recurring_plan_id FK
+        string one_time_plan_id FK
+        enum type
+        string name
+        bigint amount
+        timestamptz date
+        string location
+        text note
         text_array tags
-        enum source "MANUAL, AUTO"
-        timestamptz deleted_at "nullable, soft delete"
+        enum source
+        timestamptz deleted_at
     }
 
     TRANSACTION_IMAGE {
-        uuid id PK
-        uuid transaction_id FK
-        string public_id UK "Cloudinary public_id"
-        string mime_type "jpg, png, heic"
-        int size "bytes, max 5 MB"
-        smallint position "0 to 4"
+        string id PK
+        string transaction_id FK
+        string public_id UK
+        string mime_type
+        int size
+        smallint position
     }
 
     RECURRING_PLAN {
-        uuid id PK
-        uuid user_id FK
-        uuid account_id FK
-        uuid category_id FK "nullable"
+        string id PK
+        string user_id FK
+        string account_id FK
+        string category_id FK
         string name
-        enum type "INCOME, OUTCOME"
+        enum type
         bigint amount
-        enum frequency "DAILY, WEEKLY, MONTHLY, YEARLY"
-        date start_date "anchor for day-of-month"
-        date end_date "nullable"
-        int_array reminder_offsets "subset of 0,1,3,7"
-        boolean auto_record "default false"
+        enum frequency
+        date start_date
+        date end_date
+        int_array reminder_offsets
+        boolean auto_record
         date next_due_date
-        enum status "ACTIVE, PAUSED, ENDED"
+        enum status
     }
 
     PLAN_OCCURRENCE {
-        uuid id PK
-        uuid recurring_plan_id FK
+        string id PK
+        string recurring_plan_id FK
         date due_date
-        enum outcome "CONFIRMED, SKIPPED, AUTO_RECORDED"
-        uuid transaction_id FK "nullable, null when SKIPPED"
+        enum outcome
+        string transaction_id FK
         timestamptz resolved_at
     }
 
     ONE_TIME_PLAN {
-        uuid id PK
-        uuid user_id FK
-        uuid source_account_id FK "nullable"
+        string id PK
+        string user_id FK
+        string source_account_id FK
         string name
         date date
         bigint target_amount
-        string location "nullable"
-        text note "nullable"
-        int_array reminder_offsets "subset of 1,3,7,14"
-        enum status "PLANNED, DONE, MISSED, CANCELLED"
+        string location
+        text note
+        int_array reminder_offsets
+        enum status
     }
 
     REMINDER {
-        uuid id PK
-        uuid user_id FK
-        uuid recurring_plan_id FK "nullable"
-        uuid one_time_plan_id FK "nullable"
+        string id PK
+        string user_id FK
+        string recurring_plan_id FK
+        string one_time_plan_id FK
         date due_date
         timestamptz scheduled_at
-        timestamptz sent_at "nullable"
-        enum channel "PUSH, EMAIL"
-        enum status "SCHEDULED, SENT, ACTED, SNOOZED, SKIPPED, FAILED"
-        int attempts "retry counter"
+        timestamptz sent_at
+        enum channel
+        enum status
+        int attempts
     }
 
     IDEMPOTENCY_KEY {
-        uuid key PK
-        uuid user_id FK
+        string key PK
+        string user_id FK
         string route
         jsonb response
-        timestamptz created_at "purged after 24 hours"
+        timestamptz created_at
     }
 ```
 
-## 3. Relationships
+## 4. Data Dictionary
+
+Conventions: money is `bigint` in IDR with no decimals; timestamps are `timestamptz` stored in UTC; "Null" = `Y` means the column is optional. Every table also has `created_at timestamptz NOT NULL DEFAULT now()` and `updated_at timestamptz NOT NULL DEFAULT now()` unless stated. Monetary limits use `MAX_AMOUNT = 999,999,999,999` (just under Rp1 trillion).
+
+### 4.1 `user`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `USR` + 3+ digits | PK |
+| `name` | varchar(100) | N | | 1 – 100 chars | Trimmed |
+| `email` | varchar(254) | N | | Valid email, max 254 | Stored lowercase; unique on `lower(email)` |
+| `password_hash` | varchar(255) | N | | | argon2id (or bcrypt) hash. Raw password: 8 – 72 chars at the API |
+| `timezone` | varchar(64) | N | `Asia/Jakarta` | IANA name | Used for reminders and "today" |
+| `hide_balance` | boolean | N | `false` | | Hide-balance preference |
+| `notif_send_time` | time | N | `08:00` | | Local time of daily reminder digest |
+| `quiet_hours_start` | time | Y | null | | Both quiet-hour columns are set together or both null |
+| `quiet_hours_end` | time | Y | null | | |
+| `push_enabled` | boolean | N | `true` | | |
+| `email_fallback` | boolean | N | `false` | | Email is used when push is disabled or has no device token |
+| `deleted_at` | timestamptz | Y | null | | Set while account deletion runs in the background |
+
+### 4.2 `refresh_token`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `RTK` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `family_id` | varchar(36) | N | | | Shared by all tokens of one login session (random UUID) |
+| `token_hash` | char(64) | N | | | SHA-256 hex of the opaque token; unique. The raw token is never stored |
+| `device_info` | varchar(255) | Y | null | ≤ 255 chars | Device name / platform |
+| `expires_at` | timestamptz | N | now + 30 days | | |
+| `revoked_at` | timestamptz | Y | null | | Set on rotation, logout, or reuse detection |
+| `replaced_by` | varchar(20) | Y | null | | FK → `refresh_token.id`; next token in the rotation chain |
+
+### 4.3 `password_reset_token`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `PRT` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `token_hash` | char(64) | N | | | SHA-256 hex; unique |
+| `expires_at` | timestamptz | N | now + 30 minutes | | |
+| `used_at` | timestamptz | Y | null | | Single use |
+
+### 4.4 `device_token`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `DVC` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `token` | varchar(512) | N | | 1 – 512 chars | FCM / APNs token; unique |
+| `platform` | enum | N | | `ANDROID`, `IOS` | |
+| `last_seen_at` | timestamptz | N | now | | Stale tokens are removed when the push service rejects them |
+
+### 4.5 `account`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `ACC` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `name` | varchar(50) | N | | 1 – 50 chars | e.g. "BCA Salary" |
+| `type` | enum | N | | `BANK`, `EWALLET`, `CASH` | |
+| `institution` | varchar(50) | Y | null | ≤ 50 chars | Must be null for `CASH` |
+| `initial_balance` | bigint | N | `0` | −MAX_AMOUNT … MAX_AMOUNT | Integer IDR; may be negative |
+| `last4` | char(4) | Y | null | 4 digits (`^[0-9]{4}$`) | Only a distinguishing hint; the full number is never stored |
+| `color` | varchar(9) | Y | null | `#RRGGBB` or `#RRGGBBAA` | |
+| `icon` | varchar(50) | Y | null | ≤ 50 chars | Icon key |
+| `include_in_total` | boolean | N | `true` | | |
+| `status` | enum | N | `ACTIVE` | `ACTIVE`, `ARCHIVED` | |
+
+Unique: `(user_id, lower(name))` among non-archived accounts is recommended to avoid duplicates (optional).
+
+### 4.6 `category`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `CAT` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `name` | varchar(50) | N | | 1 – 50 chars | |
+| `type` | enum | N | | `INCOME`, `OUTCOME` | |
+| `icon` | varchar(50) | Y | null | ≤ 50 chars | |
+| `is_default` | boolean | N | `false` | | Seeded at register |
+| `is_fallback` | boolean | N | `false` | | `true` only for "Other" (one per type per user); cannot be renamed or deleted |
+
+Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Health, Admin Fee, Other. Seeded income categories: Salary, Other.
+
+### 4.7 `transaction`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `TRANS` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `account_id` | varchar(20) | N | | | FK → `account.id`, `ON DELETE RESTRICT`. Source account for transfers |
+| `to_account_id` | varchar(20) | Y | null | | FK → `account.id`. Required for `TRANSFER`, null otherwise |
+| `category_id` | varchar(20) | Y | null | | FK → `category.id`, `ON DELETE SET NULL`. Must be null for `TRANSFER` |
+| `parent_transaction_id` | varchar(20) | Y | null | | FK → `transaction.id`, `ON DELETE CASCADE`. Set on the admin-fee outcome of a transfer |
+| `recurring_plan_id` | varchar(20) | Y | null | | FK → `recurring_plan.id`, `ON DELETE SET NULL` |
+| `one_time_plan_id` | varchar(20) | Y | null | | FK → `one_time_plan.id`, `ON DELETE SET NULL` |
+| `type` | enum | N | | `INCOME`, `OUTCOME`, `TRANSFER` | |
+| `name` | varchar(100) | N | | 1 – 100 chars | |
+| `amount` | bigint | N | | 1 … MAX_AMOUNT | Integer IDR, always positive |
+| `date` | timestamptz | N | now | ≤ now | Future dates are rejected |
+| `location` | varchar(255) | Y | null | ≤ 255 chars | |
+| `note` | text | Y | null | ≤ 1,000 chars | Limit enforced by the API |
+| `tags` | text[] | N | `{}` | ≤ 10 tags, each 1 – 30 chars | Lowercased and de-duplicated |
+| `source` | enum | N | `MANUAL` | `MANUAL`, `AUTO` | `AUTO` for auto-recorded recurring plans |
+| `deleted_at` | timestamptz | Y | null | | Soft delete; purged permanently after 30 days |
+
+### 4.8 `transaction_image`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `IMG` + 3+ digits | PK |
+| `transaction_id` | varchar(20) | N | | | FK → `transaction.id`, `ON DELETE CASCADE` |
+| `public_id` | varchar(255) | N | | 1 – 255 chars | Cloudinary `public_id`; unique |
+| `mime_type` | varchar(20) | N | | `image/jpeg`, `image/png`, `image/heic` | |
+| `size` | int | N | | 1 … 5,242,880 bytes (5 MB) | |
+| `position` | smallint | N | | 0 … 4 | Display order; at most 5 images per transaction |
+
+### 4.9 `recurring_plan`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `RPLAN` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `account_id` | varchar(20) | N | | | FK → `account.id`, `ON DELETE RESTRICT` |
+| `category_id` | varchar(20) | Y | null | | FK → `category.id`, `ON DELETE SET NULL` |
+| `name` | varchar(100) | N | | 1 – 100 chars | |
+| `type` | enum | N | | `INCOME`, `OUTCOME` | |
+| `amount` | bigint | N | | 1 … MAX_AMOUNT | Estimated amount per period |
+| `frequency` | enum | N | | `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY` | |
+| `start_date` | date | N | | ≥ creation date | Anchor for the day of month (29–31 rolls to month end) |
+| `end_date` | date | Y | null | > `start_date` | Null means no end |
+| `reminder_offsets` | int[] | N | | 1 – 4 distinct values from {0, 1, 3, 7} | Days before the due date |
+| `auto_record` | boolean | N | `false` | | |
+| `next_due_date` | date | N | `start_date` | | Advances after confirm / skip / auto-record |
+| `status` | enum | N | `ACTIVE` | `ACTIVE`, `PAUSED`, `ENDED` | `ENDED` once past `end_date` |
+
+### 4.10 `plan_occurrence`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `OCC` + 3+ digits | PK |
+| `recurring_plan_id` | varchar(20) | N | | | FK → `recurring_plan.id`, `ON DELETE CASCADE` |
+| `due_date` | date | N | | | Unique together with `recurring_plan_id` |
+| `outcome` | enum | N | | `CONFIRMED`, `SKIPPED`, `AUTO_RECORDED` | |
+| `transaction_id` | varchar(20) | Y | null | | FK → `transaction.id`, `ON DELETE SET NULL`. Null when `SKIPPED` |
+| `resolved_at` | timestamptz | N | now | | |
+
+### 4.11 `one_time_plan`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `OPLAN` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `source_account_id` | varchar(20) | Y | null | | FK → `account.id`, `ON DELETE SET NULL`. Null = check funding against total balance |
+| `name` | varchar(100) | N | | 1 – 100 chars | |
+| `date` | date | N | | ≥ creation date | Execution date |
+| `target_amount` | bigint | N | | 1 … MAX_AMOUNT | Funds to prepare |
+| `location` | varchar(255) | Y | null | ≤ 255 chars | |
+| `note` | text | Y | null | ≤ 1,000 chars | |
+| `reminder_offsets` | int[] | N | | 1 – 4 distinct values from {1, 3, 7, 14} | |
+| `status` | enum | N | `PLANNED` | `PLANNED`, `DONE`, `MISSED`, `CANCELLED` | |
+
+### 4.12 `reminder`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `RMD` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `recurring_plan_id` | varchar(20) | Y | null | | FK → `recurring_plan.id`, `ON DELETE CASCADE` |
+| `one_time_plan_id` | varchar(20) | Y | null | | FK → `one_time_plan.id`, `ON DELETE CASCADE`. Exactly one of the two plan columns is set |
+| `due_date` | date | N | | | The occurrence or plan date being reminded |
+| `scheduled_at` | timestamptz | N | | | Computed from the user's send time and timezone |
+| `sent_at` | timestamptz | Y | null | | |
+| `channel` | enum | N | `PUSH` | `PUSH`, `EMAIL` | |
+| `status` | enum | N | `SCHEDULED` | `SCHEDULED`, `SENT`, `ACTED`, `SNOOZED`, `SKIPPED`, `FAILED` | |
+| `attempts` | int | N | `0` | 0 … 5 | Sending retries; `FAILED` after the limit |
+
+### 4.13 `idempotency_key`
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `key` | varchar(64) | N | | 1 – 64 chars | Client UUID from the `Idempotency-Key` header. PK together with `user_id` |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `route` | varchar(100) | N | | ≤ 100 chars | e.g. `POST /transactions` |
+| `response` | jsonb | N | | | Stored response replayed on retry |
+| `created_at` | timestamptz | N | now | | Purged after 24 hours. This table has no `updated_at` |
+
+## 5. Relationships
 
 | Relationship | Cardinality | Notes |
 |---|---|---|
@@ -216,21 +430,25 @@ erDiagram
 | Plan → Reminder | 1 : N | A reminder belongs to exactly one plan (recurring or one-time) |
 | User → RefreshToken / DeviceToken / PasswordResetToken / IdempotencyKey | 1 : N | |
 
-## 4. Constraints
+## 6. Constraints
 
 **Checks**
 | Table | Constraint |
 |---|---|
-| `transaction` | `amount > 0` |
+| all tables | `id ~ '^PREFIX[0-9]{3,}$'` for the table's own prefix |
+| `transaction` | `amount > 0 AND amount <= 999999999999` |
 | `transaction` | `type = 'TRANSFER'` ⇔ `to_account_id IS NOT NULL`; `account_id <> to_account_id` |
 | `transaction` | `type = 'TRANSFER'` ⇒ `category_id IS NULL` |
 | `transaction` | `NOT (recurring_plan_id IS NOT NULL AND one_time_plan_id IS NOT NULL)` |
 | `transaction` | `parent_transaction_id` is only allowed with `type = 'OUTCOME'`, and the parent must be a `TRANSFER` |
+| `transaction` | `cardinality(tags) <= 10` |
 | `account` | `last4 ~ '^[0-9]{4}$'` when not null |
-| `recurring_plan` | `amount > 0`; `end_date IS NULL OR end_date > start_date`; `reminder_offsets <@ {0,1,3,7}` |
-| `one_time_plan` | `target_amount > 0`; `reminder_offsets <@ {1,3,7,14}` |
-| `reminder` | Exactly one of `recurring_plan_id` and `one_time_plan_id` is not null |
-| `transaction_image` | `position BETWEEN 0 AND 4` |
+| `account` | `type = 'CASH'` ⇒ `institution IS NULL` |
+| `recurring_plan` | `amount > 0`; `end_date IS NULL OR end_date > start_date`; `reminder_offsets <@ {0,1,3,7}`; `cardinality(reminder_offsets) BETWEEN 1 AND 4` |
+| `one_time_plan` | `target_amount > 0`; `reminder_offsets <@ {1,3,7,14}`; `cardinality(reminder_offsets) BETWEEN 1 AND 4` |
+| `reminder` | Exactly one of `recurring_plan_id` and `one_time_plan_id` is not null; `attempts BETWEEN 0 AND 5` |
+| `transaction_image` | `position BETWEEN 0 AND 4`; `size BETWEEN 1 AND 5242880` |
+| `user` | `(quiet_hours_start IS NULL) = (quiet_hours_end IS NULL)` |
 
 **Unique**
 | Table | Columns | Purpose |
@@ -239,10 +457,11 @@ erDiagram
 | `plan_occurrence` | `(recurring_plan_id, due_date)` | **Idempotent** confirm, skip, and auto-record. A second attempt for the same due date fails and returns the existing result |
 | `category` | `(user_id, type, lower(name))` | No duplicate category names |
 | `transaction_image` | `public_id` | One Cloudinary asset is attached once |
+| `transaction_image` | `(transaction_id, position)` | Stable ordering |
 | `refresh_token` | `token_hash` | |
+| `password_reset_token` | `token_hash` | |
 | `device_token` | `token` | Re-registering the same token updates the row |
 | `idempotency_key` | `(user_id, key)` | |
-| `transaction_image` | `(transaction_id, position)` | |
 
 **Application-level rules** (not expressible as simple checks)
 - Maximum 5 images per transaction.
@@ -250,8 +469,9 @@ erDiagram
 - Source and destination accounts must be `ACTIVE` when a transaction is created.
 - A category's `type` must match the transaction's `type`.
 - The fallback category ("Other") exists once per `type` per user and cannot be renamed or deleted.
+- No limit on the number of plans per user (MVP).
 
-## 5. Indexes
+## 7. Indexes
 
 | Table | Index | Used for |
 |---|---|---|
@@ -268,7 +488,7 @@ erDiagram
 | `refresh_token` | `(user_id)`, `(family_id)` | Revoke all or revoke a session family |
 | `refresh_token` | `(expires_at)` | Cleanup job |
 
-## 6. Balance Calculation
+## 8. Balance Calculation
 
 Balances are computed from transactions, not stored as the source of truth.
 
@@ -292,23 +512,24 @@ GROUP BY a.id;
 - `total_balance` sums `current_balance` of accounts with `status = 'ACTIVE'` and `include_in_total = true`.
 - Optionally, a cached `balance` column can be kept for speed, updated in the same database transaction as every write. A periodic consistency job compares it against the query above.
 
-## 7. Deletion and Retention Rules
+## 9. Deletion and Retention Rules
 
 | Action | Effect on data |
 |---|---|
 | Delete transaction | Sets `deleted_at` (also on its linked admin fee). Permanently deleted after 30 days, including Cloudinary images |
-| Delete account | Allowed only when it has no transactions, including trashed ones; otherwise archive it |
+| Delete account | Allowed only when it has no transactions, including trashed ones (`ON DELETE RESTRICT`); otherwise archive it |
 | Archive account | `status = 'ARCHIVED'`. History stays, balance leaves the total |
-| Delete recurring plan | `transaction.recurring_plan_id` set to null (`ON DELETE SET NULL`); `plan_occurrence` and `reminder` rows are removed |
+| Delete recurring plan | `transaction.recurring_plan_id` set to null; `plan_occurrence` and `reminder` rows are removed |
 | Delete one-time plan | `transaction.one_time_plan_id` set to null; its reminders are removed |
 | Delete category | Transactions are re-pointed to the fallback category in the same database transaction, then the category row is deleted |
 | Delete user | All user-owned rows removed (`ON DELETE CASCADE` from `user`), then Cloudinary folder `financare/<user_id>/` is deleted by a background job |
 | Expired tokens | `refresh_token`, `password_reset_token`, and `idempotency_key` rows are purged by a daily job |
 
-## 8. Changes Compared with the Main PRD Model
+## 10. Changes Compared with the Main PRD Model
 
 | Change | Reason |
 |---|---|
+| Primary keys are prefixed strings (`TRANS001`) instead of UUIDs | Human-readable IDs |
 | `TransactionImage.storage_key` replaced by `public_id` | Images are stored in Cloudinary |
 | `Transaction.plan_id` split into `recurring_plan_id` and `one_time_plan_id` | Two plan tables; a single foreign key cannot reference both |
 | `Transaction` adds `parent_transaction_id`, `source`, `tags` | Transfer admin fee, auto-recorded marker, tag search |
