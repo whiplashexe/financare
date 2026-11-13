@@ -1,9 +1,11 @@
+import { logger } from "@/lib/logger";
 import z from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
+  LOG_LEVEL: z.enum(["error", "warn", "info", "http", "debug"]).optional(),
   PORT: z.coerce.number().int().min(1).max(65535).default(8000),
   DATABASE_URL: z.string().min(1),
 
@@ -17,6 +19,12 @@ const envSchema = z.object({
 });
 
 const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  logger.error("invalid environment variables", {
+    errors: z.flattenError(parsed.error).fieldErrors,
+  });
+}
 
 export const env = parsed.data;
 export type Env = z.infer<typeof envSchema>;
