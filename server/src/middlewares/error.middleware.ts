@@ -1,8 +1,8 @@
-import { env } from "@/config/env";
-import { logger } from "@/lib/logger";
-import { ApiError, type FieldErrors } from "@/utils/api.error.util";
 import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
+import { ApiError, type FieldErrors } from "../utils/api.error.util";
+import { logger } from "../lib/logger";
+import { env } from "../config/env";
 
 function formatZodErrors(error: ZodError): FieldErrors {
   const out: FieldErrors = {};

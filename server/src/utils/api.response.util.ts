@@ -1,5 +1,5 @@
-import { STATUS_CODES, type StatusCode } from "@/constants/status.codes";
 import type { Response } from "express";
+import { STATUS_CODES, type StatusCode } from "../constants/status.codes";
 
 type ApiResponseParams<T> = {
   success: boolean;
