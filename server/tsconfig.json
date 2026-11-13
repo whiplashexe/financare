@@ -1,13 +1,8 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "verbatimModuleSyntax": true
+    "module": "NodeNext",
+    "skipLibCheck": true
   },
   "include": ["src", "drizzle.config.ts"],
   "exclude": ["node_modules"]
