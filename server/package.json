@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "build": "bun build src/server.ts --outdir dist --target bun",
+    "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun dist/index.js"
   },
   "peerDependencies": {
