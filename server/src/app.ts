@@ -11,7 +11,4 @@ app.get("/", (_, res: Response, __) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.use(notFoundMiddleware);
-app.use(errorMiddleware);
-
 export default app;
