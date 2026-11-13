@@ -1,45 +1,29 @@
-import { STATUS_CODES, type StatusCode } from "@/constants/status.codes";
+export type FieldErrors = Record<string, string[]>;
 
 export class ApiError extends Error {
-  public readonly statusCode: StatusCode;
-  public readonly isOperational: boolean;
-  public readonly errors?: unknown;
-
   constructor(
-    statusCode: StatusCode,
+    public statusCode: number,
     message: string,
-    errors?: unknown,
-    isOperational = true,
+    public code: string,
+    public errors?: FieldErrors,
   ) {
     super(message);
     this.name = "ApiError";
-    this.statusCode = statusCode;
-    this.isOperational = isOperational;
-    this.errors = errors;
-
-    Error.captureStackTrace(this, this.constructor);
-  }
-  static badRequest(message = "bad request", errors?: unknown) {
-    return new ApiError(STATUS_CODES.BAD_REQUEST, message, errors);
   }
 
-  static unauthorized(message = "unauthorized") {
-    return new ApiError(STATUS_CODES.UNAUTHORIZED, message);
+  static badRequest(message: string, errors?: FieldErrors) {
+    return new ApiError(400, message, "VALIDATION_ERROR", errors);
   }
-
-  static forbidden(message = "forbidden") {
-    return new ApiError(STATUS_CODES.FORBIDDEN, message);
+  static unauthorized(message = "Unauthorized", code = "UNAUTHORIZED") {
+    return new ApiError(401, message, code);
   }
-
-  static notFound(message = "not found") {
-    return new ApiError(STATUS_CODES.NOT_FOUND, message);
+  static notFound(message = "Not found") {
+    return new ApiError(404, message, "NOT_FOUND");
   }
-
-  static conflict(message = "conflict") {
-    return new ApiError(STATUS_CODES.CONFLICT, message);
+  static conflict(message: string) {
+    return new ApiError(409, message, "CONFLICT");
   }
-
-  static server(message = "internal server error") {
-    return new ApiError(STATUS_CODES.INTERNAL_SERVER_ERROR, message);
+  static businessRule(message: string) {
+    return new ApiError(422, message, "BUSINESS_RULE");
   }
 }
