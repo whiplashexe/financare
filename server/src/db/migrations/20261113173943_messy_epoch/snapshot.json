@@ -1,0 +1,38 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d0653e1e-15ef-400c-89d3-076631f163d3",
+  "prevIds": [
+    "5f56ee13-9b13-49c1-b7ca-f9d24506d341"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "user",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.user.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.user.id"
+      ],
+      "sqlHash": "dd2dcc0ea666cb1b"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"user\",\"id\"]",
+      "set": {
+        "default": "'USR' || lpad(nextval('user_id_seq')::text, 3, '0')"
+      }
+    }
+  ]
+}

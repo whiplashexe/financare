@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "id" SET DEFAULT 'USR' || lpad(nextval('user_id_seq')::text, 3, '0');
