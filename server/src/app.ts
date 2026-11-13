@@ -1,7 +1,5 @@
 import express, { type Response } from "express";
 import cors from "cors";
-import { notFoundMiddleware } from "@/middlewares/notfound.middleware";
-import { errorMiddleware } from "@/middlewares/error.middleware";
 
 const app = express();
 app.use(express.json());
