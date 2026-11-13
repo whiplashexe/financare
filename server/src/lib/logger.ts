@@ -8,8 +8,8 @@ const devFormat = winston.format.combine(
   winston.format.timestamp({ format: "HH:mm:ss" }),
   winston.format.errors({ stack: true }),
   winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
-    const extra = Object.keys(meta).length ? `${JSON.stringify(meta)}` : "";
-    return `${timestamp} ${level}: ${stack ?? message}${extra}`;
+    const extra = Object.keys(meta).length ? `${JSON.stringify(meta)}` : " ";
+    return `${timestamp} ${level}: ${stack ?? message} ${extra}`;
   }),
 );
 
