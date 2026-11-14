@@ -23,6 +23,11 @@ erDiagram
     TRANSACTION ||--o{ TRANSACTION_IMAGE : has
     TRANSACTION |o--o{ TRANSACTION : "admin fee of"
 
+    USER ||--o{ TRANSACTION_TEMPLATE : saves
+    ACCOUNT |o--o{ TRANSACTION_TEMPLATE : "default account"
+    ACCOUNT |o--o{ TRANSACTION_TEMPLATE : "default transfer destination"
+    CATEGORY |o--o{ TRANSACTION_TEMPLATE : "default category"
+
     ACCOUNT ||--o{ RECURRING_PLAN : "used by"
     CATEGORY |o--o{ RECURRING_PLAN : classifies
     RECURRING_PLAN ||--o{ PLAN_OCCURRENCE : generates
@@ -53,6 +58,7 @@ Every primary key is a human-readable string made of an entity prefix and a zero
 | RefreshToken | `RTK` | `RTK001` |
 | PasswordResetToken | `PRT` | `PRT001` |
 | DeviceToken | `DVC` | `DVC001` |
+| TransactionTemplate | `TPL` | `TPL001` |
 
 Rules:
 - Type: `varchar(20)`. Pattern: `^[A-Z]+[0-9]{3,}$`. Minimum 3 digits; the number simply grows past 999 (`TRANS1000`), it is not capped.
@@ -211,6 +217,23 @@ erDiagram
         enum channel
         enum status
         int attempts
+    }
+
+    TRANSACTION_TEMPLATE {
+        string id PK
+        string user_id FK
+        string name
+        enum type
+        string transaction_name
+        bigint amount
+        string account_id FK
+        string to_account_id FK
+        string category_id FK
+        string location
+        text note
+        text_array tags
+        int use_count
+        timestamptz last_used_at
     }
 
     IDEMPOTENCY_KEY {
@@ -411,6 +434,29 @@ Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Heal
 | `response` | jsonb | N | | | Stored response replayed on retry |
 | `created_at` | timestamptz | N | now | | Purged after 24 hours. This table has no `updated_at` |
 
+### 4.14 `transaction_template`
+
+A saved set of transaction fields the user can reuse. Receipt images are **not** part of a template.
+
+| Column | Type | Null | Default | Min / Max | Notes |
+|---|---|---|---|---|---|
+| `id` | varchar(20) | N | sequence | `TPL` + 3+ digits | PK |
+| `user_id` | varchar(20) | N | | | FK → `user.id`, `ON DELETE CASCADE` |
+| `name` | varchar(50) | N | | 1 – 50 chars | Template name, e.g. "Office lunch". Unique per user on `lower(name)` |
+| `type` | enum | N | | `INCOME`, `OUTCOME`, `TRANSFER` | |
+| `transaction_name` | varchar(100) | N | | 1 – 100 chars | Default name of the transaction created from the template |
+| `amount` | bigint | Y | null | 1 … MAX_AMOUNT | Null means the amount is entered every time the template is used |
+| `account_id` | varchar(20) | Y | null | | FK → `account.id`, `ON DELETE SET NULL`. Cleared when the account is archived or deleted. Source account for transfers |
+| `to_account_id` | varchar(20) | Y | null | | FK → `account.id`, `ON DELETE SET NULL`. Only for `TRANSFER`; cleared like `account_id` |
+| `category_id` | varchar(20) | Y | null | | FK → `category.id`, `ON DELETE SET NULL`. Must be null for `TRANSFER` |
+| `location` | varchar(255) | Y | null | ≤ 255 chars | |
+| `note` | text | Y | null | ≤ 1,000 chars | Limit enforced by the API |
+| `tags` | text[] | N | `{}` | ≤ 10 tags, each 1 – 30 chars | Lowercased and de-duplicated |
+| `use_count` | int | N | `0` | ≥ 0 | Incremented each time a transaction is created from the template; used to sort |
+| `last_used_at` | timestamptz | Y | null | | Tie-breaker for sorting |
+
+There is no limit on the number of templates per user (MVP). The transaction created from a template does not store a reference back to it.
+
 ## 5. Relationships
 
 | Relationship | Cardinality | Notes |
@@ -429,6 +475,9 @@ Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Heal
 | Account → OneTimePlan (`source_account_id`) | 1 : N (optional) | Null means funding is checked against total balance |
 | Plan → Reminder | 1 : N | A reminder belongs to exactly one plan (recurring or one-time) |
 | User → RefreshToken / DeviceToken / PasswordResetToken / IdempotencyKey | 1 : N | |
+| User → TransactionTemplate | 1 : N | |
+| Account → TransactionTemplate (`account_id`, `to_account_id`) | 1 : N (optional) | Cleared (set to null) when the account is archived or deleted |
+| Category → TransactionTemplate | 1 : N (optional) | Re-pointed or cleared when the category is deleted |
 
 ## 6. Constraints
 
@@ -448,6 +497,9 @@ Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Heal
 | `one_time_plan` | `target_amount > 0`; `reminder_offsets <@ {1,3,7,14}`; `cardinality(reminder_offsets) BETWEEN 1 AND 4` |
 | `reminder` | Exactly one of `recurring_plan_id` and `one_time_plan_id` is not null; `attempts BETWEEN 0 AND 5` |
 | `transaction_image` | `position BETWEEN 0 AND 4`; `size BETWEEN 1 AND 5242880` |
+| `transaction_template` | `amount IS NULL OR (amount > 0 AND amount <= 999999999999)` |
+| `transaction_template` | `type <> 'TRANSFER'` ⇒ `to_account_id IS NULL`; `type = 'TRANSFER'` ⇒ `category_id IS NULL`; `account_id <> to_account_id` when both are set |
+| `transaction_template` | `cardinality(tags) <= 10` |
 | `user` | `(quiet_hours_start IS NULL) = (quiet_hours_end IS NULL)` |
 
 **Unique**
@@ -462,6 +514,7 @@ Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Heal
 | `password_reset_token` | `token_hash` | |
 | `device_token` | `token` | Re-registering the same token updates the row |
 | `idempotency_key` | `(user_id, key)` | |
+| `transaction_template` | `(user_id, lower(name))` | No two templates with the same name per user |
 
 **Application-level rules** (not expressible as simple checks)
 - Maximum 5 images per transaction.
@@ -487,6 +540,7 @@ Seeded outcome categories: Food, Transport, Bills, Shopping, Entertainment, Heal
 | `reminder` | `(user_id, status)` | "Action needed" list |
 | `refresh_token` | `(user_id)`, `(family_id)` | Revoke all or revoke a session family |
 | `refresh_token` | `(expires_at)` | Cleanup job |
+| `transaction_template` | `(user_id, use_count DESC, last_used_at DESC)` | Template list, most used first |
 
 ## 8. Balance Calculation
 
@@ -521,8 +575,10 @@ GROUP BY a.id;
 | Archive account | `status = 'ARCHIVED'`. History stays, balance leaves the total |
 | Delete recurring plan | `transaction.recurring_plan_id` set to null; `plan_occurrence` and `reminder` rows are removed |
 | Delete one-time plan | `transaction.one_time_plan_id` set to null; its reminders are removed |
-| Delete category | Transactions are re-pointed to the fallback category in the same database transaction, then the category row is deleted |
+| Delete category | Transactions and templates are re-pointed to the fallback category in the same database transaction, then the category row is deleted |
 | Delete user | All user-owned rows removed (`ON DELETE CASCADE` from `user`), then Cloudinary folder `financare/<user_id>/` is deleted by a background job |
+| Archive or delete account | Templates that use it get `account_id` / `to_account_id` set to null (done in the same database transaction as the archive; the delete path uses `ON DELETE SET NULL`). Unarchiving does not restore them |
+| Delete template | Row removed. Transactions created from it are unaffected |
 | Expired tokens | `refresh_token`, `password_reset_token`, and `idempotency_key` rows are purged by a daily job |
 
 ## 10. Changes Compared with the Main PRD Model
@@ -539,3 +595,4 @@ GROUP BY a.id;
 | `User` adds `hide_balance` and notification preference columns | Hide-balance feature and notification settings |
 | New `RefreshToken`, `PasswordResetToken`, `DeviceToken`, `IdempotencyKey` | JWT refresh rotation, password reset, push delivery, safe request retries |
 | `RecurringPlan.offset_pengingat` → `reminder_offsets` (array); `OneTimePlan` likewise | A plan may have several reminder offsets |
+| New `TransactionTemplate` | Reusable transaction presets (no images, optional amount) |

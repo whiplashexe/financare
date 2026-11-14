@@ -227,6 +227,7 @@ POST /api/v1/accounts
 ### 4.4 Archiving / deleting
 
 - `POST /accounts/:id/archive`: the balance is removed from the total, history remains, and the account no longer appears in the choices for new transactions. Active plans that use this account are shown with a "needs a different account" warning and their reminders keep running.
+- Transaction templates that use the account get their `account_id` / `to_account_id` cleared; the user picks another account when using them.
 - `POST /accounts/:id/unarchive`: reactivates it.
 - `DELETE /accounts/:id`: only if the account has no transactions. Otherwise `422 BUSINESS_RULE` ("Account already has transactions, archive it instead").
 
@@ -380,6 +381,80 @@ flowchart LR
 
 - `GET /transactions/trash` shows the contents of the trash.
 - Deleting a transaction created from a plan: the related plan does not automatically change status; the user is offered "Return plan to not completed".
+
+---
+
+### 5.6 Transaction templates
+
+Templates let the user save a transaction once and reuse it, so they do not retype the same data. A template stores type, name, amount (optional), account, category, location, note, and tags. **Receipt images are never copied.**
+
+**Creating a template**
+1. From a transaction's detail screen: tap "Save as template", enter a template name (for example "Office lunch"), and confirm.
+2. Or from the Templates screen: "+ Template" and fill in the fields. Amount may be left empty.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant App as React Native app
+    participant API as Express API
+    participant DB as Database
+    U->>App: Transaction detail → Save as template, enter name
+    App->>API: POST /templates {name, source_transaction_id}
+    API->>API: Check ownership, copy fields (no images), check unique name
+    API->>DB: Insert transaction_template
+    API-->>App: 201 {template}
+    App-->>U: "Template saved"
+```
+
+```http
+POST /api/v1/templates
+{ "name": "Monthly groceries", "source_transaction_id": "TRANS001" }
+```
+```json
+{ "data": { "id": "TPL001", "name": "Monthly groceries", "type": "OUTCOME", "transaction_name": "Monthly groceries", "amount": 450000, "account_id": "ACC002", "category_id": "CAT001", "use_count": 0, "missing": [] } }
+```
+
+**Using a template**
+1. On the "+ Transaction" screen, a row of templates is shown, most used first.
+2. Tap a template: the form is prefilled (type, name, account, category, location, note, tags). The date is today.
+3. If the amount is empty, the user enters it. If the account was cleared, the user picks one.
+4. Save. When nothing is missing, the whole flow is two taps; the "Record now" action on a template calls the one-tap endpoint.
+
+```mermaid
+flowchart TD
+    A[+ Transaction] --> B[Choose a template]
+    B --> C{template.missing empty?}
+    C -- Yes --> D[Option: Record now<br/>POST /templates/:id/record]
+    C -- Yes --> E[Or open prefilled form and adjust]
+    C -- No --> E
+    D --> F[201 transaction created, use_count + 1]
+    E --> G[POST /transactions with template_id]
+    G --> F
+    D -- 422 missing fields --> E
+```
+
+```http
+POST /api/v1/templates/TPL001/record
+Idempotency-Key: 6c1b...
+{ "amount": 460000 }
+```
+Response `201` has the same shape as creating a transaction (`transaction`, `account_balance_after`, `warnings`).
+
+**Rules and edge cases**
+| Situation | Behavior |
+|---|---|
+| Template amount is empty | The user must enter an amount; `missing` contains `amount` |
+| Account is archived or deleted | The template's `account_id` / `to_account_id` is cleared; the user chooses an account when using it. Unarchiving does not restore it |
+| Category is deleted | The template moves to the "Other" category, like transactions (see 4.5) |
+| Template is for a transfer | Supported. Source and destination accounts must differ; no category; admin fee is not stored in the template |
+| Receipt images | Never part of a template; add them to the created transaction afterwards |
+| Same template name twice | `409 CONFLICT` (names are unique per user, case-insensitive) |
+| Deleting a template | Removes only the template; transactions created from it stay |
+| Number of templates | No limit in the MVP |
+| Outcome exceeds balance | Same as a normal transaction: saved with a `NEGATIVE_BALANCE` warning |
+| Date | Defaults to now; future dates are rejected as usual |
+
+**Managing templates:** `GET /templates` (list), `PATCH /templates/:id` (edit; send `amount: null` to make it ask every time), `DELETE /templates/:id`.
 
 ---
 
@@ -701,5 +776,11 @@ The complete list of endpoints, fields, validation rules, and error codes is in 
 | 4 | Auto-record when balance is insufficient | Still recorded, with a warning in the notification |
 | 5 | Scope of Hide balance | Balances only. Transaction amounts and the income/outcome summary remain visible |
 | 6 | Verification when showing the balance | Not needed, just tap the eye icon |
+| 7 | Receipt images in templates | Not copied |
+| 8 | Template amount | May be empty (asked each time) |
+| 9 | Template account archived or deleted | Template `account_id` becomes empty |
+| 10 | Number of templates | Unlimited |
+| 11 | Transfer templates | Supported |
+| 12 | Templates in MVP | Yes, included in the MVP |
 
 Still open (technical): scheduler hosting, database, repo structure, and Expo vs. bare React Native.

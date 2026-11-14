@@ -218,7 +218,7 @@ All fields optional. Changing `initial_balance` on an account that already has t
 Response `204`. Errors: `422 BUSINESS_RULE` if transactions exist (including those in the trash).
 
 ### POST `/accounts/:id/archive`, `/unarchive`
-Response `200` Account object. Archiving removes the balance from the total; active plans that use this account are flagged `needs_account_change`.
+Response `200` Account object. Archiving removes the balance from the total; active plans that use this account are flagged `needs_account_change`. Templates that use this account get their `account_id` / `to_account_id` cleared.
 
 ---
 
@@ -283,6 +283,7 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 | `note` | string | No | |
 | `tags` | string[] | No | |
 | `plan_id` | string | No | ID of a recurring/one-time plan |
+| `template_id` | string | No | Write-only. ID of the template this transaction was created from; only used to increment the template's `use_count`. Not stored on the transaction |
 | `images` | array | No | Max 5: `{ public_id, mime_type, size }` |
 | `source` | enum | Read-only | `MANUAL` / `AUTO` |
 
@@ -328,7 +329,78 @@ Response `200` transaction object. Errors: `404` if already permanently deleted;
 
 ---
 
-## 8. Recurring Plans
+## 8. Transaction Templates
+
+Reusable presets for recording transactions quickly. A template stores transaction fields but never receipt images.
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/templates` | List, most used first |
+| POST | `/templates` | Create (from scratch or from an existing transaction) |
+| GET | `/templates/:id` | Detail |
+| PATCH | `/templates/:id` | Update |
+| DELETE | `/templates/:id` | Delete (transactions created from it are unaffected) |
+| POST | `/templates/:id/record` | Record a transaction in one call, with optional overrides |
+
+**Template object**
+| Field | Type | Required | Rule |
+|---|---|---|---|
+| `name` | string | Yes | 1–50 characters; unique per user (case-insensitive) |
+| `type` | enum | Yes | `INCOME` / `OUTCOME` / `TRANSFER` |
+| `transaction_name` | string | Yes | 1–100 characters; default name of the created transaction |
+| `amount` | int? | No | > 0. Null = ask every time |
+| `account_id` | string? | No | An active account owned by the user. Source account for transfers |
+| `to_account_id` | string? | No | Transfers only; not the same as `account_id` |
+| `category_id` | string? | No | Type must match. Not applicable to transfers |
+| `location` | string? | No | |
+| `note` | string? | No | Max 1,000 characters |
+| `tags` | string[] | No | Max 10 |
+| `use_count` | int | Read-only | Times a transaction was created from this template |
+| `last_used_at` | datetime? | Read-only | |
+| `missing` | string[] | Read-only | Fields still needed before a transaction can be recorded, e.g. `["amount", "account_id"]` |
+
+There is no limit on the number of templates per user (MVP).
+
+### GET `/templates`
+Sorted by `use_count` descending, then `last_used_at` descending. Response `200`: list of template objects (including `missing`).
+
+### POST `/templates`
+Request, from scratch:
+```json
+{ "name": "Office lunch", "type": "OUTCOME", "transaction_name": "Lunch", "amount": 35000, "account_id": "ACC002", "category_id": "CAT001" }
+```
+Request, from an existing transaction:
+```json
+{ "name": "Monthly groceries", "source_transaction_id": "TRANS001" }
+```
+- With `source_transaction_id`, the server copies `type`, `name` (as `transaction_name`), `amount`, `account_id`, `to_account_id`, `category_id`, `location`, `note`, and `tags`. **Images are not copied**, and a transfer's admin fee is not copied. Any field sent in the same request overrides the copied value.
+- The source transaction must belong to the user and not be in the trash (else `404`).
+- Response `201`: template object. Errors: `400` (invalid fields), `409` (name already used), `422` (inactive account, category type mismatch).
+
+### PATCH `/templates/:id`
+All fields optional. Send `"amount": null` to make the amount ask-every-time. Response `200`. Errors: `409` (duplicate name), `422`.
+
+### DELETE `/templates/:id`
+Response `204`.
+
+### POST `/templates/:id/record`
+Records a transaction immediately from the template. Header `Idempotency-Key` supported.
+
+Request (all optional overrides):
+```json
+{ "amount": 38000, "date": "2026-11-14T05:00:00Z", "account_id": "ACC003", "category_id": null, "note": "With a drink" }
+```
+- Overridable: `name`, `amount`, `date` (defaults to now, not in the future), `account_id`, `to_account_id`, `category_id`, `location`, `note`, `tags`. Images can be added afterwards through the transaction image endpoints.
+- If the template and the overrides together still lack a required value (`amount`, `account_id`, or `to_account_id` for transfers), the response is `422 BUSINESS_RULE` with `data.missing` listing the fields. The app then opens the form prefilled and asks the user to complete it.
+- The transaction goes through exactly the same validation and balance logic as `POST /transactions` (including the `NEGATIVE_BALANCE` warning).
+- On success, `use_count` is incremented and `last_used_at` is set, in the same database transaction.
+- Response `201`: same as `POST /transactions` (`transaction`, `account_balance_after` or `balances_after`, `warnings`).
+
+**Without the one-tap endpoint:** the app can also prefill the form from `GET /templates` and submit a normal `POST /transactions` with `template_id` set, which only updates the usage counters.
+
+---
+
+## 9. Recurring Plans
 
 | Method | Path | Description |
 |---|---|---|
@@ -375,7 +447,7 @@ Response `200` plan object. On `resume`, `next_due_date` is calculated to the ne
 
 ---
 
-## 9. One-Time Plans
+## 10. One-Time Plans
 
 | Method | Path | Description |
 |---|---|---|
@@ -416,7 +488,7 @@ Changing `date` on a `MISSED` plan returns it to `PLANNED` and recalculates the 
 
 ---
 
-## 10. Reminders
+## 11. Reminders
 
 | Method | Path | Description |
 |---|---|---|
@@ -429,7 +501,7 @@ Object: `{ "id", "plan_type": "RECURRING" | "ONE_TIME", "plan_id", "due_date", "
 
 ---
 
-## 11. Dashboard & Reports
+## 12. Dashboard & Reports
 
 | Method | Path | Description |
 |---|---|---|
@@ -461,7 +533,7 @@ Transfers only appear in `account-flow`; admin fees are counted as outcome in th
 
 ---
 
-## 12. Internal Endpoints (not for clients)
+## 13. Internal Endpoints (not for clients)
 
 Triggered by the scheduler (cron/queue) and protected by an internal secret, not a user token.
 
@@ -478,7 +550,7 @@ Triggered by the scheduler (cron/queue) and protected by an internal secret, not
 
 ---
 
-## 13. Data Model Additions Summary
+## 14. Data Model Additions Summary
 
 Required beyond the main PRD entity list:
 - `RefreshToken`: `id, user_id, family_id, token_hash, device_info, expires_at, revoked_at, replaced_by, created_at`
@@ -486,3 +558,4 @@ Required beyond the main PRD entity list:
 - `Transaction`: add `parent_transaction_id` (transfer admin fee), `source` (`MANUAL`/`AUTO`), `deleted_at`, `tags`; unique `(plan_id, due_date)` for recurring plan transactions
 - `User`: add `preferences.hide_balance`, `notification_preferences`
 - `IdempotencyKey`: `key, user_id, response, created_at`
+- `TransactionTemplate`: `id, user_id, name, type, transaction_name, amount, account_id, to_account_id, category_id, location, note, tags, use_count, last_used_at`
