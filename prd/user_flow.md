@@ -39,6 +39,7 @@ Method: JWT access token (15 minutes) + opaque refresh token (30 days, rotated).
 ### 2.1 Register
 
 **User flow**
+
 1. Open the Register screen and fill in name, email, password (min. 8 characters), and password confirmation.
 2. Tap "Sign Up".
 3. Success: the user is signed in immediately and taken to onboarding (create first account).
@@ -64,6 +65,7 @@ sequenceDiagram
 ```
 
 **Request**
+
 ```http
 POST /api/v1/auth/register
 {
@@ -76,10 +78,16 @@ POST /api/v1/auth/register
 ```
 
 **Response 201**
+
 ```json
 {
   "data": {
-    "user": { "id": "u1", "name": "Apri", "email": "apri@mail.com", "timezone": "Asia/Makassar" },
+    "user": {
+      "id": "u1",
+      "name": "Apri",
+      "email": "apri@mail.com",
+      "timezone": "Asia/Makassar"
+    },
     "access_token": "eyJhbGciOi...",
     "access_expires_in": 900,
     "refresh_token": "rt_9f3c...opaque"
@@ -88,6 +96,7 @@ POST /api/v1/auth/register
 ```
 
 **Rules**
+
 - Email is stored in lowercase and must be unique. Duplicate: `409 CONFLICT`.
 - Default categories are created at registration (Food, Transport, Bills, Shopping, Entertainment, Health, Salary, Other).
 - Rate limit: 5 attempts/minute per IP.
@@ -137,6 +146,7 @@ sequenceDiagram
 ```
 
 **Client rules**
+
 - Only one refresh process runs at a time; other requests wait for its result.
 - Refresh failed: delete local tokens and return to the Login screen with the message "Session expired, please sign in again".
 
@@ -166,6 +176,7 @@ A device-local feature that does not call the API. Configured in Settings. When 
 3. The location permission prompt only appears the first time the user taps "Auto-fill location" in the transaction form, not during onboarding.
 
 **Profile**
+
 - `GET /me`, `PATCH /me` (name, timezone).
 - `PATCH /me/notification-preferences`: send time (default `08:00`), quiet hours, push/email channels.
 - `PATCH /me/preferences { "hide_balance": true }`: hide balances (see 9.3). `GET /me` includes this value.
@@ -192,6 +203,7 @@ sequenceDiagram
 ```
 
 **Request**
+
 ```http
 POST /api/v1/accounts
 {
@@ -207,8 +219,21 @@ POST /api/v1/accounts
 ```
 
 **Response 201**
+
 ```json
-{ "data": { "id": "a1", "name": "BCA Salary", "type": "BANK", "institution": "BCA", "initial_balance": 2500000, "current_balance": 2500000, "last4": "1234", "include_in_total": true, "status": "ACTIVE" } }
+{
+  "data": {
+    "id": "a1",
+    "name": "BCA Salary",
+    "type": "BANK",
+    "institution": "BCA",
+    "initial_balance": 2500000,
+    "current_balance": 2500000,
+    "last4": "1234",
+    "include_in_total": true,
+    "status": "ACTIVE"
+  }
+}
 ```
 
 ### 4.2 Viewing accounts
@@ -220,6 +245,7 @@ POST /api/v1/accounts
 ### 4.3 Editing an account
 
 `PATCH /accounts/:id`. If `initial_balance` is changed and the account already has transactions:
+
 1. The server responds `422` with `code: "CONFIRMATION_REQUIRED"` and `preview: { old_balance, new_balance }`.
 2. The app shows a confirmation dialog: "Current balance will change from Rp3,000,000 to Rp3,500,000. Continue?"
 3. The user agrees: the app resends the request with `"confirm": true`.
@@ -270,6 +296,7 @@ sequenceDiagram
 ```
 
 **Request**
+
 ```http
 POST /api/v1/transactions
 Idempotency-Key: 6c1b...
@@ -289,10 +316,20 @@ Idempotency-Key: 6c1b...
 ```
 
 **Response 201**
+
 ```json
 {
   "data": {
-    "transaction": { "id": "t1", "type": "OUTCOME", "name": "Monthly groceries", "amount": 450000, "account_id": "a2", "images": [{ "id": "i1", "url": "https://res.cloudinary.com/.../s--sig--/..." }] },
+    "transaction": {
+      "id": "t1",
+      "type": "OUTCOME",
+      "name": "Monthly groceries",
+      "amount": 450000,
+      "account_id": "a2",
+      "images": [
+        { "id": "i1", "url": "https://res.cloudinary.com/.../s--sig--/..." }
+      ]
+    },
     "account_balance_after": 350000,
     "warnings": []
   }
@@ -344,6 +381,7 @@ POST /api/v1/transactions
 The form has a swap button (⇄) to reverse the source and destination. The destination choices do not show the same account as the source, and only show active accounts. The app provides "Withdraw cash" / "Deposit cash" shortcuts that automatically fill in the transfer name and account types.
 
 **Additional rules**
+
 - Insufficient source balance: can still be saved with a warning, same as outcome (the source balance becomes negative).
 - Future dates are rejected, same as other transactions.
 - The admin fee is stored as a separate outcome transaction linked to the transfer via `parent_transaction_id`. Because they are linked, editing or deleting the transfer also edits or deletes its admin fee, in a single database transaction.
@@ -365,6 +403,7 @@ The form has a swap button (⇄) to reverse the source and destination. The dest
 `PATCH /transactions/:id`. Changing the amount, type, date, or account recalculates the balances of both accounts (old and new) in a single database transaction.
 
 Images:
+
 - Add: repeat the sign → Cloudinary upload flow → `POST /transactions/:id/images {public_id, mime_type, size}` (check total ≤ 5).
 - Delete: `DELETE /transactions/:id/images/:imageId` → delete the record and call Cloudinary destroy.
 - Order: `PATCH /transactions/:id/images/order {ids: [...]}`.
@@ -389,6 +428,7 @@ flowchart LR
 Templates let the user save a transaction once and reuse it, so they do not retype the same data. A template stores type, name, amount (optional), account, category, location, note, and tags. **Receipt images are never copied.**
 
 **Creating a template**
+
 1. From a transaction's detail screen: tap "Save as template", enter a template name (for example "Office lunch"), and confirm.
 2. Or from the Templates screen: "+ Template" and fill in the fields. Amount may be left empty.
 
@@ -410,11 +450,25 @@ sequenceDiagram
 POST /api/v1/templates
 { "name": "Monthly groceries", "source_transaction_id": "TRANS001" }
 ```
+
 ```json
-{ "data": { "id": "TPL001", "name": "Monthly groceries", "type": "OUTCOME", "transaction_name": "Monthly groceries", "amount": 450000, "account_id": "ACC002", "category_id": "CAT001", "use_count": 0, "missing": [] } }
+{
+  "data": {
+    "id": "TPL001",
+    "name": "Monthly groceries",
+    "type": "OUTCOME",
+    "transaction_name": "Monthly groceries",
+    "amount": 450000,
+    "account_id": "ACC002",
+    "category_id": "CAT001",
+    "use_count": 0,
+    "missing": []
+  }
+}
 ```
 
 **Using a template**
+
 1. On the "+ Transaction" screen, a row of templates is shown, most used first.
 2. Tap a template: the form is prefilled (type, name, account, category, location, note, tags). The date is today.
 3. If the amount is empty, the user enters it. If the account was cleared, the user picks one.
@@ -438,6 +492,7 @@ POST /api/v1/templates/TPL001/record
 Idempotency-Key: 6c1b...
 { "amount": 460000 }
 ```
+
 Response `201` has the same shape as creating a transaction (`transaction`, `account_balance_after`, `warnings`).
 
 **Rules and edge cases**
@@ -480,11 +535,22 @@ POST /api/v1/recurring-plans
 ```
 
 **Response 201**
+
 ```json
-{ "data": { "id": "rp1", "name": "Gym", "status": "ACTIVE", "next_due_date": "2026-12-01", "reminder_offsets": [1, 0], "auto_record": false } }
+{
+  "data": {
+    "id": "rp1",
+    "name": "Gym",
+    "status": "ACTIVE",
+    "next_due_date": "2026-12-01",
+    "reminder_offsets": [1, 0],
+    "auto_record": false
+  }
+}
 ```
 
 **Rules**
+
 - `next_due_date` = `start_date` initially.
 - Monthly frequency with dates 29–31: in shorter months it falls on the last day of that month. The original date from `start_date` is kept as the reference (so Jan 31 → Feb 28 → Mar 31).
 - The start date may be today or in the future.
@@ -574,8 +640,20 @@ POST /api/v1/one-time-plans
 ```
 
 **Response 201**
+
 ```json
-{ "data": { "id": "op1", "status": "PLANNED", "target_amount": 1500000, "funding": { "available": 1200000, "shortfall": 300000, "sufficient": false } } }
+{
+  "data": {
+    "id": "op1",
+    "status": "PLANNED",
+    "target_amount": 1500000,
+    "funding": {
+      "available": 1200000,
+      "shortfall": 300000,
+      "sufficient": false
+    }
+  }
+}
 ```
 
 - The date must be today or in the future.
@@ -661,10 +739,20 @@ flowchart TD
 {
   "data": {
     "total_balance": 3800000,
-    "accounts": [{ "id": "a1", "name": "BCA Salary", "current_balance": 3000000 }],
+    "accounts": [
+      { "id": "a1", "name": "BCA Salary", "current_balance": 3000000 }
+    ],
     "month_summary": { "income": 8000000, "outcome": 4200000, "net": 3800000 },
     "recent_transactions": [],
-    "upcoming_reminders": [{ "plan_type": "ONE_TIME", "plan_id": "op1", "name": "Black Friday Shopping", "due": "2026-12-12", "funding": { "sufficient": false, "shortfall": 300000 } }],
+    "upcoming_reminders": [
+      {
+        "plan_type": "ONE_TIME",
+        "plan_id": "op1",
+        "name": "Black Friday Shopping",
+        "due": "2026-12-12",
+        "funding": { "sufficient": false, "shortfall": 300000 }
+      }
+    ],
     "action_needed": []
   }
 }
@@ -675,17 +763,18 @@ flowchart TD
 
 ### 9.2 Basic reports
 
-| Report | Endpoint |
-|---|---|
-| Spending by category | `GET /reports/outcome-by-category?from&to` |
-| Monthly income/outcome trend | `GET /reports/monthly-trend?months=6` |
-| Cash flow per account | `GET /reports/account-flow?from&to` |
+| Report                       | Endpoint                                   |
+| ---------------------------- | ------------------------------------------ |
+| Spending by category         | `GET /reports/outcome-by-category?from&to` |
+| Monthly income/outcome trend | `GET /reports/monthly-trend?months=6`      |
+| Cash flow per account        | `GET /reports/account-flow?from&to`        |
 
 ### 9.3 Hide Balance
 
 For users who do not want their balance to be immediately visible (for example when the app is opened in a public place).
 
 **User flow**
+
 1. On the dashboard, an eye icon sits next to the total balance. Tap to hide; tap again to show.
 2. While hidden, amounts are displayed as `Rp ••••••`.
 3. The option is also available in Settings → Privacy → "Hide balance".
@@ -704,10 +793,12 @@ sequenceDiagram
 ```
 
 **Request / Response**
+
 ```http
 PATCH /api/v1/me/preferences
 { "hide_balance": true }
 ```
+
 ```json
 { "data": { "hide_balance": true } }
 ```
@@ -730,6 +821,7 @@ The server reads `hide_balance` when composing the reminder content, because pus
 - On: "Prepare Rp1,500,000 for Black Friday Shopping (in 3 days). Funds in BCA are not yet sufficient."
 
 **Technical notes**
+
 - Hiding is done on the client. The API still returns balance data so that calculations and status changes are instant; only the way it is displayed and the notification content differ.
 - A single balance display component is used (`<Money value hideable />`) so this rule is consistent on every screen.
 - The value is stored on the server (synced across devices) and in local storage (so it is hidden immediately when the app opens, before the API response arrives).
@@ -740,14 +832,14 @@ The server reads `hide_balance` when composing the reminder content, because pus
 
 ## 10. Handling Special Conditions on the Client
 
-| Condition | Behavior |
-|---|---|
-| No connection | Reads show the message "No connection" (full offline mode is deferred to phase 2). The save button shows a retryable error; form data is not lost |
-| Timeout / 5xx | Retry with backoff for GET; for POST use the same `Idempotency-Key` |
-| 401 `TOKEN_EXPIRED` | Automatic refresh flow (2.3) |
-| Refresh failed | Forced logout + session expired message |
-| Camera/location/notification permission denied | The related feature is disabled with an explanation and a link to system settings |
-| Device timezone changes | The app offers to update the profile `timezone` so reminder times stay correct |
+| Condition                                      | Behavior                                                                                                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No connection                                  | Reads show the message "No connection" (full offline mode is deferred to phase 2). The save button shows a retryable error; form data is not lost |
+| Timeout / 5xx                                  | Retry with backoff for GET; for POST use the same `Idempotency-Key`                                                                               |
+| 401 `TOKEN_EXPIRED`                            | Automatic refresh flow (2.3)                                                                                                                      |
+| Refresh failed                                 | Forced logout + session expired message                                                                                                           |
+| Camera/location/notification permission denied | The related feature is disabled with an explanation and a link to system settings                                                                 |
+| Device timezone changes                        | The app offers to update the profile `timezone` so reminder times stay correct                                                                    |
 
 ---
 
@@ -768,19 +860,19 @@ The complete list of endpoints, fields, validation rules, and error codes is in 
 
 ## 13. Product Decisions
 
-| # | Question | Decision |
-|---|---|---|
-| 1 | Email verification at registration | Deferred (post-MVP). Password reset stays in the MVP |
-| 2 | Deleting a category that is already in use | Transactions are moved to the "Other" category (see 4.5) |
-| 3 | Plan and image limits | The number of plans is not limited in the MVP. Images are capped at 5 per transaction, with no total limit per user |
-| 4 | Auto-record when balance is insufficient | Still recorded, with a warning in the notification |
-| 5 | Scope of Hide balance | Balances only. Transaction amounts and the income/outcome summary remain visible |
-| 6 | Verification when showing the balance | Not needed, just tap the eye icon |
-| 7 | Receipt images in templates | Not copied |
-| 8 | Template amount | May be empty (asked each time) |
-| 9 | Template account archived or deleted | Template `account_id` becomes empty |
-| 10 | Number of templates | Unlimited |
-| 11 | Transfer templates | Supported |
-| 12 | Templates in MVP | Yes, included in the MVP |
+| #   | Question                                   | Decision                                                                                                            |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| 1   | Email verification at registration         | Deferred (post-MVP). Password reset stays in the MVP                                                                |
+| 2   | Deleting a category that is already in use | Transactions are moved to the "Other" category (see 4.5)                                                            |
+| 3   | Plan and image limits                      | The number of plans is not limited in the MVP. Images are capped at 5 per transaction, with no total limit per user |
+| 4   | Auto-record when balance is insufficient   | Still recorded, with a warning in the notification                                                                  |
+| 5   | Scope of Hide balance                      | Balances only. Transaction amounts and the income/outcome summary remain visible                                    |
+| 6   | Verification when showing the balance      | Not needed, just tap the eye icon                                                                                   |
+| 7   | Receipt images in templates                | Not copied                                                                                                          |
+| 8   | Template amount                            | May be empty (asked each time)                                                                                      |
+| 9   | Template account archived or deleted       | Template `account_id` becomes empty                                                                                 |
+| 10  | Number of templates                        | Unlimited                                                                                                           |
+| 11  | Transfer templates                         | Supported                                                                                                           |
+| 12  | Templates in MVP                           | Yes, included in the MVP                                                                                            |
 
 Still open (technical): scheduler hosting, database, repo structure, and Expo vs. bare React Native.
