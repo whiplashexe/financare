@@ -1,0 +1,2572 @@
+{
+  "type": "base",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d38f726b-a156-4e7c-93c5-c07b7f16654a",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "device_platform"
+      ],
+      "writes": [
+        "s|enum|public.device_platform",
+        "n|enum|public.device_platform",
+        "e|enum|public.device_platform",
+        "n|type|public.device_platform"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "account_status"
+      ],
+      "writes": [
+        "s|enum|public.account_status",
+        "n|enum|public.account_status",
+        "e|enum|public.account_status",
+        "n|type|public.account_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "account_type"
+      ],
+      "writes": [
+        "s|enum|public.account_type",
+        "n|enum|public.account_type",
+        "e|enum|public.account_type",
+        "n|type|public.account_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "transaction_source"
+      ],
+      "writes": [
+        "s|enum|public.transaction_source",
+        "n|enum|public.transaction_source",
+        "e|enum|public.transaction_source",
+        "n|type|public.transaction_source"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "transaction_type"
+      ],
+      "writes": [
+        "s|enum|public.transaction_type",
+        "n|enum|public.transaction_type",
+        "e|enum|public.transaction_type",
+        "n|type|public.transaction_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "user_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.user_id_seq",
+        "n|seq|public.user_id_seq",
+        "e|seq|public.user_id_seq",
+        "n|rel|public.user_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "password_reset_token_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.password_reset_token_id_seq",
+        "n|seq|public.password_reset_token_id_seq",
+        "e|seq|public.password_reset_token_id_seq",
+        "n|rel|public.password_reset_token_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "device_token_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.device_token_id_seq",
+        "n|seq|public.device_token_id_seq",
+        "e|seq|public.device_token_id_seq",
+        "n|rel|public.device_token_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "account_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.account_id_seq",
+        "n|seq|public.account_id_seq",
+        "e|seq|public.account_id_seq",
+        "n|rel|public.account_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "transaction_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.transaction_id_seq",
+        "n|seq|public.transaction_id_seq",
+        "e|seq|public.transaction_id_seq",
+        "n|rel|public.transaction_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "user"
+      ],
+      "writes": [
+        "s|tbl|public.user",
+        "n|tbl|public.user",
+        "e|tbl|public.user",
+        "n|rel|public.user",
+        "n|type|public.user",
+        "n|rel|public.user_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|tbl|public.refresh_token",
+        "n|tbl|public.refresh_token",
+        "e|tbl|public.refresh_token",
+        "n|rel|public.refresh_token",
+        "n|type|public.refresh_token",
+        "n|rel|public.refresh_token_pkey",
+        "n|rel|public.refresh_token_token_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "password_reset_token"
+      ],
+      "writes": [
+        "s|tbl|public.password_reset_token",
+        "n|tbl|public.password_reset_token",
+        "e|tbl|public.password_reset_token",
+        "n|rel|public.password_reset_token",
+        "n|type|public.password_reset_token",
+        "n|rel|public.password_reset_token_pkey",
+        "n|rel|public.password_reset_token_token_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "device_token"
+      ],
+      "writes": [
+        "s|tbl|public.device_token",
+        "n|tbl|public.device_token",
+        "e|tbl|public.device_token",
+        "n|rel|public.device_token",
+        "n|type|public.device_token",
+        "n|rel|public.device_token_pkey",
+        "n|rel|public.device_token_token_key"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.device_platform"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "account"
+      ],
+      "writes": [
+        "s|tbl|public.account",
+        "n|tbl|public.account",
+        "e|tbl|public.account",
+        "n|rel|public.account",
+        "n|type|public.account",
+        "n|rel|public.account_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.account_type",
+        "n|enum|public.account_status"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|tbl|public.transactions",
+        "n|tbl|public.transactions",
+        "e|tbl|public.transactions",
+        "n|rel|public.transactions",
+        "n|type|public.transactions",
+        "n|rel|public.transactions_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.transaction_type",
+        "n|enum|public.transaction_source"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "user",
+        "user_email_lower_unique"
+      ],
+      "writes": [
+        "s|idx|public.user_email_lower_unique",
+        "n|idx|public.user_email_lower_unique",
+        "e|idx|public.user_email_lower_unique",
+        "n|rel|public.user_email_lower_unique"
+      ],
+      "reads": [
+        "n|tbl|public.user",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_user_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_user_id_idx",
+        "n|idx|public.refresh_token_user_id_idx",
+        "e|idx|public.refresh_token_user_id_idx",
+        "n|rel|public.refresh_token_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_family_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_family_id_idx",
+        "n|idx|public.refresh_token_family_id_idx",
+        "e|idx|public.refresh_token_family_id_idx",
+        "n|rel|public.refresh_token_family_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.family_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "refresh_token",
+        "refresh_token_expires_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.refresh_token_expires_at_idx",
+        "n|idx|public.refresh_token_expires_at_idx",
+        "e|idx|public.refresh_token_expires_at_idx",
+        "n|rel|public.refresh_token_expires_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.expires_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "password_reset_token",
+        "password_reset_token_user_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.password_reset_token_user_id_idx",
+        "n|idx|public.password_reset_token_user_id_idx",
+        "e|idx|public.password_reset_token_user_id_idx",
+        "n|rel|public.password_reset_token_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.password_reset_token",
+        "n|sch|public",
+        "n|col|public.password_reset_token.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "password_reset_token",
+        "password_reset_token_expires_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.password_reset_token_expires_at_idx",
+        "n|idx|public.password_reset_token_expires_at_idx",
+        "e|idx|public.password_reset_token_expires_at_idx",
+        "n|rel|public.password_reset_token_expires_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.password_reset_token",
+        "n|sch|public",
+        "n|col|public.password_reset_token.expires_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "device_token",
+        "device_token_user_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.device_token_user_id_idx",
+        "n|idx|public.device_token_user_id_idx",
+        "e|idx|public.device_token_user_id_idx",
+        "n|rel|public.device_token_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.device_token",
+        "n|sch|public",
+        "n|col|public.device_token.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "account",
+        "account_user_id_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.account_user_id_status_idx",
+        "n|idx|public.account_user_id_status_idx",
+        "e|idx|public.account_user_id_status_idx",
+        "n|rel|public.account_user_id_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.account.user_id",
+        "n|col|public.account.status"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_user_date_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_user_date_idx",
+        "n|idx|public.transaction_user_date_idx",
+        "e|idx|public.transaction_user_date_idx",
+        "n|rel|public.transaction_user_date_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.user_id",
+        "n|col|public.transactions.date"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_account_date_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_account_date_idx",
+        "n|idx|public.transaction_account_date_idx",
+        "e|idx|public.transaction_account_date_idx",
+        "n|rel|public.transaction_account_date_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.account_id",
+        "n|col|public.transactions.date"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_to_account_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_to_account_idx",
+        "n|idx|public.transaction_to_account_idx",
+        "e|idx|public.transaction_to_account_idx",
+        "n|rel|public.transaction_to_account_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.to_account_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_user_category_date_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_user_category_date_idx",
+        "n|idx|public.transaction_user_category_date_idx",
+        "e|idx|public.transaction_user_category_date_idx",
+        "n|rel|public.transaction_user_category_date_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.user_id",
+        "n|col|public.transactions.category_id",
+        "n|col|public.transactions.date"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_deleted_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_deleted_at_idx",
+        "n|idx|public.transaction_deleted_at_idx",
+        "e|idx|public.transaction_deleted_at_idx",
+        "n|rel|public.transaction_deleted_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.deleted_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transactions",
+        "transaction_tags_gin_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_tags_gin_idx",
+        "n|idx|public.transaction_tags_gin_idx",
+        "e|idx|public.transaction_tags_gin_idx",
+        "n|rel|public.transaction_tags_gin_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.tags"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "n|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "e|fk|public.refresh_token.refresh_token_user_id_user_id_fkey",
+        "n|con|public.refresh_token.refresh_token_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.refresh_token.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "refresh_token"
+      ],
+      "writes": [
+        "s|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "n|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "e|fk|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey",
+        "n|con|public.refresh_token.refresh_token_replaced_by_refresh_token_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.replaced_by",
+        "n|col|public.refresh_token.id",
+        "e|uniqueness|public.refresh_token.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "password_reset_token"
+      ],
+      "writes": [
+        "s|fk|public.password_reset_token.password_reset_token_user_id_user_id_fkey",
+        "n|fk|public.password_reset_token.password_reset_token_user_id_user_id_fkey",
+        "e|fk|public.password_reset_token.password_reset_token_user_id_user_id_fkey",
+        "n|con|public.password_reset_token.password_reset_token_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.password_reset_token",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.password_reset_token.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "device_token"
+      ],
+      "writes": [
+        "s|fk|public.device_token.device_token_user_id_user_id_fkey",
+        "n|fk|public.device_token.device_token_user_id_user_id_fkey",
+        "e|fk|public.device_token.device_token_user_id_user_id_fkey",
+        "n|con|public.device_token.device_token_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.device_token",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.device_token.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "account"
+      ],
+      "writes": [
+        "s|fk|public.account.account_user_id_user_id_fkey",
+        "n|fk|public.account.account_user_id_user_id_fkey",
+        "e|fk|public.account.account_user_id_user_id_fkey",
+        "n|con|public.account.account_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.account.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_user_id_user_id_fkey",
+        "n|fk|public.transactions.transactions_user_id_user_id_fkey",
+        "e|fk|public.transactions.transactions_user_id_user_id_fkey",
+        "n|con|public.transactions.transactions_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.transactions.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_account_id_account_id_fkey",
+        "n|fk|public.transactions.transactions_account_id_account_id_fkey",
+        "e|fk|public.transactions.transactions_account_id_account_id_fkey",
+        "n|con|public.transactions.transactions_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.transactions.account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_to_account_id_account_id_fkey",
+        "n|fk|public.transactions.transactions_to_account_id_account_id_fkey",
+        "e|fk|public.transactions.transactions_to_account_id_account_id_fkey",
+        "n|con|public.transactions.transactions_to_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.transactions.to_account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_category_id_categories_id_fkey",
+        "n|fk|public.transactions.transactions_category_id_categories_id_fkey",
+        "e|fk|public.transactions.transactions_category_id_categories_id_fkey",
+        "n|con|public.transactions.transactions_category_id_categories_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.categories",
+        "n|sch|public",
+        "n|col|public.transactions.category_id",
+        "n|col|public.categories.id",
+        "e|uniqueness|public.categories.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transactions"
+      ],
+      "writes": [
+        "s|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
+        "n|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
+        "e|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
+        "n|con|public.transactions.transactions_parent_transaction_id_transactions_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|tbl|public.transactions",
+        "n|sch|public",
+        "n|col|public.transactions.parent_transaction_id",
+        "n|col|public.transactions.id",
+        "e|uniqueness|public.transactions.id"
+      ]
+    }
+  ],
+  "ddl": [
+    {
+      "schema": "public",
+      "name": "user",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "refresh_token",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "password_reset_token",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "device_token",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "account",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "transactions",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "device_platform",
+      "values": [
+        "ANDROID",
+        "IOS"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "account_status",
+      "values": [
+        "ACTIVE",
+        "ARCHIVED"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "account_type",
+      "values": [
+        "BANK",
+        "EWALLET",
+        "CASH"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "transaction_source",
+      "values": [
+        "MANUAL",
+        "AUTO"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "transaction_type",
+      "values": [
+        "INCOME",
+        "OUTCOME",
+        "TRANSFER"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'USR' || lpad(nextval('user_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "name",
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "email",
+      "type": "varchar(254)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "password_hash",
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "timezone",
+      "type": "varchar(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'Asia/Jakarta'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "hide_balance",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "notif_send_time",
+      "type": "time",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'08:00'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "quiet_hours_start",
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "quiet_hours_end",
+      "type": "time",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "push_enabled",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "email_fallback",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "deleted_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'RTK' || lpad(nextval('user_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "family_id",
+      "type": "varchar(36)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "token_hash",
+      "type": "char(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "device_info",
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "revoked_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "replaced_by",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'PRT' || lpad(nextval('password_reset_token_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "token_hash",
+      "type": "char(64)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "used_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'DVC' || lpad(nextval('device_token_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "token",
+      "type": "varchar(512)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "platform",
+      "type": "device_platform",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "last_seen_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'ACC' || lpad(nextval('account_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "name",
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "type",
+      "type": "account_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "institution",
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "initial_balance",
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "last4",
+      "type": "char(4)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "color",
+      "type": "varchar(9)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "include_in_total",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "status",
+      "type": "account_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'ACTIVE'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "timestamp",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "account_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "to_account_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "category_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "parent_transaction_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "recurring_plan_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "one_time_plan_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "type",
+      "type": "transaction_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "name",
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "amount",
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "date",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "location",
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "note",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "tags",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "source",
+      "type": "transaction_source",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'MANUAL'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "deleted_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "user_email_lower_unique",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "lower(\"email\")",
+          "isExpression": true,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_user_id_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_family_id_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "family_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_expires_at_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "expires_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_user_id_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_expires_at_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "expires_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "device_token_user_id_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_user_id_status_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_user_date_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "date",
+          "isExpression": false,
+          "asc": false,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"deleted_at\" IS NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_account_date_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "account_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "date",
+          "isExpression": false,
+          "asc": false,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"deleted_at\" IS NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_to_account_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "to_account_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"to_account_id\" IS NOT NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_user_category_date_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "category_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "date",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_deleted_at_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "deleted_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"deleted_at\" IS NOT NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_tags_gin_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "tags",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "gin",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_replaced_by_refresh_token_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "replaced_by"
+      ],
+      "schemaTo": "public",
+      "tableTo": "refresh_token",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "device_token_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_account_id_account_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "account_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "account",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_to_account_id_account_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "to_account_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "account",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_category_id_categories_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "category_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "categories",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_parent_transaction_id_transactions_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "parent_transaction_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "transactions",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "user_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "device_token_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transactions_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_token_hash_key",
+      "nameExplicit": false,
+      "columns": [
+        "token_hash"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_token_hash_key",
+      "nameExplicit": false,
+      "columns": [
+        "token_hash"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "device_token_token_key",
+      "nameExplicit": false,
+      "columns": [
+        "token"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "user_id_format",
+      "value": "\"id\" ~ '^USR[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "user",
+      "name": "user_quiet_hours_pair",
+      "value": "(\"quiet_hours_start\" IS NULL) = (\"quiet_hours_end\" IS NULL)",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "refresh_token",
+      "name": "refresh_token_id_format",
+      "value": "\"id\" ~ '^RTK[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "password_reset_token",
+      "name": "password_reset_token_id_format",
+      "value": "\"id\" ~ '^PRT[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "device_token",
+      "name": "device_token_id_format",
+      "value": "\"id\" ~ '^DVC[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_id_format",
+      "value": "\"id\" ~ '^ACC[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_last4_format",
+      "value": "\"last4\" IS NULL OR \"last4\" ~ '^[0-9]{4}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_cash_no_institution",
+      "value": "\"type\" <> 'CASH' OR \"institution\" IS NULL",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_initial_balance_range",
+      "value": "\"initial_balance\" BETWEEN -999999999999 AND 999999999999",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "account",
+      "name": "account_color_format",
+      "value": "\"color\" IS NULL OR \"color\" ~ '^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_id_format",
+      "value": "\"id\" ~ '^TRANS[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_amount_range",
+      "value": "\"amount\" > 0 AND \"amount\" <= 999999999999",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_transfer_has_destination",
+      "value": "(\"type\" = 'TRANSFER') = (\"to_account_id\" IS NOT NULL)",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_distinct_accounts",
+      "value": "\"to_account_id\" IS NULL OR \"account_id\" <> \"to_account_id\"",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_transfer_no_category",
+      "value": "\"type\" <> 'TRANSFER' OR \"category_id\" IS NULL",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_single_plan",
+      "value": "NOT (\"recurring_plan_id\" IS NOT NULL AND \"one_time_plan_id\" IS NOT NULL)",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_fee_is_outcome",
+      "value": "\"parent_transaction_id\" IS NULL OR \"type\" = 'OUTCOME'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transactions",
+      "name": "transaction_tags_max",
+      "value": "cardinality(\"tags\") <= 10",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "name": "user_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "password_reset_token_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "device_token_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "account_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "transaction_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    }
+  ]
+}
