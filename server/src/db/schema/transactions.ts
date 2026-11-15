@@ -14,12 +14,9 @@ import {
 import { users } from "./users.js";
 import { accounts } from "./accounts.js";
 import { categories } from "./categories.js";
-
-export const transactionTypeEnum = pgEnum("transaction_type", [
-  "INCOME",
-  "OUTCOME",
-  "TRANSFER",
-]);
+import { transactionTypeEnum } from "./enum.js";
+import { recurringPlans } from "./recurring.plans.js";
+import { oneTimePlans } from "./one.time.plans.js";
 
 export const transactionSourceEnum = pgEnum("transaction_source", [
   "MANUAL",
@@ -54,8 +51,16 @@ export const transactions = pgTable(
     parentTransactionId: varchar("parent_transaction_id", {
       length: 20,
     }).references((): AnyPgColumn => transactions.id, { onDelete: "cascade" }),
-    recurringPlanId: varchar("recurring_plan_id", { length: 20 }),
-    oneTimePlanId: varchar("one_time_plan_id", { length: 20 }),
+
+    recurringPlanId: varchar("recurring_plan_id", { length: 20 }).references(
+      () => recurringPlans.id,
+      { onDelete: "set null" },
+    ),
+    oneTimePlanId: varchar("one_time_plan_id", { length: 20 }).references(
+      () => oneTimePlans.id,
+      { onDelete: "set null" },
+    ),
+
     type: transactionTypeEnum("type").notNull(),
     name: varchar("name", { length: 100 }).notNull(),
     amount: bigint("amount", { mode: "number" }).notNull(),
@@ -121,5 +126,11 @@ export const transactions = pgTable(
       .on(t.deletedAt)
       .where(sql`${t.deletedAt} IS NOT NULL`),
     index("transaction_tags_gin_idx").using("gin", t.tags),
+    index("transaction_recurring_plan_idx")
+      .on(t.recurringPlanId)
+      .where(sql`${t.recurringPlanId} IS NOT NULL`),
+    index("transaction_one_time_plan_idx")
+      .on(t.oneTimePlanId)
+      .where(sql`${t.oneTimePlanId} IS NOT NULL`),
   ],
 );

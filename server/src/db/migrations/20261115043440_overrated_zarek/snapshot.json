@@ -1,0 +1,683 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "a1cf1d49-8e65-4e2f-a9bd-a81e193fc9d2",
+  "prevIds": [
+    "56b08d59-7ea7-48c3-b695-92a8b918e331"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "transaction_image_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.transaction_image_id_seq",
+        "n|seq|public.transaction_image_id_seq",
+        "e|seq|public.transaction_image_id_seq",
+        "n|rel|public.transaction_image_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "transaction_item_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.transaction_item_id_seq",
+        "n|seq|public.transaction_item_id_seq",
+        "e|seq|public.transaction_item_id_seq",
+        "n|rel|public.transaction_item_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_image"
+      ],
+      "writes": [
+        "s|tbl|public.transaction_image",
+        "n|tbl|public.transaction_image",
+        "e|tbl|public.transaction_image",
+        "n|rel|public.transaction_image",
+        "n|type|public.transaction_image",
+        "n|rel|public.transaction_image_pkey",
+        "n|rel|public.transaction_image_position_unique"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_item"
+      ],
+      "writes": [
+        "s|tbl|public.transaction_item",
+        "n|tbl|public.transaction_item",
+        "e|tbl|public.transaction_item",
+        "n|rel|public.transaction_item",
+        "n|type|public.transaction_item",
+        "n|rel|public.transaction_item_pkey",
+        "n|rel|public.transaction_item_position_unique"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_image",
+        "transaction_image_transaction_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_image_transaction_id_idx",
+        "n|idx|public.transaction_image_transaction_id_idx",
+        "e|idx|public.transaction_image_transaction_id_idx",
+        "n|rel|public.transaction_image_transaction_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|col|public.transaction_image.transaction_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_item",
+        "transaction_item_transaction_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_item_transaction_id_idx",
+        "n|idx|public.transaction_item_transaction_id_idx",
+        "e|idx|public.transaction_item_transaction_id_idx",
+        "n|rel|public.transaction_item_transaction_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_item",
+        "n|sch|public",
+        "n|col|public.transaction_item.transaction_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_image"
+      ],
+      "writes": [
+        "s|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "n|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "e|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "n|con|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction_image.transaction_id",
+        "n|col|public.transaction.id",
+        "e|uniqueness|public.transaction.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_item"
+      ],
+      "writes": [
+        "s|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "n|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "e|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "n|con|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_item",
+        "n|sch|public",
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction_item.transaction_id",
+        "n|col|public.transaction.id",
+        "e|uniqueness|public.transaction.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_image",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_item",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'IMG' || lpad(nextval('transaction_image_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "public_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "mime_type",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "size",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "position",
+        "type": "smallint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'ITM' || lpad(nextval('transaction_item_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "name",
+        "type": "varchar(150)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "quantity",
+        "type": "numeric(10,3)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "unit",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "total_price",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "position",
+        "type": "smallint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_transaction_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "transaction_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_transaction_id_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "transaction_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_transaction_id_transaction_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "transaction_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "transaction",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_transaction_id_transaction_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "transaction_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "transaction",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_position_unique",
+        "nameExplicit": true,
+        "columns": [
+          "transaction_id",
+          "position"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_position_unique",
+        "nameExplicit": true,
+        "columns": [
+          "transaction_id",
+          "position"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_id_format",
+        "value": "\"id\" ~ '^IMG[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_position_range",
+        "value": "\"position\" BETWEEN 0 AND 4",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_size_range",
+        "value": "\"size\" BETWEEN 1 AND 5242880",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_mime_type",
+        "value": "\"mime_type\" IN ('image/jpeg', 'image/png', 'image/heic')",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_id_format",
+        "value": "\"id\" ~ '^ITM[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_quantity_range",
+        "value": "\"quantity\" > 0 AND \"quantity\" <= 9999999.999",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_total_price_range",
+        "value": "\"total_price\" BETWEEN 0 AND 999999999999",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_item",
+        "name": "transaction_item_position_range",
+        "value": "\"position\" BETWEEN 0 AND 99",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_image_id_seq",
+        "incrementBy": "1",
+        "minValue": "1",
+        "maxValue": "9223372036854775807",
+        "startWith": "1",
+        "cacheSize": 1,
+        "cycle": false,
+        "entityType": "sequences"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_item_id_seq",
+        "incrementBy": "1",
+        "minValue": "1",
+        "maxValue": "9223372036854775807",
+        "startWith": "1",
+        "cacheSize": 1,
+        "cycle": false,
+        "entityType": "sequences"
+      }
+    }
+  ]
+}

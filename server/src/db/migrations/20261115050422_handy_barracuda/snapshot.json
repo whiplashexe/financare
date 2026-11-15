@@ -1,0 +1,750 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "56c80961-8cfe-4d19-bcf7-32af8d007949",
+  "prevIds": [
+    "8e4b9e1b-1b1b-4567-8434-47da1c48e9bd"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "recurring_frequency"
+      ],
+      "writes": [
+        "s|enum|public.recurring_frequency",
+        "n|enum|public.recurring_frequency",
+        "e|enum|public.recurring_frequency",
+        "n|type|public.recurring_frequency"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "recurring_plan_status"
+      ],
+      "writes": [
+        "s|enum|public.recurring_plan_status",
+        "n|enum|public.recurring_plan_status",
+        "e|enum|public.recurring_plan_status",
+        "n|type|public.recurring_plan_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "recurring_plan_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.recurring_plan_id_seq",
+        "n|seq|public.recurring_plan_id_seq",
+        "e|seq|public.recurring_plan_id_seq",
+        "n|rel|public.recurring_plan_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "recurring_plan"
+      ],
+      "writes": [
+        "s|tbl|public.recurring_plan",
+        "n|tbl|public.recurring_plan",
+        "e|tbl|public.recurring_plan",
+        "n|rel|public.recurring_plan",
+        "n|type|public.recurring_plan",
+        "n|rel|public.recurring_plan_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.transaction_type",
+        "n|enum|public.recurring_frequency",
+        "n|enum|public.recurring_plan_status"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "recurring_plan",
+        "recurring_plan_status_next_due_idx"
+      ],
+      "writes": [
+        "s|idx|public.recurring_plan_status_next_due_idx",
+        "n|idx|public.recurring_plan_status_next_due_idx",
+        "e|idx|public.recurring_plan_status_next_due_idx",
+        "n|rel|public.recurring_plan_status_next_due_idx"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|col|public.recurring_plan.status",
+        "n|col|public.recurring_plan.next_due_date"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "recurring_plan",
+        "recurring_plan_user_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.recurring_plan_user_status_idx",
+        "n|idx|public.recurring_plan_user_status_idx",
+        "e|idx|public.recurring_plan_user_status_idx",
+        "n|rel|public.recurring_plan_user_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|col|public.recurring_plan.user_id",
+        "n|col|public.recurring_plan.status"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "recurring_plan"
+      ],
+      "writes": [
+        "s|fk|public.recurring_plan.recurring_plan_user_id_user_id_fkey",
+        "n|fk|public.recurring_plan.recurring_plan_user_id_user_id_fkey",
+        "e|fk|public.recurring_plan.recurring_plan_user_id_user_id_fkey",
+        "n|con|public.recurring_plan.recurring_plan_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.recurring_plan.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "recurring_plan"
+      ],
+      "writes": [
+        "s|fk|public.recurring_plan.recurring_plan_account_id_account_id_fkey",
+        "n|fk|public.recurring_plan.recurring_plan_account_id_account_id_fkey",
+        "e|fk|public.recurring_plan.recurring_plan_account_id_account_id_fkey",
+        "n|con|public.recurring_plan.recurring_plan_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.recurring_plan.account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "recurring_plan"
+      ],
+      "writes": [
+        "s|fk|public.recurring_plan.recurring_plan_category_id_category_id_fkey",
+        "n|fk|public.recurring_plan.recurring_plan_category_id_category_id_fkey",
+        "e|fk|public.recurring_plan.recurring_plan_category_id_category_id_fkey",
+        "n|con|public.recurring_plan.recurring_plan_category_id_category_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.recurring_plan.category_id",
+        "n|col|public.category.id",
+        "e|uniqueness|public.category.id"
+      ]
+    },
+    {
+      "statementType": "recreate_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_image"
+      ],
+      "writes": [
+        "s|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "n|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "e|fk|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey",
+        "n|con|public.transaction_image.transaction_image_transaction_id_transaction_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction_image.transaction_id",
+        "n|col|public.transaction.id",
+        "e|uniqueness|public.transaction.id"
+      ],
+      "sqlHash": "e1a05fc7253a0ff5"
+    },
+    {
+      "statementType": "recreate_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_item"
+      ],
+      "writes": [
+        "s|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "n|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "e|fk|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey",
+        "n|con|public.transaction_item.transaction_item_transaction_id_transaction_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_item",
+        "n|sch|public",
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction_item.transaction_id",
+        "n|col|public.transaction.id",
+        "e|uniqueness|public.transaction.id"
+      ],
+      "sqlHash": "f305a33a4b0fe012"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "recurring_plan",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "recurring_frequency",
+        "values": [
+          "DAILY",
+          "WEEKLY",
+          "MONTHLY",
+          "YEARLY"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "recurring_plan_status",
+        "values": [
+          "ACTIVE",
+          "PAUSED",
+          "ENDED"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'RPLAN' || lpad(nextval('recurring_plan_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "user_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "account_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "category_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "name",
+        "type": "varchar(100)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "type",
+        "type": "transaction_type",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "amount",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "frequency",
+        "type": "recurring_frequency",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "start_date",
+        "type": "date",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "end_date",
+        "type": "date",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "reminder_offsets",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 1,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "auto_record",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "next_due_date",
+        "type": "date",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "status",
+        "type": "recurring_plan_status",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'ACTIVE'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_status_next_due_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "next_due_date",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_user_status_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_account_id_account_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "account_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "account",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "RESTRICT",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_category_id_category_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "category_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "category",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_id_format",
+        "value": "\"id\" ~ '^RPLAN[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_type",
+        "value": "\"type\" IN ('INCOME', 'OUTCOME')",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_amount_range",
+        "value": "\"amount\" > 0 AND \"amount\" <= 999999999999",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_end_after_start",
+        "value": "\"end_date\" IS NULL OR \"end_date\" > \"start_date\"",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "recurring_plan",
+        "name": "recurring_plan_reminder_offsets",
+        "value": "\"reminder_offsets\" <@ ARRAY[0,1,3,7] AND cardinality(\"reminder_offsets\") BETWEEN 1 AND 4",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "recurring_plan_id_seq",
+        "incrementBy": "1",
+        "minValue": "1",
+        "maxValue": "9223372036854775807",
+        "startWith": "1",
+        "cacheSize": 1,
+        "cycle": false,
+        "entityType": "sequences"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "fks\u0000[\"public\",\"transaction_image\",\"transaction_image_transaction_id_transaction_id_fkey\"]",
+      "set": {
+        "onDelete": "CASCADE"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "fks\u0000[\"public\",\"transaction_item\",\"transaction_item_transaction_id_transaction_id_fkey\"]",
+      "set": {
+        "onDelete": "CASCADE"
+      }
+    }
+  ]
+}

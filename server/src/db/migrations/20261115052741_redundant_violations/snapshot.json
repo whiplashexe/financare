@@ -1,0 +1,703 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "b104104a-0637-45eb-9b70-fe9a62b31ac0",
+  "prevIds": [
+    "56c80961-8cfe-4d19-bcf7-32af8d007949"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "one_time_plan_status"
+      ],
+      "writes": [
+        "s|enum|public.one_time_plan_status",
+        "n|enum|public.one_time_plan_status",
+        "e|enum|public.one_time_plan_status",
+        "n|type|public.one_time_plan_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "one_time_plan_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.one_time_plan_id_seq",
+        "n|seq|public.one_time_plan_id_seq",
+        "e|seq|public.one_time_plan_id_seq",
+        "n|rel|public.one_time_plan_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "one_time_plan"
+      ],
+      "writes": [
+        "s|tbl|public.one_time_plan",
+        "n|tbl|public.one_time_plan",
+        "e|tbl|public.one_time_plan",
+        "n|rel|public.one_time_plan",
+        "n|type|public.one_time_plan",
+        "n|rel|public.one_time_plan_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.one_time_plan_status"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction",
+        "transaction_recurring_plan_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_recurring_plan_idx",
+        "n|idx|public.transaction_recurring_plan_idx",
+        "e|idx|public.transaction_recurring_plan_idx",
+        "n|rel|public.transaction_recurring_plan_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction.recurring_plan_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction",
+        "transaction_one_time_plan_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_one_time_plan_idx",
+        "n|idx|public.transaction_one_time_plan_idx",
+        "e|idx|public.transaction_one_time_plan_idx",
+        "n|rel|public.transaction_one_time_plan_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction.one_time_plan_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "one_time_plan",
+        "one_time_plan_status_date_idx"
+      ],
+      "writes": [
+        "s|idx|public.one_time_plan_status_date_idx",
+        "n|idx|public.one_time_plan_status_date_idx",
+        "e|idx|public.one_time_plan_status_date_idx",
+        "n|rel|public.one_time_plan_status_date_idx"
+      ],
+      "reads": [
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|col|public.one_time_plan.status",
+        "n|col|public.one_time_plan.date"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "one_time_plan",
+        "one_time_plan_user_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.one_time_plan_user_status_idx",
+        "n|idx|public.one_time_plan_user_status_idx",
+        "e|idx|public.one_time_plan_user_status_idx",
+        "n|rel|public.one_time_plan_user_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|col|public.one_time_plan.user_id",
+        "n|col|public.one_time_plan.status"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction"
+      ],
+      "writes": [
+        "s|fk|public.transaction.transaction_recurring_plan_id_recurring_plan_id_fkey",
+        "n|fk|public.transaction.transaction_recurring_plan_id_recurring_plan_id_fkey",
+        "e|fk|public.transaction.transaction_recurring_plan_id_recurring_plan_id_fkey",
+        "n|con|public.transaction.transaction_recurring_plan_id_recurring_plan_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|col|public.transaction.recurring_plan_id",
+        "n|col|public.recurring_plan.id",
+        "e|uniqueness|public.recurring_plan.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction"
+      ],
+      "writes": [
+        "s|fk|public.transaction.transaction_one_time_plan_id_one_time_plan_id_fkey",
+        "n|fk|public.transaction.transaction_one_time_plan_id_one_time_plan_id_fkey",
+        "e|fk|public.transaction.transaction_one_time_plan_id_one_time_plan_id_fkey",
+        "n|con|public.transaction.transaction_one_time_plan_id_one_time_plan_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|col|public.transaction.one_time_plan_id",
+        "n|col|public.one_time_plan.id",
+        "e|uniqueness|public.one_time_plan.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "one_time_plan"
+      ],
+      "writes": [
+        "s|fk|public.one_time_plan.one_time_plan_user_id_user_id_fkey",
+        "n|fk|public.one_time_plan.one_time_plan_user_id_user_id_fkey",
+        "e|fk|public.one_time_plan.one_time_plan_user_id_user_id_fkey",
+        "n|con|public.one_time_plan.one_time_plan_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.one_time_plan.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "one_time_plan"
+      ],
+      "writes": [
+        "s|fk|public.one_time_plan.one_time_plan_source_account_id_account_id_fkey",
+        "n|fk|public.one_time_plan.one_time_plan_source_account_id_account_id_fkey",
+        "e|fk|public.one_time_plan.one_time_plan_source_account_id_account_id_fkey",
+        "n|con|public.one_time_plan.one_time_plan_source_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.one_time_plan.source_account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "one_time_plan",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "one_time_plan_status",
+        "values": [
+          "PLANNED",
+          "DONE",
+          "MISSED",
+          "CANCELLED"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'OPLAN' || lpad(nextval('one_time_plan_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "user_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "source_account_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "name",
+        "type": "varchar(100)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "date",
+        "type": "date",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "target_amount",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "location",
+        "type": "varchar(255)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "note",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "reminder_offsets",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 1,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "status",
+        "type": "one_time_plan_status",
+        "typeSchema": "public",
+        "notNull": false,
+        "dimensions": 0,
+        "default": "'PLANNED'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction",
+        "name": "transaction_recurring_plan_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "recurring_plan_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"recurring_plan_id\" IS NOT NULL",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction",
+        "name": "transaction_one_time_plan_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "one_time_plan_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"one_time_plan_id\" IS NOT NULL",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_status_date_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "date",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_user_status_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction",
+        "name": "transaction_recurring_plan_id_recurring_plan_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "recurring_plan_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "recurring_plan",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction",
+        "name": "transaction_one_time_plan_id_one_time_plan_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "one_time_plan_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "one_time_plan",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_source_account_id_account_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "source_account_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "account",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_id_format",
+        "value": "\"id\" ~ '^OPLAN[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_target_amount_range",
+        "value": "\"target_amount\" > 0 AND \"target_amount\" <= 999999999999",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "one_time_plan",
+        "name": "one_time_plan_reminder_offsets",
+        "value": "\"reminder_offsets\" <@ ARRAY[1,3,7,14] AND cardinality(\"reminder_offsets\") BETWEEN 1 AND 4",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "one_time_plan_id_seq",
+        "incrementBy": "1",
+        "minValue": "1",
+        "maxValue": "9223372036854775807",
+        "startWith": "1",
+        "cacheSize": 1,
+        "cycle": false,
+        "entityType": "sequences"
+      }
+    }
+  ]
+}

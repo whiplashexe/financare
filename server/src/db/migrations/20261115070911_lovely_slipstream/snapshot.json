@@ -1,0 +1,1056 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "f060f85d-53be-46bd-9b2b-833fd409189d",
+  "prevIds": [
+    "d2245727-c2b6-4b40-88cf-95383a8782d7"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "transaction_template_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.transaction_template_id_seq",
+        "n|seq|public.transaction_template_id_seq",
+        "e|seq|public.transaction_template_id_seq",
+        "n|rel|public.transaction_template_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "idempotency_key"
+      ],
+      "writes": [
+        "s|tbl|public.idempotency_key",
+        "n|tbl|public.idempotency_key",
+        "e|tbl|public.idempotency_key",
+        "n|rel|public.idempotency_key",
+        "n|type|public.idempotency_key",
+        "n|rel|public.idempotency_key_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_template"
+      ],
+      "writes": [
+        "s|tbl|public.transaction_template",
+        "n|tbl|public.transaction_template",
+        "e|tbl|public.transaction_template",
+        "n|rel|public.transaction_template",
+        "n|type|public.transaction_template",
+        "n|rel|public.transaction_template_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.transaction_type"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "idempotency_key",
+        "idempotency_key_created_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.idempotency_key_created_at_idx",
+        "n|idx|public.idempotency_key_created_at_idx",
+        "e|idx|public.idempotency_key_created_at_idx",
+        "n|rel|public.idempotency_key_created_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.idempotency_key",
+        "n|sch|public",
+        "n|col|public.idempotency_key.created_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_template",
+        "transaction_template_user_name_unique"
+      ],
+      "writes": [
+        "s|idx|public.transaction_template_user_name_unique",
+        "n|idx|public.transaction_template_user_name_unique",
+        "e|idx|public.transaction_template_user_name_unique",
+        "n|rel|public.transaction_template_user_name_unique"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_template",
+        "transaction_template_user_usage_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_template_user_usage_idx",
+        "n|idx|public.transaction_template_user_usage_idx",
+        "e|idx|public.transaction_template_user_usage_idx",
+        "n|rel|public.transaction_template_user_usage_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.user_id",
+        "n|col|public.transaction_template.use_count",
+        "n|col|public.transaction_template.last_used_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_template",
+        "transaction_template_account_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_template_account_idx",
+        "n|idx|public.transaction_template_account_idx",
+        "e|idx|public.transaction_template_account_idx",
+        "n|rel|public.transaction_template_account_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.account_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_template",
+        "transaction_template_to_account_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_template_to_account_idx",
+        "n|idx|public.transaction_template_to_account_idx",
+        "e|idx|public.transaction_template_to_account_idx",
+        "n|rel|public.transaction_template_to_account_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.to_account_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction_template",
+        "transaction_template_category_idx"
+      ],
+      "writes": [
+        "s|idx|public.transaction_template_category_idx",
+        "n|idx|public.transaction_template_category_idx",
+        "e|idx|public.transaction_template_category_idx",
+        "n|rel|public.transaction_template_category_idx"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.category_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "idempotency_key"
+      ],
+      "writes": [
+        "s|fk|public.idempotency_key.idempotency_key_user_id_user_id_fkey",
+        "n|fk|public.idempotency_key.idempotency_key_user_id_user_id_fkey",
+        "e|fk|public.idempotency_key.idempotency_key_user_id_user_id_fkey",
+        "n|con|public.idempotency_key.idempotency_key_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.idempotency_key",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.idempotency_key.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_template"
+      ],
+      "writes": [
+        "s|fk|public.transaction_template.transaction_template_user_id_user_id_fkey",
+        "n|fk|public.transaction_template.transaction_template_user_id_user_id_fkey",
+        "e|fk|public.transaction_template.transaction_template_user_id_user_id_fkey",
+        "n|con|public.transaction_template.transaction_template_user_id_user_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.transaction_template.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_template"
+      ],
+      "writes": [
+        "s|fk|public.transaction_template.transaction_template_account_id_account_id_fkey",
+        "n|fk|public.transaction_template.transaction_template_account_id_account_id_fkey",
+        "e|fk|public.transaction_template.transaction_template_account_id_account_id_fkey",
+        "n|con|public.transaction_template.transaction_template_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.transaction_template.account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_template"
+      ],
+      "writes": [
+        "s|fk|public.transaction_template.transaction_template_to_account_id_account_id_fkey",
+        "n|fk|public.transaction_template.transaction_template_to_account_id_account_id_fkey",
+        "e|fk|public.transaction_template.transaction_template_to_account_id_account_id_fkey",
+        "n|con|public.transaction_template.transaction_template_to_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.transaction_template.to_account_id",
+        "n|col|public.account.id",
+        "e|uniqueness|public.account.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_template"
+      ],
+      "writes": [
+        "s|fk|public.transaction_template.transaction_template_category_id_category_id_fkey",
+        "n|fk|public.transaction_template.transaction_template_category_id_category_id_fkey",
+        "e|fk|public.transaction_template.transaction_template_category_id_category_id_fkey",
+        "n|con|public.transaction_template.transaction_template_category_id_category_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.transaction_template.category_id",
+        "n|col|public.category.id",
+        "e|uniqueness|public.category.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "idempotency_key",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_template",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "key",
+        "type": "varchar(64)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "user_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "route",
+        "type": "varchar(100)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "response",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'TPL' || lpad(nextval('transaction_template_id_seq')::text, 3, '0')",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "user_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "name",
+        "type": "varchar(50)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "type",
+        "type": "transaction_type",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_name",
+        "type": "varchar(100)",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "amount",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "account_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "to_account_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "category_id",
+        "type": "varchar(20)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "location",
+        "type": "varchar(255)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "note",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "tags",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 1,
+        "default": "'{}'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "use_count",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "last_used_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "idempotency_key_created_at_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "created_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_user_name_unique",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "lower(\"name\")",
+            "isExpression": true,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_user_usage_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "use_count",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "last_used_at",
+            "isExpression": false,
+            "asc": false,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_account_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "account_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"account_id\" IS NOT NULL",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_to_account_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "to_account_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"to_account_id\" IS NOT NULL",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_category_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "category_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"category_id\" IS NOT NULL",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "idempotency_key_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_user_id_user_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "user",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_account_id_account_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "account_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "account",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_to_account_id_account_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "to_account_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "account",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_category_id_category_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "category_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "category",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "idempotency_key_pkey",
+        "columns": [
+          "user_id",
+          "key"
+        ],
+        "nameExplicit": true,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "idempotency_key_key_not_empty",
+        "value": "length(\"key\") >= 1",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "idempotency_key",
+        "name": "idempotency_key_route_not_empty",
+        "value": "length(\"route\") >= 1",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_id_format",
+        "value": "\"id\" ~ '^TPL[0-9]{3,}$'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_amount_range",
+        "value": "\"amount\" IS NULL OR (\"amount\" > 0 AND \"amount\" <= 999999999999)",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_destination_only_transfer",
+        "value": "\"type\" = 'TRANSFER' OR \"to_account_id\" IS NULL",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_transfer_no_category",
+        "value": "\"type\" <> 'TRANSFER' OR \"category_id\" IS NULL",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_distinct_accounts",
+        "value": "\"account_id\" IS NULL OR \"to_account_id\" IS NULL OR \"account_id\" <> \"to_account_id\"",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_tags_max",
+        "value": "cardinality(\"tags\") <= 10",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_template",
+        "name": "transaction_template_use_count",
+        "value": "\"use_count\" >= 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "transaction_template_id_seq",
+        "incrementBy": "1",
+        "minValue": "1",
+        "maxValue": "9223372036854775807",
+        "startWith": "1",
+        "cacheSize": 1,
+        "cycle": false,
+        "entityType": "sequences"
+      }
+    }
+  ]
+}
