@@ -570,6 +570,7 @@ Items are **descriptive only**. `transaction.amount` stays the single source of 
 | `transaction`          | `(user_id, category_id, date)`                     | Outcome-by-category report               |
 | `transaction`          | `(deleted_at) WHERE deleted_at IS NOT NULL`        | Trash list and the 30-day purge job      |
 | `transaction`          | GIN on `tags`; trigram on `name`, `note`           | Search and tag filter                    |
+| `transaction`          | `(recurring_plan_id) WHERE recurring_plan_id IS NOT NULL`, `(one_time_plan_id) WHERE one_time_plan_id IS NOT NULL` | Plan history and fast `ON DELETE SET NULL` when a plan is deleted |
 | `recurring_plan`       | `(status, next_due_date)`                          | Auto-record job                          |
 | `one_time_plan`        | `(status, date)`                                   | Mark-missed job                          |
 | `reminder`             | `(status, scheduled_at)`                           | Sender job (polls every minute)          |
