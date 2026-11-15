@@ -21,6 +21,7 @@ erDiagram
     ACCOUNT |o--o{ TRANSACTION : "transfer destination"
     CATEGORY |o--o{ TRANSACTION : classifies
     TRANSACTION ||--o{ TRANSACTION_IMAGE : has
+    TRANSACTION ||--o{ TRANSACTION_ITEM : "lists purchased items"
     TRANSACTION |o--o{ TRANSACTION : "admin fee of"
 
     USER ||--o{ TRANSACTION_TEMPLATE : saves
@@ -51,6 +52,7 @@ Every primary key is a human-readable string made of an entity prefix and a zero
 | Category            | `CAT`   | `CAT001`   |
 | Transaction         | `TRANS` | `TRANS001` |
 | TransactionImage    | `IMG`   | `IMG001`   |
+| TransactionItem     | `ITM`   | `ITM001`   |
 | RecurringPlan       | `RPLAN` | `RPLAN001` |
 | PlanOccurrence      | `OCC`   | `OCC001`   |
 | OneTimePlan         | `OPLAN` | `OPLAN001` |
@@ -165,6 +167,16 @@ erDiagram
         string public_id UK
         string mime_type
         int size
+        smallint position
+    }
+
+    TRANSACTION_ITEM {
+        string id PK
+        string transaction_id FK
+        string name
+        decimal quantity
+        string unit
+        bigint total_price
         smallint position
     }
 
@@ -458,6 +470,23 @@ A saved set of transaction fields the user can reuse. Receipt images are **not**
 
 There is no limit on the number of templates per user (MVP). The transaction created from a template does not store a reference back to it.
 
+### 4.15 `transaction_item`
+
+Optional line items of a transaction (what was bought, how many, and the price). Entered manually in the MVP; designed so that a receipt scan (post-MVP) can fill the same rows.
+
+| Column           | Type          | Null | Default  | Min / Max                  | Notes                                                              |
+| ---------------- | ------------- | ---- | -------- | -------------------------- | ------------------------------------------------------------------ |
+| `id`             | varchar(20)   | N    | sequence | `ITM` + 3+ digits          | PK                                                                 |
+| `transaction_id` | varchar(20)   | N    |          |                            | FK → `transaction.id`, `ON DELETE CASCADE`                         |
+| `name`           | varchar(150)  | N    |          | 1 – 150 chars              | Item name, for example "Cooking oil 2L"                            |
+| `quantity`       | numeric(10,3) | N    | `1`      | > 0, ≤ 9,999,999.999       | Fractions allowed (1.5 kg)                                         |
+| `unit`           | varchar(20)   | Y    | null     | ≤ 20 chars                 | Free text: `pcs`, `kg`, `pack`                                     |
+| `total_price`    | bigint        | N    |          | 0 … MAX_AMOUNT             | Integer IDR for the whole line (quantity × unit price). Unit price is derived (`total_price / quantity`), not stored |
+| `position`       | smallint      | N    |          | 0 … 99                     | Display order; at most 100 items per transaction                   |
+| `created_at`     | timestamptz   | N    | now      |                            |                                                                    |
+
+Items are **descriptive only**. `transaction.amount` stays the single source of truth for balances and reports. The sum of `total_price` may differ from `amount` (tax, service charge, discounts, rounding); the app shows the difference and offers "Use items total as amount", but nothing enforces equality.
+
 ## 5. Relationships
 
 | Relationship                                                            | Cardinality      | Notes                                                                                  |
@@ -468,6 +497,7 @@ There is no limit on the number of templates per user (MVP). The transaction cre
 | Account → Transaction (`to_account_id`)                                 | 1 : N (optional) | Only for `TRANSFER`                                                                    |
 | Category → Transaction                                                  | 1 : N (optional) | Not used for transfers. On category delete, transactions move to the fallback category |
 | Transaction → TransactionImage                                          | 1 : N            | Maximum 5 per transaction                                                              |
+| Transaction → TransactionItem                                           | 1 : N            | Optional, maximum 100 per transaction. Never for `TRANSFER`                            |
 | Transaction → Transaction (`parent_transaction_id`)                     | 1 : N (optional) | Admin fee outcome linked to its transfer                                               |
 | Transaction → plan                                                      | N : 0..1         | At most one of `recurring_plan_id` or `one_time_plan_id` is set                        |
 | RecurringPlan → PlanOccurrence                                          | 1 : N            | One row per resolved due date                                                          |
@@ -498,6 +528,7 @@ There is no limit on the number of templates per user (MVP). The transaction cre
 | `one_time_plan` | `target_amount > 0`; `reminder_offsets <@ {1,3,7,14}`; `cardinality(reminder_offsets) BETWEEN 1 AND 4` |
 | `reminder` | Exactly one of `recurring_plan_id` and `one_time_plan_id` is not null; `attempts BETWEEN 0 AND 5` |
 | `transaction_image` | `position BETWEEN 0 AND 4`; `size BETWEEN 1 AND 5242880` |
+| `transaction_item` | `quantity > 0 AND quantity <= 9999999.999`; `total_price BETWEEN 0 AND 999999999999`; `position BETWEEN 0 AND 99` |
 | `transaction_template` | `amount IS NULL OR (amount > 0 AND amount <= 999999999999)` |
 | `transaction_template` | `type <> 'TRANSFER'` ⇒ `to_account_id IS NULL`; `type = 'TRANSFER'` ⇒ `category_id IS NULL`; `account_id <> to_account_id` when both are set |
 | `transaction_template` | `cardinality(tags) <= 10` |
@@ -511,6 +542,7 @@ There is no limit on the number of templates per user (MVP). The transaction cre
 | `category` | `(user_id, type, lower(name))` | No duplicate category names |
 | `transaction_image` | `public_id` | One Cloudinary asset is attached once |
 | `transaction_image` | `(transaction_id, position)` | Stable ordering |
+| `transaction_item` | `(transaction_id, position)` (deferrable) | Stable ordering; also serves lookups by `transaction_id`. Deferrable so a reorder or full replace can swap positions in one database transaction |
 | `refresh_token` | `token_hash` | |
 | `password_reset_token` | `token_hash` | |
 | `device_token` | `token` | Re-registering the same token updates the row |
@@ -520,6 +552,8 @@ There is no limit on the number of templates per user (MVP). The transaction cre
 **Application-level rules** (not expressible as simple checks)
 
 - Maximum 5 images per transaction.
+- Maximum 100 items per transaction; items are allowed on `INCOME` and `OUTCOME` only, never on `TRANSFER` (and not on its admin fee). Editing items replaces the whole list in one database transaction.
+- Items do not affect balances. `transaction.amount` is authoritative; `SUM(total_price)` is informational.
 - `transaction.date` must not be later than now; future events are modeled as plans.
 - Source and destination accounts must be `ACTIVE` when a transaction is created.
 - A category's `type` must match the transaction's `type`.
@@ -598,3 +632,4 @@ GROUP BY a.id;
 | New `RefreshToken`, `PasswordResetToken`, `DeviceToken`, `IdempotencyKey`             | JWT refresh rotation, password reset, push delivery, safe request retries |
 | `RecurringPlan.offset_pengingat` → `reminder_offsets` (array); `OneTimePlan` likewise | A plan may have several reminder offsets                                  |
 | New `TransactionTemplate`                                                             | Reusable transaction presets (no images, optional amount)                 |
+| New `TransactionItem`                                                                 | Purchased line items; groundwork for receipt scanning (post-MVP)          |

@@ -29,7 +29,7 @@ export const transactionSourceEnum = pgEnum("transaction_source", [
 export const transactionIdSeq = pgSequence("transaction_id_seq");
 
 export const transactions = pgTable(
-  "transactions",
+  "transaction",
   {
     id: varchar("id", { length: 20 })
       .primaryKey()

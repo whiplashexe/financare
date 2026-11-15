@@ -45,7 +45,7 @@ export const accounts = pgTable(
     color: varchar("color", { length: 9 }),
     includeInTotal: boolean("include_in_total").notNull().default(true),
     status: accountStatusEnum("status").notNull().default("ACTIVE"),
-    createdAt: timestamp("timestamp", { withTimezone: true })
+    createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })

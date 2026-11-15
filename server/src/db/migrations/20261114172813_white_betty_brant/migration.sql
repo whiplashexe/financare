@@ -1,12 +1,15 @@
 CREATE TYPE "device_platform" AS ENUM('ANDROID', 'IOS');--> statement-breakpoint
 CREATE TYPE "account_status" AS ENUM('ACTIVE', 'ARCHIVED');--> statement-breakpoint
 CREATE TYPE "account_type" AS ENUM('BANK', 'EWALLET', 'CASH');--> statement-breakpoint
+CREATE TYPE "category_type" AS ENUM('INCOME', 'OUTCOME');--> statement-breakpoint
 CREATE TYPE "transaction_source" AS ENUM('MANUAL', 'AUTO');--> statement-breakpoint
 CREATE TYPE "transaction_type" AS ENUM('INCOME', 'OUTCOME', 'TRANSFER');--> statement-breakpoint
 CREATE SEQUENCE "public"."user_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
+CREATE SEQUENCE "public"."refresh_token_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
 CREATE SEQUENCE "public"."password_reset_token_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
 CREATE SEQUENCE "public"."device_token_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
 CREATE SEQUENCE "public"."account_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
+CREATE SEQUENCE "public"."category_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
 CREATE SEQUENCE "public"."transaction_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1;--> statement-breakpoint
 CREATE TABLE "user" (
 	"id" varchar(20) PRIMARY KEY DEFAULT 'USR' || lpad(nextval('user_id_seq')::text, 3, '0'),
@@ -28,7 +31,7 @@ CREATE TABLE "user" (
 );
 --> statement-breakpoint
 CREATE TABLE "refresh_token" (
-	"id" varchar(20) PRIMARY KEY DEFAULT 'RTK' || lpad(nextval('user_id_seq')::text, 3, '0'),
+	"id" varchar(20) PRIMARY KEY DEFAULT 'RTK' || lpad(nextval('refresh_token_id_seq')::text, 3, '0'),
 	"user_id" varchar(20) NOT NULL,
 	"family_id" varchar(36) NOT NULL,
 	"token_hash" char(64) NOT NULL UNIQUE,
@@ -74,7 +77,7 @@ CREATE TABLE "account" (
 	"color" varchar(9),
 	"include_in_total" boolean DEFAULT true NOT NULL,
 	"status" "account_status" DEFAULT 'ACTIVE'::"account_status" NOT NULL,
-	"timestamp" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "account_id_format" CHECK ("id" ~ '^ACC[0-9]{3,}$'),
 	CONSTRAINT "account_last4_format" CHECK ("last4" IS NULL OR "last4" ~ '^[0-9]{4}$'),
@@ -83,7 +86,21 @@ CREATE TABLE "account" (
 	CONSTRAINT "account_color_format" CHECK ("color" IS NULL OR "color" ~ '^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$')
 );
 --> statement-breakpoint
-CREATE TABLE "transactions" (
+CREATE TABLE "category" (
+	"id" varchar(20) PRIMARY KEY DEFAULT 'CAT' || lpad(nextval('category_id_seq')::text, 3, '0'),
+	"user_id" varchar(20) NOT NULL,
+	"name" varchar(50) NOT NULL,
+	"type" "category_type" NOT NULL,
+	"icon" varchar(50),
+	"is_default" boolean DEFAULT false NOT NULL,
+	"is_fallback" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "category_id_format" CHECK ("id" ~ '^CAT[0-9]{3,}$'),
+	CONSTRAINT "category_fallback_is_default" CHECK (NOT "is_fallback" OR "is_default")
+);
+--> statement-breakpoint
+CREATE TABLE "transaction" (
 	"id" varchar(20) PRIMARY KEY DEFAULT 'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0'),
 	"user_id" varchar(20) NOT NULL,
 	"account_id" varchar(20) NOT NULL,
@@ -121,19 +138,23 @@ CREATE INDEX "password_reset_token_user_id_idx" ON "password_reset_token" ("user
 CREATE INDEX "password_reset_token_expires_at_idx" ON "password_reset_token" ("expires_at");--> statement-breakpoint
 CREATE INDEX "device_token_user_id_idx" ON "device_token" ("user_id");--> statement-breakpoint
 CREATE INDEX "account_user_id_status_idx" ON "account" ("user_id","status");--> statement-breakpoint
-CREATE INDEX "transaction_user_date_idx" ON "transactions" ("user_id","date" DESC NULLS LAST) WHERE "deleted_at" IS NULL;--> statement-breakpoint
-CREATE INDEX "transaction_account_date_idx" ON "transactions" ("account_id","date" DESC NULLS LAST) WHERE "deleted_at" IS NULL;--> statement-breakpoint
-CREATE INDEX "transaction_to_account_idx" ON "transactions" ("to_account_id") WHERE "to_account_id" IS NOT NULL;--> statement-breakpoint
-CREATE INDEX "transaction_user_category_date_idx" ON "transactions" ("user_id","category_id","date");--> statement-breakpoint
-CREATE INDEX "transaction_deleted_at_idx" ON "transactions" ("deleted_at") WHERE "deleted_at" IS NOT NULL;--> statement-breakpoint
-CREATE INDEX "transaction_tags_gin_idx" ON "transactions" USING gin ("tags");--> statement-breakpoint
+CREATE UNIQUE INDEX "category_user_type_name_unique" ON "category" ("user_id","type",lower("name"));--> statement-breakpoint
+CREATE UNIQUE INDEX "category_user_type_fallback_unique" ON "category" ("user_id","type") WHERE "is_fallback" = true;--> statement-breakpoint
+CREATE INDEX "category_user_id_idx" ON "category" ("user_id");--> statement-breakpoint
+CREATE INDEX "transaction_user_date_idx" ON "transaction" ("user_id","date" DESC NULLS LAST) WHERE "deleted_at" IS NULL;--> statement-breakpoint
+CREATE INDEX "transaction_account_date_idx" ON "transaction" ("account_id","date" DESC NULLS LAST) WHERE "deleted_at" IS NULL;--> statement-breakpoint
+CREATE INDEX "transaction_to_account_idx" ON "transaction" ("to_account_id") WHERE "to_account_id" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX "transaction_user_category_date_idx" ON "transaction" ("user_id","category_id","date");--> statement-breakpoint
+CREATE INDEX "transaction_deleted_at_idx" ON "transaction" ("deleted_at") WHERE "deleted_at" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX "transaction_tags_gin_idx" ON "transaction" USING gin ("tags");--> statement-breakpoint
 ALTER TABLE "refresh_token" ADD CONSTRAINT "refresh_token_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "refresh_token" ADD CONSTRAINT "refresh_token_replaced_by_refresh_token_id_fkey" FOREIGN KEY ("replaced_by") REFERENCES "refresh_token"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "password_reset_token" ADD CONSTRAINT "password_reset_token_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "device_token" ADD CONSTRAINT "device_token_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id");--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_account_id_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_to_account_id_account_id_fkey" FOREIGN KEY ("to_account_id") REFERENCES "account"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_category_id_categories_id_fkey" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_parent_transaction_id_transactions_id_fkey" FOREIGN KEY ("parent_transaction_id") REFERENCES "transactions"("id") ON DELETE CASCADE;
+ALTER TABLE "category" ADD CONSTRAINT "category_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id");--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_account_id_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_to_account_id_account_id_fkey" FOREIGN KEY ("to_account_id") REFERENCES "account"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_category_id_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_parent_transaction_id_transaction_id_fkey" FOREIGN KEY ("parent_transaction_id") REFERENCES "transaction"("id") ON DELETE CASCADE;

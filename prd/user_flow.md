@@ -272,7 +272,7 @@ POST /api/v1/accounts
 
 Target: complete in ≤ 30 seconds.
 
-**User flow:** Dashboard "+ Transaction" → choose type (Income/Outcome) → amount → name → account (default: last used account) → category (optional) → date (default today) → location (type or "Auto-fill") → photo (camera/gallery, max 5) → Save.
+**User flow:** Dashboard "+ Transaction" → choose type (Income/Outcome) → amount → name → account (default: last used account) → category (optional) → date (default today) → location (type or "Auto-fill") → items (optional: name, quantity, unit, price per line) → photo (camera/gallery, max 5) → Save.
 
 ```mermaid
 sequenceDiagram
@@ -347,6 +347,10 @@ Idempotency-Key: 6c1b...
 | Image upload fails | The transaction can still be saved without images; images can be added later (5.4) |
 | Request resent (network dropped) | The same `Idempotency-Key` returns the original result, not a duplicate transaction |
 | When creating a transaction and the balance changes | Happens in a single database transaction |
+| More than 100 items, or items on a transfer | `422 BUSINESS_RULE` / `400 VALIDATION_ERROR` |
+| Items total differs from the amount | Allowed. The form shows "Items total Rp452.000, amount Rp450.000" with a button "Use items total as amount". Balances always use `amount` |
+
+**Items (line items).** The user may list what was bought: name, quantity (decimals allowed, for example 1.5 kg), optional unit, and the price of the whole line. Items are optional and descriptive: they never change balances, reports, or the amount. Editing a transaction replaces the item list as a whole. Items are shown on the transaction detail, searched by `q`, and are not copied into templates in the MVP. *Post-MVP:* scanning a receipt photo with computer vision will pre-fill this list for the user to review; the same item rows are used, so no data change is needed beyond a scan job record.
 
 ### 5.2 Transfer between accounts
 
@@ -874,5 +878,8 @@ The complete list of endpoints, fields, validation rules, and error codes is in 
 | 10  | Number of templates                        | Unlimited                                                                                                           |
 | 11  | Transfer templates                         | Supported                                                                                                           |
 | 12  | Templates in MVP                           | Yes, included in the MVP                                                                                            |
+| 13  | Transaction line items                     | In the MVP as an optional manual list (max 100). Descriptive only; `amount` stays authoritative                     |
+| 14  | Receipt scanning (computer vision)         | Post-MVP. Will pre-fill items for review; the data model already supports it                                        |
+| 15  | Items in templates                         | Not copied in the MVP                                                                                               |
 
 Still open (technical): scheduler hosting, database, repo structure, and Expo vs. bare React Native.

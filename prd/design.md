@@ -168,8 +168,10 @@ Error (offline with Retry).
 Build the New transaction modal. Tabs: Pengeluaran, Pemasukan, Transfer. Template
 chips on top (horizontal, "+ Template"). Amount first, then name, account
 (default last used), category (filtered by type, optional), date (default today,
-future dates disabled), location with "Isi otomatis", note, tags, and the Photo
-strip. Primary "Simpan" pinned to the bottom.
+future dates disabled), location with "Isi otomatis", note, tags, a collapsible "Rincian barang" section
+(item rows with name, quantity, unit, price; "+ Tambah barang"; a footer showing
+the items total and, when it differs from the amount, a "Pakai total barang"
+button), and the Photo strip. Primary "Simpan" pinned to the bottom.
 Transfer tab: source and destination with a swap button, amount, admin fee
 (optional), date, and shortcuts "Tarik tunai" and "Setor tunai".
 Frames: Outcome filled, Income, Transfer, Negative-balance warning, Photo

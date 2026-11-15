@@ -371,11 +371,12 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 | `plan_id` | string | No | ID of a recurring/one-time plan |
 | `template_id` | string | No | Write-only. ID of the template this transaction was created from; only used to increment the template's `use_count`. Not stored on the transaction |
 | `images` | array | No | Max 5: `{ public_id, mime_type, size }` |
+| `items` | array | No | Max 100, `INCOME`/`OUTCOME` only (`400` for `TRANSFER`). Each: `{ name (1–150), quantity (> 0, default 1, up to 3 decimals), unit? (≤ 20), total_price (int ≥ 0) }`. The array order is the display order. Informational: does not change `amount` or balances. The response also includes `items_total` (sum of `total_price`) so the client can show the difference from `amount` |
 | `source` | enum | Read-only | `MANUAL` / `AUTO` |
 
 ### GET `/transactions`
 
-Query: `from`, `to`, `type`, `account_id` (matches if source or destination), `category_id`, `q` (name/note), `tag`, `cursor`, `limit`. Order: `date` descending. Response: list of compact objects (no full image URLs; only `images_count` and `thumbnail_url`).
+Query: `from`, `to`, `type`, `account_id` (matches if source or destination), `category_id`, `q` (name/note), `tag`, `cursor`, `limit`. Order: `date` descending. Response: list of compact objects (no full image URLs and no items; only `images_count`, `items_count`, and `thumbnail_url`). The `q` search also matches item names.
 
 ### POST `/transactions`
 
@@ -415,7 +416,7 @@ Full object; `images[].url` is a signed Cloudinary URL with a short validity (±
 
 ### PATCH `/transactions/:id`
 
-All fields optional (except `images`, which are managed through the image endpoints). The balances of all affected accounts (old and new) are recalculated within a single database transaction. For transfers, the linked admin fee is updated as well.
+All fields optional (except `images`, which are managed through the image endpoints). `items`, when sent, **replaces the whole list** (send `[]` to remove all items; omit the field to leave them unchanged). The balances of all affected accounts (old and new) are recalculated within a single database transaction. For transfers, the linked admin fee is updated as well.
 
 ### DELETE `/transactions/:id`
 
@@ -726,4 +727,5 @@ Required beyond the main PRD entity list:
 - `Transaction`: add `parent_transaction_id` (transfer admin fee), `source` (`MANUAL`/`AUTO`), `deleted_at`, `tags`; unique `(plan_id, due_date)` for recurring plan transactions
 - `User`: add `preferences.hide_balance`, `notification_preferences`
 - `IdempotencyKey`: `key, user_id, response, created_at`
+- `TransactionItem`: `id, transaction_id, name, quantity, unit, total_price, position, created_at`
 - `TransactionTemplate`: `id, user_id, name, type, transaction_name, amount, account_id, to_account_id, category_id, location, note, tags, use_count, last_used_at`

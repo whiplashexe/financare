@@ -1,21 +1,26 @@
 import { sql } from "drizzle-orm";
-import { varchar } from "drizzle-orm/cockroach-core";
 import {
   AnyPgColumn,
   char,
   check,
   index,
+  pgSequence,
   pgTable,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
+
+export const refreshTokenIdSeq = pgSequence("refresh_token_id_seq");
 
 export const refreshTokens = pgTable(
   "refresh_token",
   {
     id: varchar("id", { length: 20 })
       .primaryKey()
-      .default(sql`'RTK' || lpad(nextval('user_id_seq')::text, 3, '0')`),
+      .default(
+        sql`'RTK' || lpad(nextval('refresh_token_id_seq')::text, 3, '0')`,
+      ),
     userId: varchar("user_id", { length: 20 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

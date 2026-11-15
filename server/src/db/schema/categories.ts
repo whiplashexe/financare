@@ -16,7 +16,7 @@ export const categoryTypeEnum = pgEnum("category_type", ["INCOME", "OUTCOME"]);
 export const categoryIdSeq = pgSequence("category_id_seq");
 
 export const categories = pgTable(
-  "categories",
+  "category",
   {
     id: varchar("id", { length: 20 })
       .primaryKey()

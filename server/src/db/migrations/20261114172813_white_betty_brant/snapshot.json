@@ -2,7 +2,7 @@
   "type": "base",
   "version": "9",
   "dialect": "postgres",
-  "id": "d38f726b-a156-4e7c-93c5-c07b7f16654a",
+  "id": "56b08d59-7ea7-48c3-b695-92a8b918e331",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -53,6 +53,23 @@
         "n|enum|public.account_type",
         "e|enum|public.account_type",
         "n|type|public.account_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "category_type"
+      ],
+      "writes": [
+        "s|enum|public.category_type",
+        "n|enum|public.category_type",
+        "e|enum|public.category_type",
+        "n|type|public.category_type"
       ],
       "reads": [
         "n|sch|public"
@@ -114,6 +131,23 @@
       "statementTarget": [
         "sequence",
         "public",
+        "refresh_token_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.refresh_token_id_seq",
+        "n|seq|public.refresh_token_id_seq",
+        "e|seq|public.refresh_token_id_seq",
+        "n|rel|public.refresh_token_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
         "password_reset_token_id_seq"
       ],
       "writes": [
@@ -155,6 +189,23 @@
         "n|seq|public.account_id_seq",
         "e|seq|public.account_id_seq",
         "n|rel|public.account_id_seq"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_sequence",
+      "statementTarget": [
+        "sequence",
+        "public",
+        "category_id_seq"
+      ],
+      "writes": [
+        "s|seq|public.category_id_seq",
+        "n|seq|public.category_id_seq",
+        "e|seq|public.category_id_seq",
+        "n|rel|public.category_id_seq"
       ],
       "reads": [
         "n|sch|public"
@@ -283,15 +334,35 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "category"
       ],
       "writes": [
-        "s|tbl|public.transactions",
-        "n|tbl|public.transactions",
-        "e|tbl|public.transactions",
-        "n|rel|public.transactions",
-        "n|type|public.transactions",
-        "n|rel|public.transactions_pkey"
+        "s|tbl|public.category",
+        "n|tbl|public.category",
+        "e|tbl|public.category",
+        "n|rel|public.category",
+        "n|type|public.category",
+        "n|rel|public.category_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.category_type"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction"
+      ],
+      "writes": [
+        "s|tbl|public.transaction",
+        "n|tbl|public.transaction",
+        "e|tbl|public.transaction",
+        "n|rel|public.transaction",
+        "n|type|public.transaction",
+        "n|rel|public.transaction_pkey"
       ],
       "reads": [
         "n|sch|public",
@@ -464,7 +535,69 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "category",
+        "category_user_type_name_unique"
+      ],
+      "writes": [
+        "s|idx|public.category_user_type_name_unique",
+        "n|idx|public.category_user_type_name_unique",
+        "e|idx|public.category_user_type_name_unique",
+        "n|rel|public.category_user_type_name_unique"
+      ],
+      "reads": [
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.category.user_id",
+        "n|col|public.category.type"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "category",
+        "category_user_type_fallback_unique"
+      ],
+      "writes": [
+        "s|idx|public.category_user_type_fallback_unique",
+        "n|idx|public.category_user_type_fallback_unique",
+        "e|idx|public.category_user_type_fallback_unique",
+        "n|rel|public.category_user_type_fallback_unique"
+      ],
+      "reads": [
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.category.user_id",
+        "n|col|public.category.type"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "category",
+        "category_user_id_idx"
+      ],
+      "writes": [
+        "s|idx|public.category_user_id_idx",
+        "n|idx|public.category_user_id_idx",
+        "e|idx|public.category_user_id_idx",
+        "n|rel|public.category_user_id_idx"
+      ],
+      "reads": [
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.category.user_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "transaction",
         "transaction_user_date_idx"
       ],
       "writes": [
@@ -474,10 +607,10 @@
         "n|rel|public.transaction_user_date_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.user_id",
-        "n|col|public.transactions.date"
+        "n|col|public.transaction.user_id",
+        "n|col|public.transaction.date"
       ]
     },
     {
@@ -485,7 +618,7 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "transaction",
         "transaction_account_date_idx"
       ],
       "writes": [
@@ -495,10 +628,10 @@
         "n|rel|public.transaction_account_date_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.account_id",
-        "n|col|public.transactions.date"
+        "n|col|public.transaction.account_id",
+        "n|col|public.transaction.date"
       ]
     },
     {
@@ -506,7 +639,7 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "transaction",
         "transaction_to_account_idx"
       ],
       "writes": [
@@ -516,9 +649,9 @@
         "n|rel|public.transaction_to_account_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.to_account_id"
+        "n|col|public.transaction.to_account_id"
       ]
     },
     {
@@ -526,7 +659,7 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "transaction",
         "transaction_user_category_date_idx"
       ],
       "writes": [
@@ -536,11 +669,11 @@
         "n|rel|public.transaction_user_category_date_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.user_id",
-        "n|col|public.transactions.category_id",
-        "n|col|public.transactions.date"
+        "n|col|public.transaction.user_id",
+        "n|col|public.transaction.category_id",
+        "n|col|public.transaction.date"
       ]
     },
     {
@@ -548,7 +681,7 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "transaction",
         "transaction_deleted_at_idx"
       ],
       "writes": [
@@ -558,9 +691,9 @@
         "n|rel|public.transaction_deleted_at_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.deleted_at"
+        "n|col|public.transaction.deleted_at"
       ]
     },
     {
@@ -568,7 +701,7 @@
       "statementTarget": [
         "index",
         "public",
-        "transactions",
+        "transaction",
         "transaction_tags_gin_idx"
       ],
       "writes": [
@@ -578,9 +711,9 @@
         "n|rel|public.transaction_tags_gin_idx"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.tags"
+        "n|col|public.transaction.tags"
       ]
     },
     {
@@ -703,20 +836,20 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "category"
       ],
       "writes": [
-        "s|fk|public.transactions.transactions_user_id_user_id_fkey",
-        "n|fk|public.transactions.transactions_user_id_user_id_fkey",
-        "e|fk|public.transactions.transactions_user_id_user_id_fkey",
-        "n|con|public.transactions.transactions_user_id_user_id_fkey"
+        "s|fk|public.category.category_user_id_user_id_fkey",
+        "n|fk|public.category.category_user_id_user_id_fkey",
+        "e|fk|public.category.category_user_id_user_id_fkey",
+        "n|con|public.category.category_user_id_user_id_fkey"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.category",
         "n|sch|public",
         "n|tbl|public.user",
         "n|sch|public",
-        "n|col|public.transactions.user_id",
+        "n|col|public.category.user_id",
         "n|col|public.user.id",
         "e|uniqueness|public.user.id"
       ]
@@ -726,20 +859,43 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "transaction"
       ],
       "writes": [
-        "s|fk|public.transactions.transactions_account_id_account_id_fkey",
-        "n|fk|public.transactions.transactions_account_id_account_id_fkey",
-        "e|fk|public.transactions.transactions_account_id_account_id_fkey",
-        "n|con|public.transactions.transactions_account_id_account_id_fkey"
+        "s|fk|public.transaction.transaction_user_id_user_id_fkey",
+        "n|fk|public.transaction.transaction_user_id_user_id_fkey",
+        "e|fk|public.transaction.transaction_user_id_user_id_fkey",
+        "n|con|public.transaction.transaction_user_id_user_id_fkey"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.transaction.user_id",
+        "n|col|public.user.id",
+        "e|uniqueness|public.user.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction"
+      ],
+      "writes": [
+        "s|fk|public.transaction.transaction_account_id_account_id_fkey",
+        "n|fk|public.transaction.transaction_account_id_account_id_fkey",
+        "e|fk|public.transaction.transaction_account_id_account_id_fkey",
+        "n|con|public.transaction.transaction_account_id_account_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
         "n|sch|public",
         "n|tbl|public.account",
         "n|sch|public",
-        "n|col|public.transactions.account_id",
+        "n|col|public.transaction.account_id",
         "n|col|public.account.id",
         "e|uniqueness|public.account.id"
       ]
@@ -749,20 +905,20 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "transaction"
       ],
       "writes": [
-        "s|fk|public.transactions.transactions_to_account_id_account_id_fkey",
-        "n|fk|public.transactions.transactions_to_account_id_account_id_fkey",
-        "e|fk|public.transactions.transactions_to_account_id_account_id_fkey",
-        "n|con|public.transactions.transactions_to_account_id_account_id_fkey"
+        "s|fk|public.transaction.transaction_to_account_id_account_id_fkey",
+        "n|fk|public.transaction.transaction_to_account_id_account_id_fkey",
+        "e|fk|public.transaction.transaction_to_account_id_account_id_fkey",
+        "n|con|public.transaction.transaction_to_account_id_account_id_fkey"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
         "n|tbl|public.account",
         "n|sch|public",
-        "n|col|public.transactions.to_account_id",
+        "n|col|public.transaction.to_account_id",
         "n|col|public.account.id",
         "e|uniqueness|public.account.id"
       ]
@@ -772,22 +928,22 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "transaction"
       ],
       "writes": [
-        "s|fk|public.transactions.transactions_category_id_categories_id_fkey",
-        "n|fk|public.transactions.transactions_category_id_categories_id_fkey",
-        "e|fk|public.transactions.transactions_category_id_categories_id_fkey",
-        "n|con|public.transactions.transactions_category_id_categories_id_fkey"
+        "s|fk|public.transaction.transaction_category_id_category_id_fkey",
+        "n|fk|public.transaction.transaction_category_id_category_id_fkey",
+        "e|fk|public.transaction.transaction_category_id_category_id_fkey",
+        "n|con|public.transaction.transaction_category_id_category_id_fkey"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|tbl|public.categories",
+        "n|tbl|public.category",
         "n|sch|public",
-        "n|col|public.transactions.category_id",
-        "n|col|public.categories.id",
-        "e|uniqueness|public.categories.id"
+        "n|col|public.transaction.category_id",
+        "n|col|public.category.id",
+        "e|uniqueness|public.category.id"
       ]
     },
     {
@@ -795,22 +951,22 @@
       "statementTarget": [
         "table",
         "public",
-        "transactions"
+        "transaction"
       ],
       "writes": [
-        "s|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
-        "n|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
-        "e|fk|public.transactions.transactions_parent_transaction_id_transactions_id_fkey",
-        "n|con|public.transactions.transactions_parent_transaction_id_transactions_id_fkey"
+        "s|fk|public.transaction.transaction_parent_transaction_id_transaction_id_fkey",
+        "n|fk|public.transaction.transaction_parent_transaction_id_transaction_id_fkey",
+        "e|fk|public.transaction.transaction_parent_transaction_id_transaction_id_fkey",
+        "n|con|public.transaction.transaction_parent_transaction_id_transaction_id_fkey"
       ],
       "reads": [
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|tbl|public.transactions",
+        "n|tbl|public.transaction",
         "n|sch|public",
-        "n|col|public.transactions.parent_transaction_id",
-        "n|col|public.transactions.id",
-        "e|uniqueness|public.transactions.id"
+        "n|col|public.transaction.parent_transaction_id",
+        "n|col|public.transaction.id",
+        "e|uniqueness|public.transaction.id"
       ]
     }
   ],
@@ -847,7 +1003,13 @@
     },
     {
       "schema": "public",
-      "name": "transactions",
+      "name": "category",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "transaction",
       "isRlsEnabled": false,
       "entityType": "tables"
     },
@@ -876,6 +1038,15 @@
         "BANK",
         "EWALLET",
         "CASH"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "category_type",
+      "values": [
+        "INCOME",
+        "OUTCOME"
       ],
       "entityType": "enums"
     },
@@ -1088,7 +1259,7 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'RTK' || lpad(nextval('user_id_seq')::text, 3, '0')",
+      "default": "'RTK' || lpad(nextval('refresh_token_id_seq')::text, 3, '0')",
       "generated": null,
       "identity": null,
       "entityType": "columns"
@@ -1525,7 +1696,7 @@
     {
       "schema": "public",
       "table": "account",
-      "name": "timestamp",
+      "name": "created_at",
       "type": "timestamp with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -1550,20 +1721,20 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
       "name": "id",
       "type": "varchar(20)",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0')",
+      "default": "'CAT' || lpad(nextval('category_id_seq')::text, 3, '0')",
       "generated": null,
       "identity": null,
       "entityType": "columns"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
       "name": "user_id",
       "type": "varchar(20)",
       "typeSchema": null,
@@ -1576,100 +1747,9 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "account_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "to_account_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "category_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "parent_transaction_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "recurring_plan_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "one_time_plan_id",
-      "type": "varchar(20)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "type",
-      "type": "transaction_type",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
+      "table": "category",
       "name": "name",
-      "type": "varchar(100)",
+      "type": "varchar(50)",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -1680,87 +1760,22 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "amount",
-      "type": "bigint",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "date",
-      "type": "timestamp with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "location",
-      "type": "varchar(255)",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "note",
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "tags",
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 1,
-      "default": "'{}'",
-      "generated": null,
-      "identity": null,
-      "entityType": "columns"
-    },
-    {
-      "schema": "public",
-      "table": "transactions",
-      "name": "source",
-      "type": "transaction_source",
+      "table": "category",
+      "name": "type",
+      "type": "category_type",
       "typeSchema": "public",
       "notNull": true,
       "dimensions": 0,
-      "default": "'MANUAL'",
+      "default": null,
       "generated": null,
       "identity": null,
       "entityType": "columns"
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "deleted_at",
-      "type": "timestamp with time zone",
+      "table": "category",
+      "name": "icon",
+      "type": "varchar(50)",
       "typeSchema": null,
       "notNull": false,
       "dimensions": 0,
@@ -1771,7 +1786,33 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
+      "name": "is_default",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "category",
+      "name": "is_fallback",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "category",
       "name": "created_at",
       "type": "timestamp with time zone",
       "typeSchema": null,
@@ -1784,7 +1825,254 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0')",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "user_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "account_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "to_account_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "category_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "parent_transaction_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "recurring_plan_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "one_time_plan_id",
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "type",
+      "type": "transaction_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "name",
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "amount",
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "date",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "location",
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "note",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "tags",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "source",
+      "type": "transaction_source",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'MANUAL'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "deleted_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
       "name": "updated_at",
       "type": "timestamp with time zone",
       "typeSchema": null,
@@ -1972,7 +2260,91 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
+      "name": "category_user_type_name_unique",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "type",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "lower(\"name\")",
+          "isExpression": true,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "category",
+      "name": "category_user_type_fallback_unique",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "type",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"is_fallback\" = true",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "category",
+      "name": "category_user_id_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
       "name": "transaction_user_date_idx",
       "nameExplicit": true,
       "columns": [
@@ -2000,7 +2372,7 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_account_date_idx",
       "nameExplicit": true,
       "columns": [
@@ -2028,7 +2400,7 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_to_account_idx",
       "nameExplicit": true,
       "columns": [
@@ -2049,7 +2421,7 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_user_category_date_idx",
       "nameExplicit": true,
       "columns": [
@@ -2084,7 +2456,7 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_deleted_at_idx",
       "nameExplicit": true,
       "columns": [
@@ -2105,7 +2477,7 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_tags_gin_idx",
       "nameExplicit": true,
       "columns": [
@@ -2211,8 +2583,25 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_user_id_user_id_fkey",
+      "table": "category",
+      "name": "category_user_id_user_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "user",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "transaction_user_id_user_id_fkey",
       "nameExplicit": false,
       "columns": [
         "user_id"
@@ -2228,8 +2617,8 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_account_id_account_id_fkey",
+      "table": "transaction",
+      "name": "transaction_account_id_account_id_fkey",
       "nameExplicit": false,
       "columns": [
         "account_id"
@@ -2245,8 +2634,8 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_to_account_id_account_id_fkey",
+      "table": "transaction",
+      "name": "transaction_to_account_id_account_id_fkey",
       "nameExplicit": false,
       "columns": [
         "to_account_id"
@@ -2262,14 +2651,14 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_category_id_categories_id_fkey",
+      "table": "transaction",
+      "name": "transaction_category_id_category_id_fkey",
       "nameExplicit": false,
       "columns": [
         "category_id"
       ],
       "schemaTo": "public",
-      "tableTo": "categories",
+      "tableTo": "category",
       "columnsTo": [
         "id"
       ],
@@ -2279,14 +2668,14 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_parent_transaction_id_transactions_id_fkey",
+      "table": "transaction",
+      "name": "transaction_parent_transaction_id_transaction_id_fkey",
       "nameExplicit": false,
       "columns": [
         "parent_transaction_id"
       ],
       "schemaTo": "public",
-      "tableTo": "transactions",
+      "tableTo": "transaction",
       "columnsTo": [
         "id"
       ],
@@ -2346,8 +2735,18 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
-      "name": "transactions_pkey",
+      "table": "category",
+      "name": "category_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
+      "name": "transaction_pkey",
       "columns": [
         "id"
       ],
@@ -2459,56 +2858,70 @@
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "category",
+      "name": "category_id_format",
+      "value": "\"id\" ~ '^CAT[0-9]{3,}$'",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "category",
+      "name": "category_fallback_is_default",
+      "value": "NOT \"is_fallback\" OR \"is_default\"",
+      "entityType": "checks"
+    },
+    {
+      "schema": "public",
+      "table": "transaction",
       "name": "transaction_id_format",
       "value": "\"id\" ~ '^TRANS[0-9]{3,}$'",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_amount_range",
       "value": "\"amount\" > 0 AND \"amount\" <= 999999999999",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_transfer_has_destination",
       "value": "(\"type\" = 'TRANSFER') = (\"to_account_id\" IS NOT NULL)",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_distinct_accounts",
       "value": "\"to_account_id\" IS NULL OR \"account_id\" <> \"to_account_id\"",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_transfer_no_category",
       "value": "\"type\" <> 'TRANSFER' OR \"category_id\" IS NULL",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_single_plan",
       "value": "NOT (\"recurring_plan_id\" IS NOT NULL AND \"one_time_plan_id\" IS NOT NULL)",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_fee_is_outcome",
       "value": "\"parent_transaction_id\" IS NULL OR \"type\" = 'OUTCOME'",
       "entityType": "checks"
     },
     {
       "schema": "public",
-      "table": "transactions",
+      "table": "transaction",
       "name": "transaction_tags_max",
       "value": "cardinality(\"tags\") <= 10",
       "entityType": "checks"
@@ -2516,6 +2929,17 @@
     {
       "schema": "public",
       "name": "user_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "refresh_token_id_seq",
       "incrementBy": "1",
       "minValue": "1",
       "maxValue": "9223372036854775807",
@@ -2549,6 +2973,17 @@
     {
       "schema": "public",
       "name": "account_id_seq",
+      "incrementBy": "1",
+      "minValue": "1",
+      "maxValue": "9223372036854775807",
+      "startWith": "1",
+      "cacheSize": 1,
+      "cycle": false,
+      "entityType": "sequences"
+    },
+    {
+      "schema": "public",
+      "name": "category_id_seq",
       "incrementBy": "1",
       "minValue": "1",
       "maxValue": "9223372036854775807",
