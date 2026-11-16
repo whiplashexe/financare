@@ -10,6 +10,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
 
   JWT_ACCESS_SECRET: z.string().min(32, "must be at least 32 characters"),
+  JWT_ACCESS_TTL: z.string(),
   ACCESS_TOKEN_TTL_MINUTES: z.coerce.number().int().positive().default(15),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
 

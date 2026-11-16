@@ -6,10 +6,10 @@ export type AsyncRouteHandler = (
   next: NextFunction,
 ) => Promise<unknown>;
 
-export function AsyncHandler(fn: AsyncRouteHandler) {
+export const asyncHandler = (fn: AsyncRouteHandler) => {
   return function (req: Request, res: Response, next: NextFunction) {
     Promise.resolve()
       .then(() => fn(req, res, next))
       .catch(next);
   };
-}
+};

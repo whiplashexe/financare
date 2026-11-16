@@ -1,0 +1,55 @@
+export const API_MESSAGE = {
+  SUCCESS: "Success",
+  CREATED: "Created successfully",
+  UPDATED: "Updated successfully",
+  DELETED: "Deleted successfully",
+  FETCHED: "Fetched successfully",
+
+  BAD_REQUEST: "Bad request",
+  VALIDATION_FAILED: "Validation failed",
+  NOT_FOUND: "Resource not found",
+  CONFLICT: "Resource already exists",
+  TOO_MANY_REQUESTS: "Too many requests, please try again later",
+  INTERNAL_SERVER_ERROR: "Something went wrong, please try again later",
+  SERVICE_UNAVAILABLE: "Service temporarily unavailable",
+} as const;
+
+export const CRUD_MESSAGE = {
+  created: (resource: string) => `${resource} created successfully`,
+  updated: (resource: string) => `${resource} updated successfully`,
+  deleted: (resource: string) => `${resource} deleted successfully`,
+  fetched: (resource: string) => `${resource} fetched successfully`,
+  listed: (resource: string) => `${resource} list fetched successfully`,
+  notFound: (resource: string) => `${resource} not found`,
+  alreadyExists: (resource: string) => `${resource} already exists`,
+  createFailed: (resource: string) => `Failed to create ${resource}`,
+  updateFailed: (resource: string) => `Failed to update ${resource}`,
+  deleteFailed: (resource: string) => `Failed to delete ${resource}`,
+  fetchFailed: (resource: string) => `Failed to fetch ${resource}`,
+} as const;
+
+export const AUTH_MESSAGE = {
+  LOGIN_SUCCESS: "Login successful",
+  LOGOUT_SUCCESS: "Logout successful",
+  REGISTER_SUCCESS: "Registration successful",
+  TOKEN_REFRESHED: "Token refreshed successfully",
+  PASSWORD_CHANGED: "Password changed successfully",
+  PASSWORD_RESET_SENT: "Password reset link has been sent to your email",
+  PASSWORD_RESET_SUCCESS: "Password has been reset successfully",
+  EMAIL_VERIFIED: "Email verified successfully",
+  VERIFICATION_SENT: "Verification email has been sent",
+
+  UNAUTHORIZED: "You must be logged in to access this resource",
+  FORBIDDEN: "You don't have permission to access this resource",
+  INVALID_CREDENTIALS: "Invalid email or password",
+  TOKEN_MISSING: "Authentication token is missing",
+  TOKEN_INVALID: "Authentication token is invalid",
+  TOKEN_EXPIRED: "Authentication token has expired",
+  SESSION_EXPIRED: "Your session has expired, please log in again",
+  EMAIL_NOT_VERIFIED: "Please verify your email first",
+  EMAIL_ALREADY_EXISTS: "Email is already registered",
+  ACCOUNT_DISABLED: "Your account has been disabled",
+  USER_NOT_FOUND: "User not found",
+  PASSWORD_MISMATCH: "Passwords do not match",
+  OLD_PASSWORD_INCORRECT: "Old password is incorrect",
+} as const;
