@@ -15,7 +15,6 @@ export class UserController {
       deviceInfo: req.get("user-agent"),
     });
 
-    // kontrak API (prd/endpoint.md) memakai snake_case
     ApiResponse.created(res, AUTH_MESSAGE.REGISTER_SUCCESS, {
       user: {
         id: user.id,

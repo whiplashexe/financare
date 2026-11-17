@@ -5,35 +5,23 @@ import { RegisterInput } from "../../validations/user.validation.js";
 import { hashPassword } from "../../utils/password.util.js";
 import { ApiError } from "../../utils/api.error.util.js";
 import { AUTH_MESSAGE } from "../../constants/response.message.js";
-import {
-  generateRefreshToken,
-  newFamilyId,
-  REFRESH_TTL_MS,
-  signAccessToken,
-} from "../../utils/token.util.js";
 import { createDefaultCategories } from "../../db/seeds/create.default.categories.js";
-import { refreshTokens } from "../../db/schema/refresh.tokens.js";
-
-// nama perangkat dari klien lebih informatif daripada user-agent
-const describeDevice = (
-  device: RegisterInput["device"],
-  userAgent?: string,
-) => {
-  const fromClient = device && [device.platform, device.name].filter(Boolean).join(" ");
-  return (fromClient || userAgent)?.slice(0, 255);
-};
+import {
+  createSession,
+  describeDevice,
+} from "../../utils/auth.session.util.js";
 
 export const register = async ({
   input,
   deviceInfo,
 }: {
   input: RegisterInput;
-  deviceInfo?: string;
+  deviceInfo?: string | undefined;
 }) => {
   const existing = await db
     .select({ id: users.id })
     .from(users)
-    .where(sql`lower(${users.email}) = ${input.email}`)
+    .where(sql`lower(${users.email}) = ${input.email.toLowerCase()}`)
     .limit(1);
 
   if (existing.length > 0)
@@ -41,8 +29,7 @@ export const register = async ({
 
   const passwordHash = await hashPassword(input.password);
 
-  const refresh = generateRefreshToken();
-  const user = await db.transaction(async (tx) => {
+  return db.transaction(async (tx) => {
     const [created] = await tx
       .insert(users)
       .values({
@@ -60,16 +47,12 @@ export const register = async ({
 
     await createDefaultCategories(tx, created!.id);
 
-    await tx.insert(refreshTokens).values({
+    const session = await createSession({
+      executor: tx,
       userId: created!.id,
-      familyId: newFamilyId(),
-      tokenHash: refresh.hash,
       deviceInfo: describeDevice(input.device, deviceInfo),
-      expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
     });
-    return created!;
-  });
 
-  const accessToken = await signAccessToken(user.id);
-  return { user, accessToken, refreshToken: refresh.raw };
+    return { user: created!, ...session };
+  });
 };
