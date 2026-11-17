@@ -23,7 +23,7 @@ export const categories = pgTable(
       .default(sql`'CAT' || lpad(nextval('category_id_seq')::text, 3, '0')`),
     userId: varchar("user_id", { length: 20 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 50 }).notNull(),
     type: categoryTypeEnum("type").notNull(),
     icon: varchar("icon", { length: 50 }),

@@ -15,6 +15,22 @@ const device = z
   .strict()
   .optional();
 
+const timezone = z
+  .string()
+  .trim()
+  .refine(
+    (tz) => {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: tz });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: "timezone must be a valid IANA name" },
+  )
+  .default("Asia/Jakarta");
+
 export class UserValidation {
   static REGISTER = z
     .object({
@@ -24,6 +40,8 @@ export class UserValidation {
         .string()
         .min(8, "password minimum 8 chars")
         .max(128, "password to long"),
+      timezone,
+      device,
     })
     .strict();
 

@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { users } from "../../db/schema/users.js";
 import { RegisterInput } from "../../validations/user.validation.js";
+import { hashPassword } from "../../utils/password.util.js";
 import { ApiError } from "../../utils/api.error.util.js";
 import { AUTH_MESSAGE } from "../../constants/response.message.js";
 import {
@@ -9,9 +10,18 @@ import {
   newFamilyId,
   REFRESH_TTL_MS,
   signAccessToken,
-} from "../../utils/toke.util.js";
+} from "../../utils/token.util.js";
 import { createDefaultCategories } from "../../db/seeds/create.default.categories.js";
 import { refreshTokens } from "../../db/schema/refresh.tokens.js";
+
+// nama perangkat dari klien lebih informatif daripada user-agent
+const describeDevice = (
+  device: RegisterInput["device"],
+  userAgent?: string,
+) => {
+  const fromClient = device && [device.platform, device.name].filter(Boolean).join(" ");
+  return (fromClient || userAgent)?.slice(0, 255);
+};
 
 export const register = async ({
   input,
@@ -29,9 +39,7 @@ export const register = async ({
   if (existing.length > 0)
     throw ApiError.conflict(AUTH_MESSAGE.EMAIL_ALREADY_EXISTS);
 
-  const passwordHash = await Bun.password.hash(input.password, {
-    algorithm: "argon2id",
-  });
+  const passwordHash = await hashPassword(input.password);
 
   const refresh = generateRefreshToken();
   const user = await db.transaction(async (tx) => {
@@ -41,14 +49,13 @@ export const register = async ({
         name: input.name,
         email: input.email,
         passwordHash,
+        timezone: input.timezone,
       })
       .returning({
         id: users.id,
         name: users.name,
         email: users.email,
         timezone: users.timezone,
-        hideBalance: users.hideBalance,
-        createdAt: users.createdAt,
       });
 
     await createDefaultCategories(tx, created!.id);
@@ -57,12 +64,12 @@ export const register = async ({
       userId: created!.id,
       familyId: newFamilyId(),
       tokenHash: refresh.hash,
-      deviceInfo: deviceInfo?.slice(0, 255),
+      deviceInfo: describeDevice(input.device, deviceInfo),
       expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
     });
     return created!;
   });
 
   const accessToken = await signAccessToken(user.id);
-  return { user, accessToken, refreshTokens: refresh.raw };
+  return { user, accessToken, refreshToken: refresh.raw };
 };
