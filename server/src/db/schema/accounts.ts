@@ -31,7 +31,7 @@ export const accounts = pgTable(
   {
     id: varchar("id", { length: 20 })
       .primaryKey()
-      .default(sql`'ACC' || lpad(nextval('account_id_seq')::text, 3, '0')`),
+      .default(sql`prefixed_id('ACC', nextval('account_id_seq'))`),
     userId: varchar("user_id", { length: 20 })
       .notNull()
       .references(() => users.id),

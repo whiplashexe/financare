@@ -19,7 +19,7 @@ export const transactionImages = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'IMG' || lpad(nextval('transaction_image_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('IMG', nextval('transaction_image_id_seq'))`,
       ),
     transactionId: varchar("transaction_id", { length: 20 })
       .notNull()

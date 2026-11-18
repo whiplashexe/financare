@@ -35,7 +35,7 @@ export const reminders = pgTable(
   {
     id: varchar("id", { length: 20 })
       .primaryKey()
-      .default(sql`'RMD' || lpad(nextval('reminder_id_seq')::text, 3, '0')`),
+      .default(sql`prefixed_id('RMD', nextval('reminder_id_seq'))`),
     userId: varchar("user_id", { length: 20 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

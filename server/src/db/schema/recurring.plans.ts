@@ -38,7 +38,7 @@ export const recurringPlans = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'RPLAN' || lpad(nextval('recurring_plan_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('RPLAN', nextval('recurring_plan_id_seq'))`,
       ),
     userId: varchar("user_id", { length: 20 })
       .notNull()

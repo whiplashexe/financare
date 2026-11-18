@@ -20,7 +20,7 @@ export const categories = pgTable(
   {
     id: varchar("id", { length: 20 })
       .primaryKey()
-      .default(sql`'CAT' || lpad(nextval('category_id_seq')::text, 3, '0')`),
+      .default(sql`prefixed_id('CAT', nextval('category_id_seq'))`),
     userId: varchar("user_id", { length: 20 })
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

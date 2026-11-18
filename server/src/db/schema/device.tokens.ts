@@ -19,7 +19,7 @@ export const deviceTokens = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'DVC' || lpad(nextval('device_token_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('DVC', nextval('device_token_id_seq'))`,
       ),
     userId: varchar("user_id", { length: 20 })
       .notNull()

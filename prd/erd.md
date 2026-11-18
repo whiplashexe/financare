@@ -65,7 +65,7 @@ Every primary key is a human-readable string made of an entity prefix and a zero
 Rules:
 
 - Type: `varchar(20)`. Pattern: `^[A-Z]+[0-9]{3,}$`. Minimum 3 digits; the number simply grows past 999 (`TRANS1000`), it is not capped.
-- The number comes from one PostgreSQL sequence per table (for example `transaction_id_seq`). The ID is built in the database as `'TRANS' || lpad(nextval('transaction_id_seq')::text, 3, '0')`, so concurrent inserts never collide. Gaps are allowed (failed inserts and rollbacks consume numbers).
+- The number comes from one PostgreSQL sequence per table (for example `transaction_id_seq`). The ID is built in the database by the SQL function `prefixed_id(prefix, n)`, used as the column default: `prefixed_id('TRANS', nextval('transaction_id_seq'))`. The function pads to 3 digits and never truncates. Do **not** use `lpad(n::text, 3, '0')`: `lpad` cuts longer strings, so `lpad('1000', 3, '0')` returns `'100'` and IDs collide from number 1000 onward. Concurrent inserts never collide. Gaps are allowed (failed inserts and rollbacks consume numbers).
 - The sequence is **global per table**, not per user. IDs are unique across all users.
 - IDs are never reused or edited after creation.
 - Sequential IDs are guessable. Safety relies on every query being scoped by `user_id` (another user's ID returns `404`), never on the ID being secret.

@@ -27,7 +27,7 @@ export const planOccurrences = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'OCC' || lpad(nextval('plan_occurrence_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('OCC', nextval('plan_occurrence_id_seq'))`,
       ),
     recurringPlanId: varchar("recurring_plan_id", { length: 20 })
       .notNull()

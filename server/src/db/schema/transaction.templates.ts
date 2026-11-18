@@ -26,7 +26,7 @@ export const transactionTemplates = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'TPL' || lpad(nextval('transaction_template_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('TPL', nextval('transaction_template_id_seq'))`,
       ),
     userId: varchar("user_id", { length: 20 })
       .notNull()

@@ -21,7 +21,7 @@ export const transactionItems = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'ITM' || lpad(nextval('transaction_item_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('ITM', nextval('transaction_item_id_seq'))`,
       ),
     transactionId: varchar("transaction_id", { length: 20 })
       .notNull()

@@ -17,7 +17,7 @@ export const users = pgTable(
   {
     id: varchar("id", { length: 20 })
       .primaryKey()
-      .default(sql`'USR' || lpad(nextval('user_id_seq')::text, 3, '0')`),
+      .default(sql`prefixed_id('USR', nextval('user_id_seq'))`),
     name: varchar("name", { length: 100 }).notNull(),
     email: varchar("email", { length: 254 }).notNull(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),

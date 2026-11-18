@@ -1,0 +1,363 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "6c62fe2b-071c-459c-bea4-2b6cc9475e7d",
+  "prevIds": [
+    "d57c6748-8932-4f3a-95fd-f3a026b3c7a0"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "user",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.user.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.user",
+        "n|sch|public",
+        "n|col|public.user.id"
+      ],
+      "sqlHash": "219c7d7062b68fed"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "refresh_token",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.refresh_token.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.refresh_token",
+        "n|sch|public",
+        "n|col|public.refresh_token.id"
+      ],
+      "sqlHash": "563392763dc95ae8"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "password_reset_token",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.password_reset_token.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.password_reset_token",
+        "n|sch|public",
+        "n|col|public.password_reset_token.id"
+      ],
+      "sqlHash": "1ef954e88a9f2ff7"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "device_token",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.device_token.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.device_token",
+        "n|sch|public",
+        "n|col|public.device_token.id"
+      ],
+      "sqlHash": "15b11b75c1aac25e"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "account",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.account.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.account",
+        "n|sch|public",
+        "n|col|public.account.id"
+      ],
+      "sqlHash": "10b4803a102e5db9"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "category",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.category.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.category",
+        "n|sch|public",
+        "n|col|public.category.id"
+      ],
+      "sqlHash": "7eb8d12409637fee"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transaction",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.transaction.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.transaction",
+        "n|sch|public",
+        "n|col|public.transaction.id"
+      ],
+      "sqlHash": "dc67e69ce5b7f58a"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transaction_image",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.transaction_image.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|col|public.transaction_image.id"
+      ],
+      "sqlHash": "bbd66ed09fa994cc"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transaction_item",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.transaction_item.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_item",
+        "n|sch|public",
+        "n|col|public.transaction_item.id"
+      ],
+      "sqlHash": "82cc421a6218e2ce"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "recurring_plan",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.recurring_plan.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.recurring_plan",
+        "n|sch|public",
+        "n|col|public.recurring_plan.id"
+      ],
+      "sqlHash": "490881abefffbafc"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "one_time_plan",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.one_time_plan.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.one_time_plan",
+        "n|sch|public",
+        "n|col|public.one_time_plan.id"
+      ],
+      "sqlHash": "ac8fa0d70269f18f"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "plan_occurrence",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.plan_occurrence.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.plan_occurrence",
+        "n|sch|public",
+        "n|col|public.plan_occurrence.id"
+      ],
+      "sqlHash": "d3c5b5ceb12bfa9e"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "reminder",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.reminder.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.reminder",
+        "n|sch|public",
+        "n|col|public.reminder.id"
+      ],
+      "sqlHash": "608923d0722deb60"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transaction_template",
+        "id"
+      ],
+      "writes": [
+        "s|colprop|public.transaction_template.id.default"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_template",
+        "n|sch|public",
+        "n|col|public.transaction_template.id"
+      ],
+      "sqlHash": "b4afc3ed97602c93"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"user\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('USR', nextval('user_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"refresh_token\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('RTK', nextval('refresh_token_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"password_reset_token\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('PRT', nextval('password_reset_token_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"device_token\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('DVC', nextval('device_token_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"account\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('ACC', nextval('account_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"category\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('CAT', nextval('category_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"transaction\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('TRANS', nextval('transaction_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"transaction_image\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('IMG', nextval('transaction_image_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"transaction_item\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('ITM', nextval('transaction_item_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"recurring_plan\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('RPLAN', nextval('recurring_plan_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"one_time_plan\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('OPLAN', nextval('one_time_plan_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"plan_occurrence\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('OCC', nextval('plan_occurrence_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"reminder\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('RMD', nextval('reminder_id_seq'))"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"transaction_template\",\"id\"]",
+      "set": {
+        "default": "prefixed_id('TPL', nextval('transaction_template_id_seq'))"
+      }
+    }
+  ]
+}

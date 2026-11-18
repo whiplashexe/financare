@@ -30,7 +30,7 @@ export const oneTimePlans = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'OPLAN' || lpad(nextval('one_time_plan_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('OPLAN', nextval('one_time_plan_id_seq'))`,
       ),
     userId: varchar("user_id", { length: 20 })
       .notNull()

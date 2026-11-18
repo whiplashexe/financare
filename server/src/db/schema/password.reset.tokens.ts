@@ -20,7 +20,7 @@ export const passwordResetTokens = pgTable(
     id: varchar("id", { length: 20 })
       .primaryKey()
       .default(
-        sql`'PRT' || lpad(nextval('password_reset_token_id_seq')::text, 3, '0')`,
+        sql`prefixed_id('PRT', nextval('password_reset_token_id_seq'))`,
       ),
     userId: varchar("user_id", { length: 20 })
       .notNull()
