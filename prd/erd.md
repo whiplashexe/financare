@@ -487,6 +487,18 @@ Optional line items of a transaction (what was bought, how many, and the price).
 
 Items are **descriptive only**. `transaction.amount` stays the single source of truth for balances and reports. The sum of `total_price` may differ from `amount` (tax, service charge, discounts, rounding); the app shows the difference and offers "Use items total as amount", but nothing enforces equality.
 
+### 4.16 `rate_limit`
+
+Fixed-window counters for rate limiting. Infrastructure table: it has no prefixed ID, no foreign keys, and is not part of the entity diagram. Stored in Postgres because in-process counters do not work on serverless instances.
+
+| Column     | Type         | Null | Default | Min / Max | Notes                                                                                 |
+| ---------- | ------------ | ---- | ------- | --------- | ------------------------------------------------------------------------------------- |
+| `key`      | varchar(320) | N    |         |           | PK. `auth:ip:<ip>` (per-IP limit) or `login:fail:<lowercase email>:<ip>` (failed logins) |
+| `count`    | integer      | N    |         | ≥ 1       | Hits in the current window                                                            |
+| `reset_at` | timestamptz  | N    |         |           | End of the current window. A hit after this time starts a new window with `count = 1` |
+
+Each hit is one atomic `INSERT ... ON CONFLICT DO UPDATE`. All time comparisons use the database clock (`now()`), never the application clock. Index: `rate_limit_reset_at_idx` on `reset_at` for the purge job.
+
 ## 5. Relationships
 
 | Relationship                                                            | Cardinality      | Notes                                                                                  |
@@ -616,7 +628,7 @@ GROUP BY a.id;
 | Delete user               | All user-owned rows removed (`ON DELETE CASCADE` from `user`), then Cloudinary folder `financare/<user_id>/` is deleted by a background job                                                               |
 | Archive or delete account | Templates that use it get `account_id` / `to_account_id` set to null (done in the same database transaction as the archive; the delete path uses `ON DELETE SET NULL`). Unarchiving does not restore them |
 | Delete template           | Row removed. Transactions created from it are unaffected                                                                                                                                                  |
-| Expired tokens            | `refresh_token`, `password_reset_token`, and `idempotency_key` rows are purged by a daily job                                                                                                             |
+| Expired tokens            | `refresh_token`, `password_reset_token`, `idempotency_key`, and `rate_limit` rows are purged by a daily job                                                                                                             |
 
 ## 10. Changes Compared with the Main PRD Model
 

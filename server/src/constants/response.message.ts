@@ -42,6 +42,8 @@ export const AUTH_MESSAGE = {
   UNAUTHORIZED: "You must be logged in to access this resource",
   FORBIDDEN: "You don't have permission to access this resource",
   INVALID_CREDENTIALS: "Invalid email or password",
+  TOO_MANY_LOGIN_ATTEMPTS:
+    "Too many failed login attempts, please try again later",
   TOKEN_MISSING: "Authentication token is missing",
   TOKEN_INVALID: "Authentication token is invalid",
   TOKEN_EXPIRED: "Authentication token has expired",

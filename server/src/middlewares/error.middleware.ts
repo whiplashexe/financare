@@ -26,6 +26,9 @@ export const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
 
   if (err instanceof ApiError) {
     ({ statusCode, message, code, errors } = err);
+    if (err.retryAfterSeconds !== undefined) {
+      res.setHeader("Retry-After", String(err.retryAfterSeconds));
+    }
   } else if (err instanceof ZodError) {
     statusCode = 400;
     message = "invalid request data";

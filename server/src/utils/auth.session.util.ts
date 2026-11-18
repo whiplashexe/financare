@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { refreshTokens } from "../db/schema/refresh.tokens.js";
 import {
+  ACCESS_TTL_SECONDS,
   generateRefreshToken,
   newFamilyId,
   REFRESH_TTL_MS,
@@ -8,6 +9,12 @@ import {
 } from "./token.util.js";
 
 type Executor = Pick<typeof db, "insert">;
+type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
+  timezone: string;
+};
 
 type DeviceInput = { platform: string; name?: string | undefined } | undefined;
 
@@ -39,3 +46,19 @@ export const createSession = async ({
   const accessToken = await signAccessToken(userId);
   return { accessToken, refreshToken: refresh.raw };
 };
+
+export const toAuthResponse = (result: {
+  user: SessionUser;
+  accessToken: string;
+  refreshToken: string;
+}) => ({
+  user: {
+    id: result.user.id,
+    name: result.user.name,
+    email: result.user.email,
+    timezone: result.user.timezone,
+  },
+  access_token: result.accessToken,
+  access_expires_in: ACCESS_TTL_SECONDS,
+  refresh_token: result.refreshToken,
+});

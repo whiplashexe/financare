@@ -14,3 +14,4 @@ export * from "./plan.occurrences.js";
 export * from "./reminders.js";
 export * from "./idempotency.keys.js";
 export * from "./transaction.templates.js";
+export * from "./rate.limits.js";

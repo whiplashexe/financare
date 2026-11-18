@@ -34,7 +34,7 @@ export const transactionTemplates = pgTable(
     name: varchar("name", { length: 50 }).notNull(),
     type: transactionTypeEnum("type").notNull(),
     transactionName: varchar("transaction_name", { length: 100 }).notNull(),
-    amount: bigint("amount", { mode: "number" }), // null = isi setiap kali
+    amount: bigint("amount", { mode: "number" }),
     accountId: varchar("account_id", { length: 20 }).references(
       () => accounts.id,
       { onDelete: "set null" },

@@ -2,7 +2,6 @@ import { defineRelations } from "drizzle-orm";
 import * as schema from "./schema/index.js";
 
 export const relations = defineRelations(schema, (r) => ({
-  // ───────────── user ─────────────
   users: {
     accounts: r.many.accounts(),
     categories: r.many.categories(),
@@ -17,16 +16,13 @@ export const relations = defineRelations(schema, (r) => ({
     idempotencyKeys: r.many.idempotencyKeys(),
   },
 
-  // ───────────── account ─────────────
   accounts: {
     user: r.one.users({
       from: r.accounts.userId,
       to: r.users.id,
       optional: false,
     }),
-    // sumber (income, outcome, transfer keluar)
     transactions: r.many.transactions({ alias: "transaction_source" }),
-    // tujuan transfer
     incomingTransfers: r.many.transactions({
       alias: "transaction_destination",
     }),
@@ -38,7 +34,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
-  // ───────────── category ─────────────
   categories: {
     user: r.one.users({
       from: r.categories.userId,
@@ -50,7 +45,6 @@ export const relations = defineRelations(schema, (r) => ({
     templates: r.many.transactionTemplates(),
   },
 
-  // ───────────── transaction ─────────────
   transactions: {
     user: r.one.users({
       from: r.transactions.userId,
@@ -73,7 +67,6 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.categories.id,
     }),
 
-    // biaya admin -> transfer induknya
     parent: r.one.transactions({
       from: r.transactions.parentTransactionId,
       to: r.transactions.id,
@@ -81,7 +74,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     adminFees: r.many.transactions({ alias: "transaction_admin_fee" }),
 
-    // asal plan (kosong untuk transaksi manual)
     recurringPlan: r.one.recurringPlans({
       from: r.transactions.recurringPlanId,
       to: r.recurringPlans.id,
@@ -112,7 +104,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
-  // ───────────── recurring plan ─────────────
   recurringPlans: {
     user: r.one.users({
       from: r.recurringPlans.userId,
@@ -139,14 +130,12 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.recurringPlans.id,
       optional: false,
     }),
-    // kosong jika SKIPPED atau transaksinya sudah dihapus permanen
     transaction: r.one.transactions({
       from: r.planOccurrences.transactionId,
       to: r.transactions.id,
     }),
   },
 
-  // ───────────── one-time plan ─────────────
   oneTimePlans: {
     user: r.one.users({
       from: r.oneTimePlans.userId,
@@ -161,14 +150,12 @@ export const relations = defineRelations(schema, (r) => ({
     transactions: r.many.transactions(),
   },
 
-  // ───────────── reminder ─────────────
   reminders: {
     user: r.one.users({
       from: r.reminders.userId,
       to: r.users.id,
       optional: false,
     }),
-    // tepat satu dari dua ini terisi
     recurringPlan: r.one.recurringPlans({
       from: r.reminders.recurringPlanId,
       to: r.recurringPlans.id,
@@ -179,7 +166,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
-  // ───────────── template ─────────────
   transactionTemplates: {
     user: r.one.users({
       from: r.transactionTemplates.userId,
@@ -202,14 +188,12 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
-  // ───────────── auth & pendukung ─────────────
   refreshTokens: {
     user: r.one.users({
       from: r.refreshTokens.userId,
       to: r.users.id,
       optional: false,
     }),
-    // token pengganti (rotasi) dan token yang digantikannya
     replacedByToken: r.one.refreshTokens({
       from: r.refreshTokens.replacedBy,
       to: r.refreshTokens.id,

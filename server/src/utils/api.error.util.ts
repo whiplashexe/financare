@@ -6,6 +6,7 @@ export class ApiError extends Error {
     message: string,
     public code: string,
     public errors?: FieldErrors,
+    public retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = "ApiError";
@@ -22,6 +23,15 @@ export class ApiError extends Error {
   }
   static conflict(message: string) {
     return new ApiError(409, message, "CONFLICT");
+  }
+  static tooManyRequests(message: string, retryAfterSeconds?: number) {
+    return new ApiError(
+      429,
+      message,
+      "RATE_LIMITED",
+      undefined,
+      retryAfterSeconds,
+    );
   }
   static businessRule(message: string) {
     return new ApiError(422, message, "BUSINESS_RULE");

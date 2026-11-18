@@ -4,7 +4,6 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 const accessSecret = new TextEncoder().encode(env?.JWT_ACCESS_SECRET);
 
-// satu sumber TTL: dipakai untuk exp JWT dan untuk access_expires_in di respons
 export const ACCESS_TTL_SECONDS = (env?.ACCESS_TOKEN_TTL_MINUTES ?? 15) * 60;
 export const REFRESH_TTL_MS =
   (env?.REFRESH_TOKEN_TTL_DAYS ?? 30) * 24 * 60 * 60 * 1000;

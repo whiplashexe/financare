@@ -15,7 +15,7 @@ REST API endpoint reference (Express). User flows and sequence diagrams are in [
 | Ownership      | All data is scoped by the `user_id` from the token. Data belonging to other users returns `404`                                                        |
 | Pagination     | `?cursor=<id>&limit=20` (max 100). The response includes `pagination.next_cursor` (null when exhausted)                                                |
 | Idempotency    | The `Idempotency-Key` header (UUID) is supported on `POST /transactions` and `POST .../confirm`; the same key within 24 hours returns the first result |
-| Rate limit     | Auth: 5 attempts/minute/IP. Others: 120 requests/minute/user                                                                                           |
+| Rate limit     | Auth (register, login): 5 requests/minute/IP, every request counts. Login failures: 5 per 15 minutes per (email, IP). Others: 120 requests/minute/user. A rejected request returns `429 RATE_LIMITED` with a `Retry-After` header (seconds) |
 
 **Response envelope (ServerCN format)**
 
@@ -100,6 +100,8 @@ Notes:
 | POST   | `/auth/forgot-password` | 🔓     | Send reset email                 |
 | POST   | `/auth/reset-password`  | 🔓     | Set a new password with a token  |
 
+This section describes the mobile contract. Token delivery for a future web client (cookie-based refresh token) is described in [Token delivery per client type](#token-delivery-per-client-type).
+
 ### POST `/auth/register`
 
 Request:
@@ -144,7 +146,7 @@ Errors: `400`, `409` (email already registered), `429`. Side effect: creates the
 
 ### POST `/auth/login`
 
-Request: `{ "email", "password", "device" }`. Response `200`: same as register. Errors: `401` (generic message), `429` (5 failures within 15 minutes).
+Request: `{ "email", "password", "device" }`. Response `200`: same as register. Errors: `401` (generic message, identical for unknown email, deleted account, and wrong password), `429` (after 5 failed attempts for the same email and IP within 15 minutes, even if the next password is correct; the counter also covers unregistered emails so the response does not reveal whether an email exists; a successful login resets it). `Retry-After` is set on every `429`.
 
 ### POST `/auth/refresh`
 
@@ -165,6 +167,26 @@ Request: `{ "email" }`. Response is always `202` (does not leak whether the emai
 ### POST `/auth/reset-password`
 
 Request: `{ "token", "new_password" }`. Response `204`; all of the user's refresh tokens are revoked. Errors: `400` (invalid/expired token, weak password).
+
+### Token delivery per client type
+
+The MVP client is the React Native app, so the contract above delivers `refresh_token` in the JSON body. A web client is planned for later (post-MVP); it must not change the core token logic (hashed storage, rotation, `family_id`, reuse detection), only how the token is handed over.
+
+| | Mobile (MVP) | Web (post-MVP) |
+| --- | --- | --- |
+| `access_token` | Response body; kept in memory | Response body; kept in JS memory only (never `localStorage`) |
+| `refresh_token` | Response body; kept in Keychain/Keystore (`expo-secure-store` / `react-native-keychain`; not `AsyncStorage`) | `Set-Cookie`, not present in the body |
+| Sent on refresh/logout | Request body `{ "refresh_token" }` | Cookie, sent automatically by the browser |
+
+Web rules (to implement when the web client starts):
+
+- **Client detection:** the web client sends `X-Client: web`. Do not infer the client from the user-agent.
+- **Cookie:** `refresh_token=...; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000`. `Path` limits the cookie to the auth endpoints.
+- **Sources:** `/auth/refresh` and `/auth/logout` accept the token from either the body (mobile) or the cookie (web). Read it in one function (`readRefreshToken(req)`) so adding a source touches one place.
+- **CSRF:** only cookie-based endpoints (`refresh`, `logout`) need it. Use `SameSite=Strict` plus a required custom header (`X-Requested-With`), which cross-site requests cannot send without a CORS preflight. The access token travels in the `Authorization` header, so it does not need CSRF protection.
+- **CORS:** replace the open `cors()` with an explicit origin allow-list and `credentials: true` **before** the web client launches. Mobile is unaffected (CORS is enforced only by browsers).
+- **Domain:** host web and API on the same site (e.g. `app.<domain>` and `api.<domain>`) so `SameSite=Strict` cookies are sent. A different registrable domain would require `SameSite=None; Secure` and a heavier CSRF design.
+- **Page reload:** the access token lives only in memory, so the web client calls `POST /auth/refresh` on load to obtain a new one.
 
 ---
 

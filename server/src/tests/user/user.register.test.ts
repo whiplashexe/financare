@@ -3,7 +3,7 @@ import { deleteUser, startServer, uniqueEmail } from "../helpers.js";
 
 const server = startServer();
 const email = uniqueEmail();
-const valid = { name: "Tes", email, password: "secret123" };
+const valid = { name: "Test", email, password: "secret123" };
 
 afterAll(async () => {
   try {
@@ -25,7 +25,7 @@ describe("POST /auth/register", () => {
     expect(json.success).toBe(true);
     expect(json.data.user).toEqual({
       id: expect.stringMatching(/^USR\d{3,}$/),
-      name: "Tes",
+      name: "Test",
       email,
       timezone: "Asia/Makassar",
     });
@@ -58,7 +58,7 @@ describe("POST /auth/register", () => {
   });
 
   it("400: invalid data returns errors per field", async () => {
-    const res = await register({ name: "", email: "bukan-email", password: "123" });
+    const res = await register({ name: "", email: "not-an-email", password: "123" });
     const json = await res.json();
 
     expect(res.status).toBe(400);
