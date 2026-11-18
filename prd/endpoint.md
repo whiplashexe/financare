@@ -150,23 +150,31 @@ Request: `{ "email", "password", "device" }`. Response `200`: same as register. 
 
 ### POST `/auth/refresh`
 
-Request: `{ "refresh_token": "rt_..." }`. Response `200`: `{ "access_token", "access_expires_in", "refresh_token" }` (new token, the old one is revoked). Errors: `401` if the token is invalid, expired, or reused (the entire derived session family is revoked).
+Request: `{ "refresh_token": "rt_..." }`. Response `200`: `{ "access_token", "access_expires_in", "refresh_token" }` (no `user` object). The old token is revoked and the new one joins the same `family_id`; its 30-day lifetime restarts at each rotation.
+
+Errors:
+
+- `401 TOKEN_EXPIRED`: the token is past `expires_at` (it is not rotated or revoked).
+- `401 UNAUTHORIZED`: unknown token, owner deleted, or **reuse** of an already revoked token. Reuse revokes the entire session family, including the newest token, and the client must sign in again. The body is identical for unknown and reused tokens.
+- `429`: this endpoint has its own, looser limit of 30 requests/minute/IP (the 5/minute auth limit would break normal use behind shared mobile IPs).
+
+Two simultaneous refreshes with the same token are treated as reuse: one succeeds, the other gets `401`, and the family is revoked. The client must run a single refresh at a time.
 
 ### POST `/auth/logout`
 
-Request: `{ "refresh_token" }`. Response `204`.
+Request: `{ "refresh_token" }`. Response `204`, always: unknown, already revoked, and repeated tokens all return `204` so the endpoint reveals nothing. Revokes every token of the same `family_id` (this device's session), even if the given token was already rotated. Other devices keep their sessions. Same 30 requests/minute/IP limit as refresh.
 
 ### POST `/auth/logout-all`
 
-Response `204`.
+Requires `Authorization: Bearer <access_token>`. Response `204`; revokes every refresh token of the user. Access tokens already issued stay valid until they expire (at most 15 minutes), except that an access token of a deleted account is rejected at once (see Authentication below). Errors: `401 UNAUTHORIZED` (header missing, malformed, bad signature, no subject) or `401 TOKEN_EXPIRED`.
 
 ### POST `/auth/forgot-password`
 
-Request: `{ "email" }`. Response is always `202` (does not leak whether the email exists). The token is valid for 30 minutes, single use.
+Request: `{ "email" }`. Response is always `202` with the same body (does not leak whether the email exists). The emailed token is valid for 30 minutes and single use. Only one unused token exists per user: a new request replaces the previous one. Nothing is created or sent for unknown or deleted accounts. After 3 requests per email within 15 minutes, further requests still answer `202` but no new email is sent. Shares the 5 requests/minute/IP auth limit.
 
 ### POST `/auth/reset-password`
 
-Request: `{ "token", "new_password" }`. Response `204`; all of the user's refresh tokens are revoked. Errors: `400` (invalid/expired token, weak password).
+Request: `{ "token", "new_password" }` (password 8 to 128 characters). Response `204`; the password changes, the token and any other unused reset tokens of the user are marked used, and all of the user's refresh tokens are revoked. Errors: `400 VALIDATION_ERROR` with `errors.token` for an unknown, expired, or already used token or a deleted account (identical body for all of them), and with `errors.new_password` for a weak password (the token is not consumed). Two simultaneous requests with the same token: only one succeeds. Shares the 5 requests/minute/IP auth limit.
 
 ### Token delivery per client type
 
@@ -203,6 +211,10 @@ Web rules (to implement when the web client starts):
 | POST   | `/devices`                     | 🔒     | Register push token                  |
 | DELETE | `/devices/:id`                 | 🔒     | Remove device                        |
 
+### Authentication of 🔒 endpoints
+
+`Authorization: Bearer <access_token>` (JWT HS256, 15 minutes). The token carries `sub` (user id) and `sid` (the session family id of the refresh token it was issued with; it stays the same across rotations). On every request the server also checks that the user still exists and is not deleted, so a deleted account is cut off immediately: `401 UNAUTHORIZED`. An expired token returns `401 TOKEN_EXPIRED`; a missing, malformed, or wrongly signed one returns `401 UNAUTHORIZED`.
+
 ### GET `/me`
 
 ```json
@@ -225,15 +237,15 @@ Web rules (to implement when the web client starts):
 
 ### PATCH `/me`
 
-Request: `{ "name"?, "timezone"? }`. Response `200` with the updated profile. Changing `timezone` recalculates the schedule of reminders that have not yet been sent.
+Request: `{ "name"?, "timezone"? }` (at least one field; `name` 1 to 100 characters after trimming; `timezone` an IANA name). Any other field, such as `email`, is rejected with `400`. Response `200` with the full profile (same shape as `GET /me`). Changing `timezone` recalculates the schedule of reminders that have not yet been sent (done together with the reminder feature).
 
 ### POST `/me/password`
 
-Request: `{ "current_password", "new_password" }`. Response `204`. All other sessions are revoked. Errors: `401` if the old password is wrong.
+Request: `{ "current_password", "new_password" }` (new password 8 to 128 characters). Response `204`. Every session except the current one (identified by the `sid` of the access token) is revoked. Errors: `401 PASSWORD_INCORRECT` if the current password is wrong (a dedicated code, so a client does not mistake it for an expired token and loop on refresh); `429` after 5 wrong attempts within 15 minutes per user, with `Retry-After`.
 
 ### PATCH `/me/notification-preferences`
 
-Request (all optional): `{ "send_time": "08:00", "quiet_hours": { "start", "end" } | null, "push": true, "email_fallback": true }`. Response `200`.
+Request (at least one field): `{ "send_time": "08:00", "quiet_hours": { "start", "end" } | null, "push": true, "email_fallback": true }`. Times are `HH:MM`, 24 hours. `quiet_hours` start and end must differ; `null` clears both. Response `200`: the updated `notification_preferences` object (same shape as in `GET /me`).
 
 ### PATCH `/me/preferences`
 
@@ -241,11 +253,15 @@ Request: `{ "hide_balance": true }`. Response `200`: `{ "data": { "hide_balance"
 
 ### DELETE `/me`
 
-Request: `{ "password" }`. Response `202`. Data and Cloudinary images are deleted by a background job.
+Request: `{ "password" }`. Response `202`. Synchronously: the account is marked deleted (`deleted_at`), every refresh token is revoked, and every device token is removed; from that moment the access token, login, and refresh no longer work. The email stays reserved (register returns `409`) until the data is purged. The permanent deletion of all rows and the Cloudinary images is done by a background job (not built yet). Errors: `401 PASSWORD_INCORRECT`, `429` (same limiter as `POST /me/password`).
 
 ### POST `/devices`
 
-Request: `{ "platform": "ANDROID" | "IOS", "push_token": "..." }`. Response `201`: `{ "data": { "id" } }`. The same token is updated (upsert).
+Request: `{ "platform": "ANDROID" | "IOS", "push_token": "..." }` (token 1 to 512 characters). Response `201`: `{ "data": { "id" } }`. The same token is updated (upsert): it keeps its `id`, refreshes `last_seen_at`, and moves to the calling user if another user had registered it.
+
+### DELETE `/devices/:id`
+
+Response `204`. A device that does not exist or belongs to another user returns the same `404`.
 
 ---
 
