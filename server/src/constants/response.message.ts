@@ -35,6 +35,10 @@ export const AUTH_MESSAGE = {
   TOKEN_REFRESHED: "Token refreshed successfully",
   PASSWORD_CHANGED: "Password changed successfully",
   PASSWORD_RESET_SENT: "Password reset link has been sent to your email",
+  PASSWORD_RESET_REQUESTED:
+    "If the email is registered, a password reset link has been sent",
+  RESET_TOKEN_INVALID: "Reset token is invalid or has expired",
+  TOKEN_REFRESHED_INVALID: "Refresh token is invalid",
   PASSWORD_RESET_SUCCESS: "Password has been reset successfully",
   EMAIL_VERIFIED: "Email verified successfully",
   VERIFICATION_SENT: "Verification email has been sent",
@@ -54,4 +58,18 @@ export const AUTH_MESSAGE = {
   USER_NOT_FOUND: "User not found",
   PASSWORD_MISMATCH: "Passwords do not match",
   OLD_PASSWORD_INCORRECT: "Old password is incorrect",
+  PASSWORD_INCORRECT: "Password is incorrect",
+} as const;
+
+export const ME_MESSAGE = {
+  PROFILE_FETCHED: "Profile fetched successfully",
+  PROFILE_UPDATED: "Profile updated successfully",
+  PASSWORD_CHANGED: "Password changed successfully",
+  NOTIFICATION_PREFERENCES_UPDATED:
+    "Notification preferences updated successfully",
+  PREFERENCES_UPDATED: "Preferences updated successfully",
+  ACCOUNT_DELETION_SCHEDULED: "Account deletion has been scheduled",
+  DEVICE_REGISTERED: "Device registered successfully",
+  DEVICE_REMOVED: "Device removed successfully",
+  DEVICE_NOT_FOUND: "Device not found",
 } as const;

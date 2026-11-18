@@ -1,12 +1,59 @@
 @baseurl = http://localhost:8000/api/v1
+@validEmail = "apri@gmail.com"
+@validPassword = "11111111"
 
 ### REGISTER
-POST http://localhost:8000/api/v1/auth/register
+POST {{baseurl}}/auth/register
 content-type: application/json
 
 {
     "name": "Apriana",
-    "email": "apri@gmail.com",
-    "password": "11111111"
+    "email": {{validEmail}},
+    "password": {{validPassword}}
 }
 
+### LOGIN
+POST {{baseurl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": {{validEmail}},
+    "password": {{validPassword}}
+}
+
+### REFRESH
+POST {{baseurl}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refresh_token": "paste-refresh-token-here"
+}
+
+### LOGOUT (this device)
+POST {{baseurl}}/auth/logout
+Content-Type: application/json
+
+{
+    "refresh_token": "paste-refresh-token-here"
+}
+
+### LOGOUT ALL
+POST {{baseurl}}/auth/logout-all
+Authorization: Bearer paste-access-token-here
+
+### FORGOT PASSWORD (token is printed in the server log in development)
+POST {{baseurl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": {{validEmail}}
+}
+
+### RESET PASSWORD
+POST {{baseurl}}/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "paste-reset-token-here",
+    "new_password": "22222222"
+}

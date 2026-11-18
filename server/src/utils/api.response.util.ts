@@ -58,6 +58,14 @@ export class ApiResponse<T = unknown> {
     return ApiResponse.Success(res, message, data, STATUS_CODES.OK);
   }
 
+  static accepted<T>(res: Response, message = "Accepted", data?: T) {
+    return ApiResponse.Success(res, message, data, STATUS_CODES.ACCEPTED);
+  }
+
+  static noContent(res: Response): Response {
+    return res.status(STATUS_CODES.NO_CONTENT).send();
+  }
+
   static created<T>(res: Response, message = "Created", data?: T) {
     return ApiResponse.Success(res, message, data, STATUS_CODES.CREATED);
   }

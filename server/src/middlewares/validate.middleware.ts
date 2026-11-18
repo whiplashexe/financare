@@ -1,5 +1,4 @@
 import { RequestHandler } from "express";
-import { query } from "winston";
 import z, { type ZodType } from "zod";
 
 type Schemas = {
@@ -29,7 +28,7 @@ export const validate = (schemas: Schemas): RequestHandler => {
     };
 
     if (data.body !== undefined) req.body = data.body;
-    if (data.params !== undefined) req.params = data.query as typeof req.params;
+    if (data.params !== undefined) req.params = data.params as typeof req.params;
     if (data.query !== undefined) {
       Object.defineProperty(req, "query", {
         value: data.query,

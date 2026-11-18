@@ -33,17 +33,8 @@ export const createSession = async ({
   userId: string;
   deviceInfo?: string | undefined;
 }) => {
-  const refresh = generateRefreshToken();
-
-  await executor.insert(refreshTokens).values({
-    userId,
-    familyId: newFamilyId(),
-    tokenHash: refresh.hash,
-    deviceInfo,
-    expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
-  });
-
-  const accessToken = await signAccessToken(userId);
+  const refresh = await issueRefreshToken({ executor, userId, deviceInfo });
+  const accessToken = await signAccessToken(userId, refresh.familyId);
   return { accessToken, refreshToken: refresh.raw };
 };
 
@@ -58,6 +49,41 @@ export const toAuthResponse = (result: {
     email: result.user.email,
     timezone: result.user.timezone,
   },
+  access_token: result.accessToken,
+  access_expires_in: ACCESS_TTL_SECONDS,
+  refresh_token: result.refreshToken,
+});
+
+export const issueRefreshToken = async ({
+  executor = db,
+  userId,
+  familyId = newFamilyId(),
+  deviceInfo,
+}: {
+  executor?: Executor;
+  userId: string;
+  familyId?: string;
+  deviceInfo?: string | undefined;
+}) => {
+  const refresh = generateRefreshToken();
+  const [row] = await executor
+    .insert(refreshTokens)
+    .values({
+      userId,
+      familyId,
+      tokenHash: refresh.hash,
+      deviceInfo,
+      expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
+    })
+    .returning({ id: refreshTokens.id });
+
+  return { id: row!.id, familyId, raw: refresh.raw };
+};
+
+export const toTokenResponse = (result: {
+  accessToken: string;
+  refreshToken: string;
+}) => ({
   access_token: result.accessToken,
   access_expires_in: ACCESS_TTL_SECONDS,
   refresh_token: result.refreshToken,
