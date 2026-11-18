@@ -291,9 +291,11 @@ Response `204`. A device that does not exist or belongs to another user returns 
 | `include_in_total` | bool | Default `true` |
 | `status` | enum | `ACTIVE` / `ARCHIVED` |
 
+All endpoints require authentication. Another user's account returns the same `404` as an unknown id.
+
 ### GET `/accounts`
 
-Query: `status` (`ACTIVE` default, `ARCHIVED`, `ALL`). Response:
+Query: `status` (`ACTIVE` default, `ARCHIVED`, `ALL`; other values and unknown parameters return `400`). Accounts are ordered by creation time. Each item is the full account object. Response:
 
 ```json
 {
@@ -313,23 +315,23 @@ Query: `status` (`ACTIVE` default, `ARCHIVED`, `ALL`). Response:
 }
 ```
 
-`total_balance` only counts `ACTIVE` accounts with `include_in_total = true`.
+`total_balance` only counts `ACTIVE` accounts with `include_in_total = true`, whatever the `status` filter is (filtering by `ARCHIVED` still returns the total of the active accounts).
 
 ### POST `/accounts`
 
-Request: the object fields above except `id`, `current_balance`, `status`. Response `201` full object. Errors: `400`.
+Request: the object fields above except `id`, `current_balance`, `status`; sending any of those, or any unknown field, returns `400`. `name` is trimmed; `institution` must be empty for `CASH` (an empty string is stored as null); `initial_balance` is an integer from -999,999,999,999 to 999,999,999,999; `last4` exactly 4 digits; `color` is `#RRGGBB` or `#RRGGBBAA`. Response `201` full object. Errors: `400` with `errors` per field.
 
 ### PATCH `/accounts/:id`
 
-All fields optional. Changing `initial_balance` on an account that already has transactions returns `422 CONFIRMATION_REQUIRED` with `{ "preview": { "old_balance", "new_balance" } }`; repeat with `"confirm": true`.
+All fields optional, at least one required (`confirm` alone does not count). Optional fields can be cleared with `null`. Archived accounts can be edited. Changing `initial_balance` to a different value on an account that already has transactions (including those in the trash) returns `422 CONFIRMATION_REQUIRED` with `{ "data": { "preview": { "old_balance", "new_balance" } } }` and changes nothing; repeat with `"confirm": true` to apply it. Other fields never need confirmation. Changing `type` to `CASH` while an institution is set (or setting an institution on a cash account) returns `400` unless the institution is cleared in the same request.
 
 ### DELETE `/accounts/:id`
 
-Response `204`. Errors: `422 BUSINESS_RULE` if transactions exist (including those in the trash).
+Response `204`. Errors: `422 BUSINESS_RULE` if transactions exist (including those in the trash, and including transfers where the account is the destination) or if a recurring plan uses the account. Templates that use the account get their `account_id` / `to_account_id` cleared.
 
 ### POST `/accounts/:id/archive`, `/unarchive`
 
-Response `200` Account object. Archiving removes the balance from the total; active plans that use this account are flagged `needs_account_change`. Templates that use this account get their `account_id` / `to_account_id` cleared.
+Response `200` Account object. Both calls are idempotent. Archiving removes the balance from the total; templates that use this account get their `account_id` / `to_account_id` cleared in the same database transaction (unarchiving does not restore them). Active plans that use this account are flagged `needs_account_change` (done together with the plan feature; it is derived from the account status, not stored).
 
 ---
 
@@ -342,10 +344,15 @@ Response `200` Account object. Archiving removes the balance from the total; act
 | PATCH  | `/categories/:id` | Update name/icon                          |
 | DELETE | `/categories/:id` | Delete; transactions are moved to "Other" |
 
-Object: `{ "id", "name", "type": "INCOME" | "OUTCOME", "icon", "is_default" }`.
+Object: `{ "id", "name", "type": "INCOME" | "OUTCOME", "icon", "is_default", "is_fallback" }`. `is_fallback` is `true` only for the "Other" category of each type, so the client knows which one is protected.
 
-- `DELETE`: response `200` `{ "data": { "moved_transactions": 12 } }`. Without `?confirm=true`, the server responds `422 CONFIRMATION_REQUIRED` with the number of affected transactions.
-- The "Other" category (per type) cannot be renamed or deleted: `422 BUSINESS_RULE`.
+All endpoints require authentication. Another user's category returns the same `404` as an unknown id.
+
+- `GET /categories`: optional `?type=INCOME|OUTCOME` (other values and unknown parameters return `400`). Response `200`: an array. Order: by type, the fallback last within each type, then creation order.
+- `POST /categories`: `{ "name", "type", "icon"? }`. `name` is trimmed, 1 to 50 characters. Response `201`. Errors: `400` (also for `is_default`, `is_fallback`, or any unknown field), `409 CONFLICT` if the user already has a category with the same name (ignoring case) **of the same type**; the same name is allowed under the other type.
+- `PATCH /categories/:id`: `{ "name"?, "icon"? }`, at least one; `icon: null` clears it. The `type` cannot be changed (`400`). Renaming to an existing name of the same type returns `409`. Renaming the fallback category returns `422 BUSINESS_RULE`; changing only its icon is allowed.
+- `DELETE /categories/:id[?confirm=true]`: response `200` `{ "data": { "moved_transactions": 12 } }`. All transactions of the category (including those in the trash), its templates, and its recurring plans are moved to the fallback category of the same type, in the same database transaction. If transactions would be moved and `confirm=true` is missing, the server responds `422 CONFIRMATION_REQUIRED` with `{ "data": { "affected_transactions": 12 } }` and changes nothing. A category without transactions is deleted without confirmation (`moved_transactions: 0`). `confirm` accepts `true` or `false`; anything else returns `400`.
+- The "Other" category (per type) cannot be renamed or deleted, even with `confirm=true`: `422 BUSINESS_RULE`.
 
 ---
 
