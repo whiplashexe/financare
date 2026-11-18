@@ -5,8 +5,12 @@ import { users } from "../db/schema/users.js";
 import { rateLimits } from "../db/schema/rate.limits.js";
 import { refreshTokens } from "../db/schema/refresh.tokens.js";
 import { passwordResetTokens } from "../db/schema/password.reset.tokens.js";
+import { accounts } from "../db/schema/accounts.js";
+import { transactions } from "../db/schema/transactions.js";
+import { recurringPlans } from "../db/schema/recurring.plans.js";
+import { transactionTemplates } from "../db/schema/transaction.templates.js";
 import { generateOpaqueToken } from "../utils/token.util.js";
-import { eq, like } from "drizzle-orm";
+import { eq, inArray, like } from "drizzle-orm";
 
 const octet = () => Math.floor(Math.random() * 254) + 1;
 
@@ -47,8 +51,25 @@ export const startServer = () => {
 };
 
 export const uniqueEmail = () => `test-${crypto.randomUUID()}@mail.test`;
-export const deleteUser = (email: string) =>
-  db.delete(users).where(eq(users.email, email));
+export const deleteUsers = async (emails: string[]) => {
+  if (emails.length === 0) return;
+
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(inArray(users.email, emails));
+  const ids = rows.map((row) => row.id);
+
+  if (ids.length > 0) {
+    await db.delete(transactions).where(inArray(transactions.userId, ids));
+    await db.delete(recurringPlans).where(inArray(recurringPlans.userId, ids));
+    await db.delete(accounts).where(inArray(accounts.userId, ids));
+  }
+
+  await db.delete(users).where(inArray(users.email, emails));
+};
+
+export const deleteUser = (email: string) => deleteUsers([email]);
 
 export const deleteRateLimit = (key: string) =>
   db.delete(rateLimits).where(eq(rateLimits.key, key));
@@ -95,4 +116,85 @@ export const insertResetToken = async (
     usedAt: options.used ? new Date() : null,
   });
   return token.raw;
+};
+
+export const insertTransaction = async (options: {
+  userId: string;
+  accountId: string;
+  toAccountId?: string;
+  type: "INCOME" | "OUTCOME" | "TRANSFER";
+  amount: number;
+  deleted?: boolean;
+  categoryId?: string;
+}) => {
+  await db.insert(transactions).values({
+    userId: options.userId,
+    accountId: options.accountId,
+    toAccountId: options.toAccountId ?? null,
+    categoryId: options.categoryId ?? null,
+    type: options.type,
+    name: "Test transaction",
+    amount: options.amount,
+    deletedAt: options.deleted ? new Date() : null,
+  });
+};
+
+export const insertTemplate = async (options: {
+  userId: string;
+  accountId?: string;
+  toAccountId?: string;
+  categoryId?: string;
+}) => {
+  const [row] = await db
+    .insert(transactionTemplates)
+    .values({
+      userId: options.userId,
+      name: `template-${crypto.randomUUID()}`,
+      type: options.toAccountId ? "TRANSFER" : "OUTCOME",
+      transactionName: "Test template",
+      accountId: options.accountId ?? null,
+      toAccountId: options.toAccountId ?? null,
+      categoryId: options.categoryId ?? null,
+    })
+    .returning({ id: transactionTemplates.id });
+  return row!.id;
+};
+
+export const insertRecurringPlan = async (options: {
+  userId: string;
+  accountId: string;
+  categoryId?: string;
+}) => {
+  const [row] = await db.insert(recurringPlans).values({
+    userId: options.userId,
+    accountId: options.accountId,
+    categoryId: options.categoryId ?? null,
+    name: "Test plan",
+    type: "OUTCOME",
+    amount: 1000,
+    frequency: "MONTHLY",
+    startDate: "2026-01-01",
+    nextDueDate: "2026-02-01",
+    reminderOffsets: [0],
+  }).returning({ id: recurringPlans.id });
+  return row!.id;
+};
+
+export const planRow = async (id: string) => {
+  const [row] = await db
+    .select()
+    .from(recurringPlans)
+    .where(eq(recurringPlans.id, id));
+  return row!;
+};
+
+export const transactionRows = (userId: string) =>
+  db.select().from(transactions).where(eq(transactions.userId, userId));
+
+export const templateRow = async (id: string) => {
+  const [row] = await db
+    .select()
+    .from(transactionTemplates)
+    .where(eq(transactionTemplates.id, id));
+  return row!;
 };

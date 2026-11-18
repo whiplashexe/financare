@@ -7,6 +7,7 @@ export class ApiError extends Error {
     public code: string,
     public errors?: FieldErrors,
     public retryAfterSeconds?: number,
+    public data?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
@@ -31,6 +32,16 @@ export class ApiError extends Error {
       "RATE_LIMITED",
       undefined,
       retryAfterSeconds,
+    );
+  }
+  static confirmationRequired(message: string, data: unknown) {
+    return new ApiError(
+      422,
+      message,
+      "CONFIRMATION_REQUIRED",
+      undefined,
+      undefined,
+      data,
     );
   }
   static businessRule(message: string) {

@@ -73,3 +73,33 @@ export const ME_MESSAGE = {
   DEVICE_REMOVED: "Device removed successfully",
   DEVICE_NOT_FOUND: "Device not found",
 } as const;
+
+export const ACCOUNT_MESSAGE = {
+  LISTED: "Accounts fetched successfully",
+  FETCHED: "Account fetched successfully",
+  CREATED: "Account created successfully",
+  UPDATED: "Account updated successfully",
+  DELETED: "Account deleted successfully",
+  ARCHIVED: "Account archived successfully",
+  UNARCHIVED: "Account unarchived successfully",
+  NOT_FOUND: "Account not found",
+  HAS_TRANSACTIONS:
+    "Account has transactions (including those in the trash) and cannot be deleted",
+  HAS_RECURRING_PLANS:
+    "Account is used by recurring plans and cannot be deleted",
+  CONFIRM_INITIAL_BALANCE:
+    "Changing the initial balance of an account with transactions changes its current balance; repeat with confirm: true",
+  CASH_NO_INSTITUTION: "A cash account cannot have an institution",
+} as const;
+
+export const CATEGORY_MESSAGE = {
+  LISTED: "Categories fetched successfully",
+  CREATED: "Category created successfully",
+  UPDATED: "Category updated successfully",
+  DELETED: "Category deleted successfully",
+  NOT_FOUND: "Category not found",
+  NAME_EXISTS: "A category with this name already exists for this type",
+  FALLBACK_PROTECTED: "The fallback category cannot be renamed or deleted",
+  CONFIRM_DELETE:
+    "Deleting this category moves its transactions to the fallback category; repeat with confirm=true",
+} as const;

@@ -23,9 +23,10 @@ export const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
   let message = "internal server error";
   let code = "INTERNAL_ERROR";
   let errors: FieldErrors | undefined;
+  let data: unknown;
 
   if (err instanceof ApiError) {
-    ({ statusCode, message, code, errors } = err);
+    ({ statusCode, message, code, errors, data } = err);
     if (err.retryAfterSeconds !== undefined) {
       res.setHeader("Retry-After", String(err.retryAfterSeconds));
     }
@@ -59,6 +60,7 @@ export const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
     statusCode,
     code,
     ...(errors && { errors }),
+    ...(data !== undefined && { data }),
     ...(env?.NODE_ENV === "development" && { stack: err.stack }),
   });
 };

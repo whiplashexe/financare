@@ -1,0 +1,47 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "94949b61-6feb-4d89-ab5d-8e9a889865cf",
+  "prevIds": [
+    "6c62fe2b-071c-459c-bea4-2b6cc9475e7d"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "account",
+        "icon"
+      ],
+      "writes": [
+        "s|col|public.account.icon",
+        "n|col|public.account.icon",
+        "e|col|public.account.icon"
+      ],
+      "reads": [
+        "n|tbl|public.account",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "account",
+        "name": "icon",
+        "type": "varchar(50)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}
