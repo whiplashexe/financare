@@ -22,8 +22,15 @@ export class ApiError extends Error {
   static notFound(message = "Not found") {
     return new ApiError(404, message, "NOT_FOUND");
   }
-  static conflict(message: string) {
-    return new ApiError(409, message, "CONFLICT");
+  static conflict(message: string, data?: unknown) {
+    return new ApiError(
+      409,
+      message,
+      "CONFLICT",
+      undefined,
+      undefined,
+      data,
+    );
   }
   static tooManyRequests(message: string, retryAfterSeconds?: number) {
     return new ApiError(

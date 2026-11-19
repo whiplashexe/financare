@@ -164,19 +164,36 @@ export const insertRecurringPlan = async (options: {
   userId: string;
   accountId: string;
   categoryId?: string;
+  name?: string;
+  type?: "INCOME" | "OUTCOME";
+  amount?: number;
+  frequency?: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+  startDate?: string;
+  endDate?: string | null;
+  nextDueDate?: string;
+  status?: "ACTIVE" | "PAUSED" | "ENDED";
+  autoRecord?: boolean;
+  reminderOffsets?: number[];
 }) => {
-  const [row] = await db.insert(recurringPlans).values({
-    userId: options.userId,
-    accountId: options.accountId,
-    categoryId: options.categoryId ?? null,
-    name: "Test plan",
-    type: "OUTCOME",
-    amount: 1000,
-    frequency: "MONTHLY",
-    startDate: "2026-01-01",
-    nextDueDate: "2026-02-01",
-    reminderOffsets: [0],
-  }).returning({ id: recurringPlans.id });
+  const startDate = options.startDate ?? "2026-01-01";
+  const [row] = await db
+    .insert(recurringPlans)
+    .values({
+      userId: options.userId,
+      accountId: options.accountId,
+      categoryId: options.categoryId ?? null,
+      name: options.name ?? "Test plan",
+      type: options.type ?? "OUTCOME",
+      amount: options.amount ?? 1000,
+      frequency: options.frequency ?? "MONTHLY",
+      startDate,
+      endDate: options.endDate ?? null,
+      nextDueDate: options.nextDueDate ?? "2026-02-01",
+      status: options.status ?? "ACTIVE",
+      autoRecord: options.autoRecord ?? false,
+      reminderOffsets: options.reminderOffsets ?? [0],
+    })
+    .returning({ id: recurringPlans.id });
   return row!.id;
 };
 
@@ -198,3 +215,8 @@ export const templateRow = async (id: string) => {
     .where(eq(transactionTemplates.id, id));
   return row!;
 };
+
+export const dayInJakarta = (offsetDays = 0) =>
+  new Date(Date.now() + 7 * 60 * 60 * 1000 + offsetDays * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);

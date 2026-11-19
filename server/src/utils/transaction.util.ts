@@ -1,5 +1,6 @@
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
+import { transactionImages } from "../db/schema/transaction.images.js";
 import { transactionItems } from "../db/schema/transaction.items.js";
 import { transactions } from "../db/schema/transactions.js";
 import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
@@ -25,6 +26,18 @@ export const transactionColumns = {
   note: transactions.note,
   tags: transactions.tags,
   source: transactions.source,
+};
+
+export const transactionSummaryColumns = {
+  ...transactionColumns,
+  imagesCount: sql<number>`(
+    select count(*) from ${transactionImages}
+    where ${transactionImages.transactionId} = ${transactions.id}
+  )`.mapWith(Number),
+  itemsCount: sql<number>`(
+    select count(*) from ${transactionItems}
+    where ${transactionItems.transactionId} = ${transactions.id}
+  )`.mapWith(Number),
 };
 
 export type TransactionRow = {

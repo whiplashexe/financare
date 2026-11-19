@@ -151,3 +151,24 @@ export const TEMPLATE_MESSAGE = {
     "Only a transfer has a destination account; send to_account_id: null",
   SAME_ACCOUNT: "Source and destination must differ",
 } as const;
+
+export const PLAN_MESSAGE = {
+  LISTED: "Recurring plans fetched successfully",
+  FETCHED: "Recurring plan fetched successfully",
+  CREATED: "Recurring plan created successfully",
+  UPDATED: "Recurring plan updated successfully",
+  DELETED: "Recurring plan deleted successfully",
+  PAUSED: "Recurring plan paused successfully",
+  RESUMED: "Recurring plan resumed successfully",
+  CONFIRMED: "Occurrence confirmed successfully",
+  SKIPPED: "Occurrence skipped successfully",
+  NOT_FOUND: "Recurring plan not found",
+  START_IN_PAST: "The start date cannot be in the past",
+  END_BEFORE_START: "The end date must be after the start date",
+  PLAN_ENDED: "The plan has ended and can no longer be changed",
+  NOT_ACTIVE: "The plan is not active",
+  NOT_A_DUE_DATE: "This is not the plan's current due date",
+  ALREADY_RESOLVED: "This period has already been resolved",
+  CATEGORY_TYPE_MISMATCH: "The category type must match the plan type",
+  DUPLICATE_OFFSETS: "reminder_offsets must not repeat a value",
+} as const;

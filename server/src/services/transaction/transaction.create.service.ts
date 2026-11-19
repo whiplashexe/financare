@@ -30,6 +30,7 @@ export const createInTx = async (
   tx: DbTx,
   userId: string,
   input: CreateTransactionInput,
+  options: { source?: "MANUAL" | "AUTO" } = {},
 ) => {
   if (input.date && input.date.getTime() > Date.now() + CLOCK_SKEW_MS) {
     throw ApiError.businessRule(TRANSACTION_MESSAGE.FUTURE_DATE);
@@ -130,7 +131,7 @@ export const createInTx = async (
       location: input.location ?? null,
       note: input.note ?? null,
       tags: input.tags ?? [],
-      source: "MANUAL",
+      source: options.source ?? "MANUAL",
     })
     .returning({ id: transactions.id, date: transactions.date });
 

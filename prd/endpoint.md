@@ -659,11 +659,33 @@ Request (all optional overrides):
 | `status` | enum | Read-only | `ACTIVE` / `PAUSED` / `ENDED` |
 | `next_due_date` | date | Read-only | |
 
-Rule for monthly/yearly due dates on the 29th–31st: moves to the last day of that month, with the original date from `start_date` remaining the reference.
+Rule for monthly/yearly due dates on the 29th–31st: moves to the last day of that month, with the original date from `start_date` remaining the reference (31 Jan, 28 Feb, 31 Mar; a 29 Feb yearly plan falls on 28 Feb in non-leap years).
+
+All endpoints require authentication; another user's plan returns the same `404` as an unknown id. The plan object also carries `needs_account_change` (read-only): `true` for an `ACTIVE` plan whose account has been archived, derived from the account status and not stored. `next_due_date` is `null` for an `ENDED` plan.
+
+### POST `/recurring-plans`
+
+`type` is `INCOME` or `OUTCOME`; `name` 1 to 100 characters (trimmed); `reminder_offsets` has 1 to 4 distinct values from `0, 1, 3, 7`; `end_date`, when given, must be after `start_date` (`400`). `start_date` may be today (in the user's timezone) or later, otherwise `422 BUSINESS_RULE`. The account must be active and owned (`422` / `404`) and a category must match the type (`400`). `status`, `next_due_date`, `needs_account_change`, and any unknown field return `400`. `next_due_date` starts at `start_date`. Response `201`: the plan object.
+
+### GET `/recurring-plans`
+
+Query: `status` (`ACTIVE`, `PAUSED`, `ENDED`, or `ALL`, the default). Ordered by `next_due_date`, with ended plans last. Response `200`: an array of plan objects.
+
+### GET `/recurring-plans/:id`
+
+The plan object plus `transactions` (the compact transaction objects of the list, up to the 50 newest, trashed ones excluded) and `occurrences` (up to the 50 latest, newest first): `{ "due_date", "outcome": "CONFIRMED" | "SKIPPED" | "AUTO_RECORDED", "transaction_id", "resolved_at" }`.
+
+### PATCH `/recurring-plans/:id`
+
+All fields optional, at least one: `name`, `type`, `amount`, `account_id`, `category_id`, `frequency`, `end_date`, `reminder_offsets`, `auto_record`. `start_date`, `status`, and `next_due_date` cannot be sent. The change applies to the following periods: past transactions are untouched and the current `next_due_date` stays. Changing `frequency` moves the anchor to the current `next_due_date`, so the periods after it follow the new frequency. An `end_date` earlier than `next_due_date` ends the plan at once (`ENDED`); one on `next_due_date` ends it once that period is resolved; `null` clears it; it must stay after the start date (`400`). A plan that has `ENDED` cannot be changed: `422 BUSINESS_RULE`. Response `200`: the plan object.
+
+### DELETE `/recurring-plans/:id`
+
+Response `204`. Transactions already created remain and lose their `plan_id`; the occurrences are removed.
 
 ### POST `.../occurrences/:dueDate/confirm`
 
-Request (optional): `{ "amount": 360000, "date": "2026-12-01T05:00:00Z", "account_id"?: "..." }`. The `Idempotency-Key` header is supported. Response `201`:
+`dueDate` is `YYYY-MM-DD` (`400` otherwise) and must be the plan's current `next_due_date`; the plan must be `ACTIVE`. Request (optional): `{ "amount": 360000, "date": "2026-12-01T05:00:00Z", "account_id"?: "..." }`; any other field returns `400`. The transaction takes `type`, `name`, `category_id`, and the plan link from the plan and goes through exactly the same validation and balance logic as `POST /transactions` (an archived account returns `422` unless another account is given; a future `date` returns `422`). The `Idempotency-Key` header is supported: a repeated key replays the first result with `Idempotent-Replayed: true` instead of answering `409`, and a key used for another period or route returns `409`. Response `201`:
 
 ```json
 {
@@ -674,15 +696,21 @@ Request (optional): `{ "amount": 360000, "date": "2026-12-01T05:00:00Z", "accoun
 }
 ```
 
-Errors: `409 CONFLICT` if that period has already been confirmed/skipped/auto-recorded (the response includes the existing transaction); `422` if `dueDate` is not an active due date.
+The response also carries `account_balance_after` (or `balances_after`) and `warnings`, like `POST /transactions`, and `transaction` is the full transaction object. `next_due_date` is `null` when the plan has ended.
+
+Errors: `409 CONFLICT` if that period has already been confirmed/skipped/auto-recorded, with `data: { "outcome", "transaction" }` (`transaction` is `null` for a skipped period, or when the transaction was deleted for good; deleting a transaction never reopens its period); `422 BUSINESS_RULE` if the plan is not `ACTIVE` or `dueDate` is not the current due date. Two simultaneous confirmations record one transaction and the other gets `409`.
 
 ### POST `.../occurrences/:dueDate/skip`
 
-Response `200`: `{ "data": { "next_due_date" } }`.
+Same rules and errors as confirm, without a transaction and without a body. Response `200`: `{ "data": { "next_due_date" } }` (`null` when the plan has ended).
 
 ### POST `.../pause`, `/resume`
 
-Response `200` plan object. On `resume`, `next_due_date` is calculated to the next upcoming date (it does not create backdated due dates).
+Response `200` plan object. Both are harmless when repeated and return `422 BUSINESS_RULE` for an `ENDED` plan. A paused plan cannot be confirmed or skipped. On `resume`, `next_due_date` is calculated to the next upcoming date, today included, in the user's timezone (it does not create backdated due dates); if that date is past `end_date`, the plan becomes `ENDED`.
+
+### Auto-record job
+
+`GET /internal/cron/recurring-auto-record`, not part of the app API. It is called by the scheduler with `Authorization: Bearer <CRON_SECRET>`; the secret comes from the `CRON_SECRET` environment variable and must be at least 16 characters, otherwise the endpoint always answers `401` (so it is off by default). For every `ACTIVE` plan with `auto_record = true` whose `next_due_date` is today or earlier in its owner's timezone (users that have been deleted are ignored), it records the periods one by one, each in its own database transaction, until the plan is up to date, so periods missed while the job did not run are caught up. The transaction has `source = AUTO`, the plan link, and the due day at 00:00 in the user's timezone as its `date`, and an `AUTO_RECORDED` occurrence is stored. A period that already has an occurrence is not recorded again, running the job twice or at the same time records each period once, and a plan locked by another run is skipped. The balance may go negative. A plan whose account is archived is left untouched and reported as skipped (`ACCOUNT_ARCHIVED`); the "action needed" notification comes with the notification feature. Response `200`: `{ "recorded": <total>, "plans": [ { "planId", "recorded" } | { "planId", "skipped": "<reason>" } ] }`. Reminders and push notifications are not part of this job yet.
 
 ---
 
