@@ -90,6 +90,7 @@ export const ACCOUNT_MESSAGE = {
   CONFIRM_INITIAL_BALANCE:
     "Changing the initial balance of an account with transactions changes its current balance; repeat with confirm: true",
   CASH_NO_INSTITUTION: "A cash account cannot have an institution",
+  ARCHIVED_NOT_ALLOWED: "Account is archived",
 } as const;
 
 export const CATEGORY_MESSAGE = {
@@ -102,4 +103,17 @@ export const CATEGORY_MESSAGE = {
   FALLBACK_PROTECTED: "The fallback category cannot be renamed or deleted",
   CONFIRM_DELETE:
     "Deleting this category moves its transactions to the fallback category; repeat with confirm=true",
+} as const;
+
+export const TRANSACTION_MESSAGE = {
+  LISTED: "Transactions fetched successfully",
+  FETCHED: "Transaction fetched successfully",
+  CREATED: "Transaction created successfully",
+  NOT_FOUND: "Transaction not found",
+  FUTURE_DATE:
+    "The date cannot be in the future; create a one-time plan for future payments",
+  CATEGORY_TYPE_MISMATCH: "The category type must match the transaction type",
+  PLAN_NOT_FOUND: "Plan not found",
+  TEMPLATE_NOT_FOUND: "Template not found",
+  INVALID_CURSOR: "The cursor is invalid",
 } as const;

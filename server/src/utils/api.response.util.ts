@@ -7,6 +7,7 @@ type ApiResponseParams<T> = {
   statusCode: StatusCode;
   data?: T | null;
   errors?: unknown;
+  pagination?: unknown;
 };
 
 export class ApiResponse<T = unknown> {
@@ -15,6 +16,7 @@ export class ApiResponse<T = unknown> {
   public readonly statusCode: StatusCode;
   public readonly data?: T | null;
   public readonly errors?: unknown;
+  public readonly pagination?: unknown;
 
   constructor({
     success,
@@ -22,12 +24,14 @@ export class ApiResponse<T = unknown> {
     statusCode,
     data,
     errors,
+    pagination,
   }: ApiResponseParams<T>) {
     this.success = success;
     this.message = message;
     this.statusCode = statusCode;
     this.data = data;
     this.errors = errors;
+    this.pagination = pagination;
   }
 
   send(res: Response): Response {
@@ -37,6 +41,7 @@ export class ApiResponse<T = unknown> {
       statusCode: this.statusCode,
       ...(this.data !== undefined && { data: this.data }),
       ...(this.errors !== undefined && { errors: this.errors }),
+      ...(this.pagination !== undefined && { pagination: this.pagination }),
     });
   }
 
@@ -56,6 +61,21 @@ export class ApiResponse<T = unknown> {
 
   static ok<T>(res: Response, message = "OK", data?: T) {
     return ApiResponse.Success(res, message, data, STATUS_CODES.OK);
+  }
+
+  static list<T>(
+    res: Response,
+    message: string,
+    data: T[],
+    pagination: { next_cursor: string | null; limit: number },
+  ) {
+    return new ApiResponse<T[]>({
+      success: true,
+      message,
+      data,
+      statusCode: STATUS_CODES.OK,
+      pagination,
+    }).send(res);
   }
 
   static accepted<T>(res: Response, message = "Accepted", data?: T) {

@@ -1,0 +1,127 @@
+import z from "zod";
+
+const MAX_AMOUNT = 999_999_999_999;
+
+const id = z.string().min(1).max(20);
+
+const instant = z.iso
+  .datetime({ offset: true })
+  .transform((value) => new Date(value));
+
+const tags = z
+  .array(z.string().trim().min(1, "a tag must not be empty").max(30))
+  .max(50)
+  .transform((list) => [...new Set(list.map((tag) => tag.toLowerCase()))])
+  .refine((list) => list.length <= 10, { message: "at most 10 tags" });
+
+const quantity = z
+  .number()
+  .positive()
+  .max(9_999_999.999)
+  .refine((value) => Math.abs(value * 1000 - Math.round(value * 1000)) < 1e-6, {
+    message: "quantity allows up to 3 decimals",
+  });
+
+const item = z
+  .object({
+    name: z.string().trim().min(1, "item name is required").max(150),
+    quantity: quantity.default(1),
+    unit: z
+      .string()
+      .trim()
+      .max(20)
+      .transform((value) => (value === "" ? null : value))
+      .nullable()
+      .optional(),
+    total_price: z.number().int().min(0).max(MAX_AMOUNT),
+  })
+  .strict();
+
+const dayOrInstant = z.union([
+  z.iso.date().transform((value) => ({ kind: "date" as const, value })),
+  instant.transform((value) => ({ kind: "instant" as const, value })),
+]);
+
+export class TransactionValidation {
+  static CREATE = z
+    .object({
+      type: z.enum(["INCOME", "OUTCOME", "TRANSFER"]),
+      name: z.string().trim().min(1, "name is required").max(100),
+      amount: z.number().int("amount must be an integer").min(1).max(MAX_AMOUNT),
+      date: instant.optional(),
+      account_id: id,
+      to_account_id: id.nullable().optional(),
+      admin_fee: z.number().int().min(0).max(MAX_AMOUNT).optional(),
+      category_id: id.nullable().optional(),
+      location: z.string().trim().max(255).nullable().optional(),
+      note: z.string().trim().max(1000).nullable().optional(),
+      tags: tags.optional(),
+      plan_id: id.nullable().optional(),
+      template_id: id.nullable().optional(),
+      items: z.array(item).max(100).optional(),
+    })
+    .strict()
+    .superRefine((value, ctx) => {
+      const issue = (path: string, message: string) =>
+        ctx.addIssue({ code: "custom", message, path: [path] });
+
+      if (value.type === "TRANSFER") {
+        if (!value.to_account_id) {
+          issue("to_account_id", "to_account_id is required for a transfer");
+        } else if (value.to_account_id === value.account_id) {
+          issue("to_account_id", "source and destination must differ");
+        }
+        if (value.category_id) {
+          issue("category_id", "a transfer has no category");
+        }
+        if (value.items && value.items.length > 0) {
+          issue("items", "a transfer cannot have items");
+        }
+        return;
+      }
+
+      if (value.to_account_id) {
+        issue("to_account_id", "only a transfer has a destination account");
+      }
+      if (value.admin_fee !== undefined) {
+        issue("admin_fee", "only a transfer has an admin fee");
+      }
+    });
+
+  static LIST_QUERY = z
+    .object({
+      from: dayOrInstant.optional(),
+      to: dayOrInstant.optional(),
+      type: z.enum(["INCOME", "OUTCOME", "TRANSFER"]).optional(),
+      account_id: id.optional(),
+      category_id: id.optional(),
+      q: z.string().trim().min(1).max(100).optional(),
+      tag: z
+        .string()
+        .trim()
+        .min(1)
+        .max(30)
+        .transform((value) => value.toLowerCase())
+        .optional(),
+      cursor: id.optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(20),
+    })
+    .strict()
+    .refine(
+      (query) => {
+        const { from, to } = query;
+        if (!from || !to || from.kind !== to.kind) return true;
+        return from.kind === "date"
+          ? from.value <= (to.value as string)
+          : from.value.getTime() <= (to.value as Date).getTime();
+      },
+      { message: "from must not be after to", path: ["from"] },
+    );
+
+  static PARAMS = z.object({ id });
+}
+
+export type CreateTransactionInput = z.infer<typeof TransactionValidation.CREATE>;
+export type ListTransactionsQuery = z.infer<
+  typeof TransactionValidation.LIST_QUERY
+>;

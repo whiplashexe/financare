@@ -4,6 +4,7 @@ import meRoute from "./me.route.js";
 import deviceRoute from "./device.route.js";
 import accountRoute from "./account.route.js";
 import categoryRoute from "./category.route.js";
+import transactionRoute from "./transaction.route.js";
 
 const setupRoutes = (app: Express) => {
   const v1 = Router();
@@ -12,6 +13,7 @@ const setupRoutes = (app: Express) => {
   v1.use("/devices", deviceRoute);
   v1.use("/accounts", accountRoute);
   v1.use("/categories", categoryRoute);
+  v1.use("/transactions", transactionRoute);
   app.use("/api/v1", v1);
 };
 

@@ -63,8 +63,14 @@ export const toAccountResponse = (row: AccountRow) => ({
   status: row.status,
 });
 
-export const findOwnedAccount = async (userId: string, accountId: string) => {
-  const [row] = await db
+export type SelectExecutor = Pick<typeof db, "select">;
+
+export const findOwnedAccount = async (
+  userId: string,
+  accountId: string,
+  executor: SelectExecutor = db,
+) => {
+  const [row] = await executor
     .select(accountColumns)
     .from(accounts)
     .where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
@@ -86,4 +92,16 @@ export const hasTransactions = async (accountId: string) => {
     .limit(1);
 
   return Boolean(row);
+};
+
+export const accountBalance = async (
+  executor: SelectExecutor,
+  accountId: string,
+) => {
+  const [row] = await executor
+    .select({ balance: accountColumns.currentBalance })
+    .from(accounts)
+    .where(eq(accounts.id, accountId));
+
+  return row!.balance;
 };

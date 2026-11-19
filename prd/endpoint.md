@@ -421,11 +421,25 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 
 ### GET `/transactions`
 
-Query: `from`, `to`, `type`, `account_id` (matches if source or destination), `category_id`, `q` (name/note), `tag`, `cursor`, `limit`. Order: `date` descending. Response: list of compact objects (no full image URLs and no items; only `images_count`, `items_count`, and `thumbnail_url`). The `q` search also matches item names.
+Query (all optional; unknown parameters return `400`):
+
+| Parameter | Rule |
+|---|---|
+| `from`, `to` | Either an ISO 8601 instant **with an offset** (`2026-11-05T09:00:00+08:00`, `...Z`), compared as an exact, inclusive range, or a date-only `YYYY-MM-DD`, interpreted in the **user's timezone**: `from=2026-11-11` starts at 00:00 of that local day and `to=2026-11-11` includes the whole local day. Use `from=D&to=D` for "transactions on day D". A datetime without an offset, an invalid date, or `from` after `to` returns `400` |
+| `type` | `INCOME`, `OUTCOME`, or `TRANSFER` |
+| `account_id` | Matches if the account is the source or the destination |
+| `category_id` | |
+| `q` | Case-insensitive search in name, note, and item names; `%` and `_` are matched literally |
+| `tag` | Case-insensitive exact tag |
+| `cursor`, `limit` | `limit` 1 to 100, default 20. `cursor` is the `id` of the last item of the previous page; an unknown or foreign id returns `400` |
+
+Order: `date` descending, ties broken by `id` descending, so pages are stable. Trashed transactions are never listed here. A transfer's admin fee appears as its own outcome row (`parent_transaction_id` set).
+
+Response `200`: `data` is an array of compact objects `{ id, type, name, amount, date, account_id, to_account_id, category_id, parent_transaction_id, tags, source, images_count, items_count, thumbnail_url }` (no items and no full image URLs), and the envelope carries `pagination: { next_cursor, limit }` with `next_cursor: null` on the last page.
 
 ### POST `/transactions`
 
-Optional `Idempotency-Key` header. Response `201`:
+Optional `Idempotency-Key` header (1 to 64 characters, otherwise `400`). The same key of the same user within 24 hours returns the first result (status `201`, the same body, header `Idempotent-Replayed: true`) and records nothing again; two simultaneous requests with the same key record exactly one transaction. A failed request does not consume the key. The payload is not compared: a different body with a reused key still returns the first result. Response `201`:
 
 ```json
 {
@@ -444,20 +458,30 @@ Optional `Idempotency-Key` header. Response `201`:
 }
 ```
 
-For transfers, `account_balance_after` is replaced by `balances_after: { "<source>": ..., "<destination>": ... }`.
+`transaction` is the full object of `GET /transactions/:id`. For transfers, `account_balance_after` is replaced by `balances_after: { "<source>": ..., "<destination>": ... }` (the source already includes the admin fee).
+
+Notes:
+
+- `date` is an ISO 8601 datetime with an offset or `Z` and is returned in UTC. A date more than 60 seconds ahead of the server clock (a small allowance for device clock drift) is a future date.
+- `tags` are trimmed, lowercased, and de-duplicated; at most 10 remain.
+- A transfer's `admin_fee` greater than 0 creates a linked `OUTCOME` on the source account, with the same date, named `Biaya admin: <transfer name>`, in the user's "Biaya Admin" category (null if that category was renamed or deleted). `admin_fee` of 0 or absent creates nothing. The transfer object reports `admin_fee` (0 when none); other types report `null`.
+- `plan_id` is matched against the user's recurring plans, then one-time plans; an unknown id returns `404`. For now it only links the transaction to the plan.
+- `template_id` increments the template's `use_count` and sets `last_used_at`; an unknown id returns `404`.
+- The `NEGATIVE_BALANCE` warning is `{ "code", "account_id", "balance_after" }` and is only given for an outcome or a transfer that leaves the source account below 0.
+- `images` is not accepted yet (`400`); it arrives with the image upload endpoints.
 
 | Condition                            | Response                                                 |
 | ------------------------------------ | -------------------------------------------------------- |
 | Amount ≤ 0 / not an integer          | `400`                                                    |
 | Future date                          | `422 BUSINESS_RULE` (suggestion: create a One-Time Plan) |
-| Account archived / not owned by user | `422` / `404`                                            |
+| Account archived / not owned by user | `422` / `404` (also for the destination account)        |
 | Source = destination on transfer     | `400`                                                    |
 | Images > 5                           | `422`                                                    |
 | Balance would go negative            | `201` + warning `NEGATIVE_BALANCE`                       |
 
 ### GET `/transactions/:id`
 
-Full object; `images[].url` is a signed Cloudinary URL with a short validity (± 1 hour).
+Full object; `images[].url` is a signed Cloudinary URL with a short validity (± 1 hour). Includes `items` (in display order), `items_total`, `admin_fee`, `plan_id`, and `parent_transaction_id`. A transaction in the trash, another user's transaction, and an unknown id all return the same `404`.
 
 ### PATCH `/transactions/:id`
 
