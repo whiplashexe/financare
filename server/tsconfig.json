@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "NodeNext",
     "skipLibCheck": true,
+    "strict": true,
     "types": ["node"]
   },
   "include": ["src", "drizzle.config.ts"],
