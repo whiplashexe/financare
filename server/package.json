@@ -13,7 +13,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "test": "bun test --timeout 30000"
+    "test": "bun test --timeout 30000",
+    "db:test:start": "sh scripts/test-db.sh start",
+    "db:test:stop": "sh scripts/test-db.sh stop",
+    "db:test:reset": "sh scripts/test-db.sh reset",
+    "db:test:migrate": "bun --env-file=.env.test run db:migrate"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
