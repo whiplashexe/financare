@@ -130,3 +130,24 @@ export const TRANSACTION_MESSAGE = {
     "Only a transfer has a destination account; send to_account_id: null",
   NON_TRANSFER_FEE: "Only a transfer has an admin fee",
 } as const;
+
+export const TEMPLATE_MESSAGE = {
+  LISTED: "Templates fetched successfully",
+  FETCHED: "Template fetched successfully",
+  CREATED: "Template created successfully",
+  UPDATED: "Template updated successfully",
+  DELETED: "Template deleted successfully",
+  NOT_FOUND: "Template not found",
+  NAME_EXISTS: "A template with this name already exists",
+  SOURCE_NOT_FOUND: "Source transaction not found",
+  INCOMPLETE:
+    "The template and the overrides do not provide every required value",
+  TYPE_REQUIRED: "type is required when there is no source transaction",
+  TRANSACTION_NAME_REQUIRED:
+    "transaction_name is required when there is no source transaction",
+  CATEGORY_TYPE_MISMATCH: "The category type must match the template type",
+  TRANSFER_NEEDS_NO_CATEGORY: "A transfer has no category; send category_id: null",
+  ONLY_TRANSFER_DESTINATION:
+    "Only a transfer has a destination account; send to_account_id: null",
+  SAME_ACCOUNT: "Source and destination must differ",
+} as const;

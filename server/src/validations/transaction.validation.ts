@@ -1,14 +1,14 @@
 import z from "zod";
 
-const MAX_AMOUNT = 999_999_999_999;
+export const MAX_AMOUNT = 999_999_999_999;
 
-const id = z.string().min(1).max(20);
+export const id = z.string().min(1).max(20);
 
-const instant = z.iso
+export const instant = z.iso
   .datetime({ offset: true })
   .transform((value) => new Date(value));
 
-const tags = z
+export const tags = z
   .array(z.string().trim().min(1, "a tag must not be empty").max(30))
   .max(50)
   .transform((list) => [...new Set(list.map((tag) => tag.toLowerCase()))])

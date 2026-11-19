@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import TransactionService from "../services/transaction/index.js";
 import { ApiResponse } from "../utils/api.response.util.js";
-import { ApiError } from "../utils/api.error.util.js";
+import { readIdempotencyKey } from "../utils/idempotency.util.js";
 import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
 import {
   toTransactionSummary,
@@ -20,12 +20,7 @@ export class TransactionController {
     req: Request<unknown, unknown, CreateTransactionInput>,
     res: Response,
   ) => {
-    const key = req.get("idempotency-key");
-    if (key !== undefined && (key.length < 1 || key.length > 64)) {
-      throw ApiError.badRequest("Invalid Idempotency-Key header", {
-        "idempotency-key": ["must be 1 to 64 characters"],
-      });
-    }
+    const key = readIdempotencyKey(req);
 
     const result = await TransactionService.create({
       userId: req.user!.id,

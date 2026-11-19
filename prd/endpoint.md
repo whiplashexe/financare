@@ -439,7 +439,7 @@ Response `200`: `data` is an array of compact objects `{ id, type, name, amount,
 
 ### POST `/transactions`
 
-Optional `Idempotency-Key` header (1 to 64 characters, otherwise `400`). The same key of the same user within 24 hours returns the first result (status `201`, the same body, header `Idempotent-Replayed: true`) and records nothing again; two simultaneous requests with the same key record exactly one transaction. A failed request does not consume the key. The payload is not compared: a different body with a reused key still returns the first result. Response `201`:
+Optional `Idempotency-Key` header (1 to 64 characters, otherwise `400`). The same key of the same user within 24 hours returns the first result (status `201`, the same body, header `Idempotent-Replayed: true`) and records nothing again; two simultaneous requests with the same key record exactly one transaction. A failed request does not consume the key. A key that was already used for a different route (or, for `POST /templates/:id/record`, a different template) returns `409 CONFLICT`. The payload is not compared: a different body with a reused key still returns the first result. Response `201`:
 
 ```json
 {
@@ -564,7 +564,7 @@ There is no limit on the number of templates per user (MVP).
 
 ### GET `/templates`
 
-Sorted by `use_count` descending, then `last_used_at` descending. Response `200`: list of template objects (including `missing`).
+Sorted by `use_count` descending, then `last_used_at` descending (templates never used come last), then newest first. Response `200`: `data` is an array of template objects (including `missing`), not paginated. Another user's templates are never shown, and another user's template returns the same `404` as an unknown id on every endpoint below.
 
 ### POST `/templates`
 
@@ -589,11 +589,14 @@ Request, from an existing transaction:
 
 - With `source_transaction_id`, the server copies `type`, `name` (as `transaction_name`), `amount`, `account_id`, `to_account_id`, `category_id`, `location`, `note`, and `tags`. **Images are not copied**, and a transfer's admin fee is not copied. Any field sent in the same request overrides the copied value.
 - The source transaction must belong to the user and not be in the trash (else `404`).
-- Response `201`: template object. Errors: `400` (invalid fields), `409` (name already used), `422` (inactive account, category type mismatch).
+- Without `source_transaction_id`, `type` and `transaction_name` are required (`400` with `errors`). `name` is 1 to 50 characters (trimmed). A copied account that has been archived since is left empty instead of failing, so the template reports it in `missing`; an archived account sent explicitly in the request returns `422`. Items are not copied either.
+- `use_count`, `last_used_at`, `missing`, `id`, and any unknown field are rejected with `400`.
+- A transfer cannot have a category, a non-transfer cannot have `to_account_id`, and the two accounts must differ (`400` with the field in `errors`).
+- Response `201`: template object. Errors: `400` (invalid fields), `404` (unknown or foreign account, category, or source transaction), `409` (name already used, ignoring case), `422` (inactive account, category type mismatch).
 
 ### PATCH `/templates/:id`
 
-All fields optional. Send `"amount": null` to make the amount ask-every-time. Response `200`. Errors: `409` (duplicate name), `422`.
+All fields optional, at least one. Send `"amount": null` to make the amount ask-every-time; `account_id`, `to_account_id`, `category_id`, `location`, and `note` can be cleared with `null`, and `tags: []` clears the tags. The result is validated as a whole: changing `type` needs the other fields to agree, so the client sends `to_account_id: null` when leaving `TRANSFER` and `category_id: null` when entering it. `use_count`, `last_used_at`, and `missing` cannot be sent. Renaming to another template's name returns `409`; changing only the letter case of its own name is fine. Response `200` with the template object. Errors: `400`, `404`, `409`, `422`.
 
 ### DELETE `/templates/:id`
 
@@ -615,11 +618,12 @@ Request (all optional overrides):
 }
 ```
 
-- Overridable: `name`, `amount`, `date` (defaults to now, not in the future), `account_id`, `to_account_id`, `category_id`, `location`, `note`, `tags`. Images can be added afterwards through the transaction image endpoints.
+- The body may be empty or omitted. Overridable: `name`, `amount`, `date` (defaults to now, not in the future), `account_id`, `to_account_id`, `category_id` (`null` removes the template's category), `location`, `note`, `tags`. Anything else (`type`, `items`, `admin_fee`, `template_id`, ...) returns `400`; the type always comes from the template and no admin fee is recorded. Images can be added afterwards through the transaction image endpoints.
 - If the template and the overrides together still lack a required value (`amount`, `account_id`, or `to_account_id` for transfers), the response is `422 BUSINESS_RULE` with `data.missing` listing the fields. The app then opens the form prefilled and asks the user to complete it.
 - The transaction goes through exactly the same validation and balance logic as `POST /transactions` (including the `NEGATIVE_BALANCE` warning).
 - On success, `use_count` is incremented and `last_used_at` is set, in the same database transaction.
-- Response `201`: same as `POST /transactions` (`transaction`, `account_balance_after` or `balances_after`, `warnings`).
+- Response `201`: same as `POST /transactions` (`transaction`, `account_balance_after` or `balances_after`, `warnings`). The transaction does not store a reference to the template.
+- `Idempotency-Key` works like on `POST /transactions` (same key replays the first result, header `Idempotent-Replayed: true`, `use_count` counted once). A key that was already used for another template or for another route returns `409 CONFLICT`.
 
 **Without the one-tap endpoint:** the app can also prefill the form from `GET /templates` and submit a normal `POST /transactions` with `template_id` set, which only updates the usage counters.
 

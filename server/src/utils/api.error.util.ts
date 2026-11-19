@@ -44,7 +44,14 @@ export class ApiError extends Error {
       data,
     );
   }
-  static businessRule(message: string) {
-    return new ApiError(422, message, "BUSINESS_RULE");
+  static businessRule(message: string, data?: unknown) {
+    return new ApiError(
+      422,
+      message,
+      "BUSINESS_RULE",
+      undefined,
+      undefined,
+      data,
+    );
   }
 }
