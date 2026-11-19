@@ -740,9 +740,33 @@ Response `200` plan object. Both are harmless when repeated and return `422 BUSI
 
 When `hide_balance` is active, the server still populates `funding` (hiding is done on the client), but notification content does not include balance figures.
 
+All endpoints require authentication; another user's plan returns the same `404` as an unknown id.
+
+`funding` is computed on every read from the live balances: `available` is the current balance of `source_account_id`, or, when there is none, the total balance (active accounts with `include_in_total`, the same figure as `total_balance` of `GET /accounts`); `shortfall` is `max(0, target_amount - available)`; `sufficient` is `available >= target_amount`. It is `null` for a plan that is `DONE` or `CANCELLED`.
+
+### POST `/one-time-plans`
+
+`name` 1 to 100 characters (trimmed); `target_amount` an integer from 1 to 999,999,999,999; `location` up to 255 and `note` up to 1,000 characters; `reminder_offsets` has 1 to 4 distinct values from `1, 3, 7, 14` (0 is not allowed here). `date` is `YYYY-MM-DD` and may be today (in the user's timezone) or later, otherwise `422 BUSINESS_RULE`. The source account must be active and owned (`422` / `404`). `status`, `funding`, and unknown fields return `400`. Response `201`: the plan object. Reminders are not created yet; they come with the notification feature.
+
+### GET `/one-time-plans`
+
+Query: `status` (`PLANNED`, `DONE`, `MISSED`, `CANCELLED`, or `ALL`, the default). Open plans (`PLANNED` and `MISSED`) come first by date, then `DONE` and `CANCELLED`. Response `200`: an array of plan objects with `funding`.
+
+### GET `/one-time-plans/:id`
+
+The plan object plus `transactions`: the compact transaction objects (as in the transaction list) recorded for the plan, up to the 50 newest, trashed ones excluded.
+
+### PATCH `/one-time-plans/:id`
+
+All fields optional, at least one: `name`, `date`, `target_amount`, `source_account_id` (`null` clears it), `location`, `note` (`null` clears them), `reminder_offsets`. `status` cannot be sent. A plan that is `DONE` or `CANCELLED` cannot be changed (`422 BUSINESS_RULE`). A `date` in the past returns `422`, except when a `PLANNED` plan is sent its own current date. The response is the plan object with the recalculated `funding`.
+
+### DELETE `/one-time-plans/:id`
+
+Response `204`. Transactions recorded for the plan remain and lose their `plan_id`. If the plan's source account is deleted, the plan is kept and falls back to the total balance.
+
 ### POST `/one-time-plans/:id/complete`
 
-Request:
+Request (the body may be omitted; it then marks the plan done without a transaction):
 
 ```json
 {
@@ -753,15 +777,19 @@ Request:
 }
 ```
 
-With `create_transaction: true`, an outcome transaction is created (`plan_id` populated) within a single database transaction. Status becomes `DONE`. Response `200` `{ "data": { "plan", "transaction"? } }`. Errors: `422` if the status is `CANCELLED` or `DONE`.
+With `create_transaction: true`, an outcome transaction is created (`plan_id` populated, `name`, `location`, and `note` taken from the plan) within a single database transaction and goes through exactly the same validation and balance logic as `POST /transactions`. `amount` defaults to `target_amount`, `date` to now (not in the future), and `account_id` to the plan's `source_account_id`; if neither gives an account, the response is `422 BUSINESS_RULE` with `data: { "missing": ["account_id"] }`. Status becomes `DONE`. `amount`, `account_id`, and `date` without `create_transaction: true`, and any other field, return `400`. A plan that is `MISSED` can be completed too. Response `200`: `{ "data": { "plan", "transaction"?, "account_balance_after"?, "warnings"? } }`, where the last three are those of `POST /transactions` and are present only when a transaction was created. If anything fails, the plan stays open and nothing is recorded. Errors: `422` if the status is `CANCELLED` or `DONE`. Two simultaneous completions record one transaction and the other gets `422`.
 
 ### POST `/one-time-plans/:id/cancel`
 
-Response `200`; reminders are stopped.
+Response `200`: the plan object; reminders are stopped. Works for `PLANNED` and `MISSED` plans, is harmless when repeated on a `CANCELLED` one, and returns `422` for a `DONE` plan.
 
 ### PATCH `/one-time-plans/:id`
 
-Changing `date` on a `MISSED` plan returns it to `PLANNED` and recalculates the reminders.
+Changing `date` on a `MISSED` plan (to today or later) returns it to `PLANNED` and recalculates the reminders; other changes leave it `MISSED`.
+
+### Missed-plan job
+
+`GET /internal/cron/one-time-plans-missed`, not part of the app API; it is guarded exactly like the auto-record job (`Authorization: Bearer <CRON_SECRET>`, at least 16 characters, otherwise always `401`). It marks every `PLANNED` plan whose `date` is before today in its owner's timezone as `MISSED` (users that have been deleted are ignored) and reports them as `{ "missed": <count>, "planIds": [...] }`. Running it again changes nothing. Until it runs, an overdue plan is still reported as `PLANNED`. The follow-up notification comes with the notification feature.
 
 ---
 

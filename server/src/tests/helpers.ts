@@ -8,6 +8,7 @@ import { passwordResetTokens } from "../db/schema/password.reset.tokens.js";
 import { accounts } from "../db/schema/accounts.js";
 import { transactions } from "../db/schema/transactions.js";
 import { recurringPlans } from "../db/schema/recurring.plans.js";
+import { oneTimePlans } from "../db/schema/one.time.plans.js";
 import { transactionTemplates } from "../db/schema/transaction.templates.js";
 import { generateOpaqueToken } from "../utils/token.util.js";
 import { eq, inArray, like } from "drizzle-orm";
@@ -220,3 +221,35 @@ export const dayInJakarta = (offsetDays = 0) =>
   new Date(Date.now() + 7 * 60 * 60 * 1000 + offsetDays * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
+
+export const insertOneTimePlan = async (options: {
+  userId: string;
+  date: string;
+  sourceAccountId?: string;
+  name?: string;
+  targetAmount?: number;
+  status?: "PLANNED" | "DONE" | "MISSED" | "CANCELLED";
+  reminderOffsets?: number[];
+}) => {
+  const [row] = await db
+    .insert(oneTimePlans)
+    .values({
+      userId: options.userId,
+      sourceAccountId: options.sourceAccountId ?? null,
+      name: options.name ?? "Test plan",
+      date: options.date,
+      targetAmount: options.targetAmount ?? 1000,
+      status: options.status ?? "PLANNED",
+      reminderOffsets: options.reminderOffsets ?? [1],
+    })
+    .returning({ id: oneTimePlans.id });
+  return row!.id;
+};
+
+export const oneTimeRow = async (id: string) => {
+  const [row] = await db
+    .select()
+    .from(oneTimePlans)
+    .where(eq(oneTimePlans.id, id));
+  return row!;
+};

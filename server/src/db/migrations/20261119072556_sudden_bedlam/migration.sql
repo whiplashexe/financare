@@ -1,0 +1,1 @@
+ALTER TABLE "one_time_plan" ALTER COLUMN "status" SET NOT NULL;

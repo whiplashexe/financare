@@ -105,3 +105,22 @@ export const accountBalance = async (
 
   return row!.balance;
 };
+
+export const loadBalances = async (executor: SelectExecutor, userId: string) => {
+  const rows = await executor
+    .select({
+      id: accounts.id,
+      status: accounts.status,
+      includeInTotal: accounts.includeInTotal,
+      balance: accountColumns.currentBalance,
+    })
+    .from(accounts)
+    .where(eq(accounts.userId, userId));
+
+  return {
+    byAccount: new Map(rows.map((row) => [row.id, row.balance])),
+    total: rows
+      .filter((row) => row.status === "ACTIVE" && row.includeInTotal)
+      .reduce((sum, row) => sum + row.balance, 0),
+  };
+};

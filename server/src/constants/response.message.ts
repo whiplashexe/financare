@@ -172,3 +172,23 @@ export const PLAN_MESSAGE = {
   CATEGORY_TYPE_MISMATCH: "The category type must match the plan type",
   DUPLICATE_OFFSETS: "reminder_offsets must not repeat a value",
 } as const;
+
+export const ONE_TIME_MESSAGE = {
+  LISTED: "One-time plans fetched successfully",
+  FETCHED: "One-time plan fetched successfully",
+  CREATED: "One-time plan created successfully",
+  UPDATED: "One-time plan updated successfully",
+  DELETED: "One-time plan deleted successfully",
+  COMPLETED: "One-time plan completed successfully",
+  CANCELLED: "One-time plan cancelled successfully",
+  NOT_FOUND: "One-time plan not found",
+  DATE_IN_PAST: "The date cannot be in the past",
+  NOT_EDITABLE: "A plan that is done or cancelled can no longer be changed",
+  ALREADY_DONE: "The plan is already done",
+  ALREADY_CANCELLED: "The plan has been cancelled",
+  TRANSACTION_FIELDS_NEED_FLAG:
+    "amount, account_id and date are only used with create_transaction: true",
+  ACCOUNT_REQUIRED:
+    "An account is needed to record the transaction: send account_id or set a source account",
+  DUPLICATE_OFFSETS: "reminder_offsets must not repeat a value",
+} as const;

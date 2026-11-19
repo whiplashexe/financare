@@ -7,6 +7,7 @@ import categoryRoute from "./category.route.js";
 import transactionRoute from "./transaction.route.js";
 import templateRoute from "./template.route.js";
 import recurringRoute from "./recurring.route.js";
+import oneTimeRoute from "./onetime.route.js";
 import internalRoute from "./internal.route.js";
 
 const setupRoutes = (app: Express) => {
@@ -19,6 +20,7 @@ const setupRoutes = (app: Express) => {
   v1.use("/transactions", transactionRoute);
   v1.use("/templates", templateRoute);
   v1.use("/recurring-plans", recurringRoute);
+  v1.use("/one-time-plans", oneTimeRoute);
   v1.use("/internal", internalRoute);
   app.use("/api/v1", v1);
 };

@@ -45,7 +45,7 @@ export const oneTimePlans = pgTable(
     location: varchar("location", { length: 255 }),
     note: text("note"),
     reminderOffsets: integer("reminder_offsets").array().notNull(),
-    status: oneTimePlanStatusEnum("status").default("PLANNED"),
+    status: oneTimePlanStatusEnum("status").notNull().default("PLANNED"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

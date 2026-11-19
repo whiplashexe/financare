@@ -9,4 +9,9 @@ internalRoute.get(
   asyncHandler(InternalController.autoRecordRecurring),
 );
 
+internalRoute.get(
+  "/cron/one-time-plans-missed",
+  asyncHandler(InternalController.markMissedOneTime),
+);
+
 export default internalRoute;
