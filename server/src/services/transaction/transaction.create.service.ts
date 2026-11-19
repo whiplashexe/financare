@@ -13,6 +13,7 @@ import {
 } from "../../constants/response.message.js";
 import { ApiError } from "../../utils/api.error.util.js";
 import { accountBalance, findOwnedAccount } from "../../utils/account.util.js";
+import { insertAdminFee } from "../../utils/transaction.fee.util.js";
 import { loadTransactionDetail } from "../../utils/transaction.util.js";
 import { CreateTransactionInput } from "../../validations/transaction.validation.js";
 
@@ -160,27 +161,13 @@ export const createTransaction = async ({
       .returning({ id: transactions.id, date: transactions.date });
 
     if (input.type === "TRANSFER" && input.admin_fee) {
-      const [feeCategory] = await tx
-        .select({ id: categories.id })
-        .from(categories)
-        .where(
-          and(
-            eq(categories.userId, userId),
-            eq(categories.type, "OUTCOME"),
-            sql`lower(${categories.name}) = 'biaya admin'`,
-          ),
-        );
-
-      await tx.insert(transactions).values({
+      await insertAdminFee(tx, {
         userId,
         accountId: input.account_id,
-        categoryId: feeCategory?.id ?? null,
-        parentTransactionId: created!.id,
-        type: "OUTCOME",
-        name: `Biaya admin: ${input.name}`.slice(0, 100),
+        parentId: created!.id,
+        transferName: input.name,
         amount: input.admin_fee,
         date: created!.date,
-        source: "MANUAL",
       });
     }
 

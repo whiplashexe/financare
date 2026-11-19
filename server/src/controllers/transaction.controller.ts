@@ -3,10 +3,16 @@ import TransactionService from "../services/transaction/index.js";
 import { ApiResponse } from "../utils/api.response.util.js";
 import { ApiError } from "../utils/api.error.util.js";
 import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
-import { toTransactionSummary } from "../utils/transaction.util.js";
+import {
+  toTransactionSummary,
+  toTrashSummary,
+} from "../utils/transaction.util.js";
 import {
   CreateTransactionInput,
+  DeleteTransactionQuery,
   ListTransactionsQuery,
+  TrashQuery,
+  UpdateTransactionInput,
 } from "../validations/transaction.validation.js";
 
 export class TransactionController {
@@ -51,5 +57,49 @@ export class TransactionController {
       result.rows.map(toTransactionSummary),
       { next_cursor: result.nextCursor, limit: query.limit },
     );
+  };
+
+  static update = async (
+    req: Request<{ id: string }, unknown, UpdateTransactionInput>,
+    res: Response,
+  ) => {
+    const result = await TransactionService.update({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+      input: req.body,
+    });
+    ApiResponse.ok(res, TRANSACTION_MESSAGE.UPDATED, result);
+  };
+
+  static delete = async (req: Request<{ id: string }>, res: Response) => {
+    const { permanent } = req.query as unknown as DeleteTransactionQuery;
+    await TransactionService.delete({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+      permanent,
+    });
+    ApiResponse.noContent(res);
+  };
+
+  static trash = async (req: Request, res: Response) => {
+    const query = req.query as unknown as TrashQuery;
+    const result = await TransactionService.trash({
+      userId: req.user!.id,
+      query,
+    });
+    ApiResponse.list(
+      res,
+      TRANSACTION_MESSAGE.TRASH_LISTED,
+      result.rows.map(toTrashSummary),
+      { next_cursor: result.nextCursor, limit: query.limit },
+    );
+  };
+
+  static restore = async (req: Request<{ id: string }>, res: Response) => {
+    const transaction = await TransactionService.restore({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+    });
+    ApiResponse.ok(res, TRANSACTION_MESSAGE.RESTORED, transaction);
   };
 }

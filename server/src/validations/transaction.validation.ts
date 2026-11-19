@@ -88,6 +88,55 @@ export class TransactionValidation {
       }
     });
 
+  static UPDATE = z
+    .object({
+      type: z.enum(["INCOME", "OUTCOME", "TRANSFER"]).optional(),
+      name: z.string().trim().min(1, "name is required").max(100).optional(),
+      amount: z
+        .number()
+        .int("amount must be an integer")
+        .min(1)
+        .max(MAX_AMOUNT)
+        .optional(),
+      date: instant.optional(),
+      account_id: id.optional(),
+      to_account_id: id.nullable().optional(),
+      admin_fee: z.number().int().min(0).max(MAX_AMOUNT).optional(),
+      category_id: id.nullable().optional(),
+      location: z.string().trim().max(255).nullable().optional(),
+      note: z.string().trim().max(1000).nullable().optional(),
+      tags: tags.optional(),
+      plan_id: id.nullable().optional(),
+      items: z.array(item).max(100).optional(),
+    })
+    .strict()
+    .refine((value) => Object.keys(value).length > 0, {
+      message: "at least one field is required",
+    })
+    .refine(
+      (value) =>
+        !value.to_account_id ||
+        !value.account_id ||
+        value.to_account_id !== value.account_id,
+      { message: "source and destination must differ", path: ["to_account_id"] },
+    );
+
+  static DELETE_QUERY = z
+    .object({
+      permanent: z
+        .enum(["true", "false"])
+        .default("false")
+        .transform((value) => value === "true"),
+    })
+    .strict();
+
+  static TRASH_QUERY = z
+    .object({
+      cursor: id.optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(20),
+    })
+    .strict();
+
   static LIST_QUERY = z
     .object({
       from: dayOrInstant.optional(),
@@ -125,3 +174,8 @@ export type CreateTransactionInput = z.infer<typeof TransactionValidation.CREATE
 export type ListTransactionsQuery = z.infer<
   typeof TransactionValidation.LIST_QUERY
 >;
+export type UpdateTransactionInput = z.infer<typeof TransactionValidation.UPDATE>;
+export type DeleteTransactionQuery = z.infer<
+  typeof TransactionValidation.DELETE_QUERY
+>;
+export type TrashQuery = z.infer<typeof TransactionValidation.TRASH_QUERY>;

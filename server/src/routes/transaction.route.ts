@@ -15,6 +15,12 @@ transactionRoute.get(
   asyncHandler(TransactionController.list),
 );
 
+transactionRoute.get(
+  "/trash",
+  validate({ query: TransactionValidation.TRASH_QUERY }),
+  asyncHandler(TransactionController.trash),
+);
+
 transactionRoute.post(
   "/",
   validate({ body: TransactionValidation.CREATE }),
@@ -25,6 +31,30 @@ transactionRoute.get(
   "/:id",
   validate({ params: TransactionValidation.PARAMS }),
   asyncHandler(TransactionController.get),
+);
+
+transactionRoute.patch(
+  "/:id",
+  validate({
+    params: TransactionValidation.PARAMS,
+    body: TransactionValidation.UPDATE,
+  }),
+  asyncHandler(TransactionController.update),
+);
+
+transactionRoute.delete(
+  "/:id",
+  validate({
+    params: TransactionValidation.PARAMS,
+    query: TransactionValidation.DELETE_QUERY,
+  }),
+  asyncHandler(TransactionController.delete),
+);
+
+transactionRoute.post(
+  "/:id/restore",
+  validate({ params: TransactionValidation.PARAMS }),
+  asyncHandler(TransactionController.restore),
 );
 
 export default transactionRoute;

@@ -116,4 +116,17 @@ export const TRANSACTION_MESSAGE = {
   PLAN_NOT_FOUND: "Plan not found",
   TEMPLATE_NOT_FOUND: "Template not found",
   INVALID_CURSOR: "The cursor is invalid",
+  UPDATED: "Transaction updated successfully",
+  DELETED: "Transaction deleted successfully",
+  RESTORED: "Transaction restored successfully",
+  TRASH_LISTED: "Trash fetched successfully",
+  FEE_IS_LINKED:
+    "An admin fee is managed through its transfer; change the transfer instead",
+  TRANSFER_NEEDS_DESTINATION: "A transfer needs a destination account",
+  TRANSFER_SAME_ACCOUNT: "Source and destination must differ",
+  TRANSFER_NO_CATEGORY: "A transfer has no category; send category_id: null",
+  TRANSFER_NO_ITEMS: "A transfer cannot have items; send items: []",
+  NON_TRANSFER_DESTINATION:
+    "Only a transfer has a destination account; send to_account_id: null",
+  NON_TRANSFER_FEE: "Only a transfer has an admin fee",
 } as const;

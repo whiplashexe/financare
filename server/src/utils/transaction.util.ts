@@ -5,6 +5,8 @@ import { transactions } from "../db/schema/transactions.js";
 import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
 import { ApiError } from "./api.error.util.js";
 
+export const TRASH_RETENTION_DAYS = 30;
+
 export type SelectExecutor = Pick<typeof db, "select">;
 
 export const transactionColumns = {
@@ -148,3 +150,17 @@ export const loadTransactionDetail = async (
 
   return toTransactionResponse(row, items, adminFee);
 };
+
+export const toTrashSummary = (
+  row: TransactionRow & {
+    imagesCount: number;
+    itemsCount: number;
+    deletedAt: Date;
+  },
+) => ({
+  ...toTransactionSummary(row),
+  deleted_at: row.deletedAt.toISOString(),
+  permanent_delete_at: new Date(
+    row.deletedAt.getTime() + TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString(),
+});

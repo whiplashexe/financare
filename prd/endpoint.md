@@ -485,19 +485,42 @@ Full object; `images[].url` is a signed Cloudinary URL with a short validity (±
 
 ### PATCH `/transactions/:id`
 
-All fields optional (except `images`, which are managed through the image endpoints). `items`, when sent, **replaces the whole list** (send `[]` to remove all items; omit the field to leave them unchanged). The balances of all affected accounts (old and new) are recalculated within a single database transaction. For transfers, the linked admin fee is updated as well.
+All fields optional, at least one: `type`, `name`, `amount`, `date`, `account_id`, `to_account_id`, `admin_fee`, `category_id`, `location`, `note`, `tags`, `plan_id`, `items`. `images` are managed through the image endpoints, and `template_id`, `source`, `user_id`, `deleted_at`, and `parent_transaction_id` are rejected with `400`. `location`, `note`, `category_id`, `to_account_id`, and `plan_id` can be cleared with `null`; `tags: []` clears the tags.
+
+The result is validated as a whole with the same rules as creation, so changing `type` needs the other fields to agree, and the client sends the cleanup explicitly:
+
+- to a `TRANSFER`: a destination different from the source, `category_id: null`, and no items (`items: []` if there were some);
+- from a `TRANSFER`: `to_account_id: null`; the linked admin fee is removed;
+- between `INCOME` and `OUTCOME`: the category must match the new type or be `null`;
+- `admin_fee` is only accepted when the result is a transfer.
+
+Violations return `400` with the field in `errors`. A future date returns `422 BUSINESS_RULE`. Only accounts that are being changed need to be active and owned (`422` / `404`); editing other fields of a transaction on an archived account is allowed.
+
+`items`, when sent, **replaces the whole list** (`[]` removes all; omit the field to leave them unchanged).
+
+For a transfer, the linked admin fee follows the change in the same database transaction: `admin_fee` greater than 0 updates it or creates it, `0` removes it, and a change of `name`, `date`, or `account_id` is applied to it as well.
+
+Concurrent edits of the same transaction are applied one after the other. Everything runs in a single database transaction.
+
+Response `200`: `{ "transaction": <full object>, "balances_after": { "<account_id>": <balance>, ... }, "warnings": [] }`. `balances_after` lists every account the edit touched (old and new source and destination). A `NEGATIVE_BALANCE` warning is given for a touched account that ends below 0 **and** was made lower by this edit.
+
+An admin fee (a row with `parent_transaction_id`) cannot be edited, deleted, or restored on its own: `422 BUSINESS_RULE`. Trashed, foreign, and unknown transactions return `404`.
 
 ### DELETE `/transactions/:id`
 
-Soft delete: `deleted_at` is set, the balance is restored immediately. Response `204`. A transfer carries its linked admin fee along. With `?permanent=true`, the transaction and Cloudinary images are permanently deleted. Transactions in the trash for more than 30 days are permanently deleted by a daily job.
+Query: `permanent` (`true` or `false`, default `false`; anything else returns `400`). Response `204`.
+
+Without `permanent`: soft delete. `deleted_at` is set, the balance is restored immediately, and a transfer carries its linked admin fee along. Deleting a transaction that is already in the trash returns `404`.
+
+With `?permanent=true`: the transaction is removed for good, together with its items, images, and admin fee, whether it is live or in the trash. The files on Cloudinary are deleted with the image feature. A permanently deleted transaction returns `404` afterwards. Transactions in the trash for more than 30 days are removed by a daily job (not built yet); until then they are already treated as gone: hidden from the trash and not restorable.
 
 ### GET `/transactions/trash`
 
-List of transactions with `deleted_at` and `permanent_delete_at`.
+Query: `cursor`, `limit` (same rules as the list; no other parameters). Response `200`: `data` is an array of the compact objects of the list plus `deleted_at` and `permanent_delete_at` (`deleted_at` + 30 days), newest deletion first, with `pagination: { next_cursor, limit }`. A transfer appears once; its admin fee row is not listed. Only the last 30 days are shown.
 
 ### POST `/transactions/:id/restore`
 
-Response `200` transaction object. Errors: `404` if already permanently deleted; `422` if its account has been deleted.
+Response `200`: the full transaction object (the balance is applied again, and a transfer brings its admin fee back). Errors: `404` if the transaction is not in the trash, was permanently deleted, or has been in the trash for more than 30 days; `422 BUSINESS_RULE` for an admin fee row. Restoring onto an archived account is allowed. The `422` "account deleted" case of the original spec cannot occur: an account that still has transactions (even trashed ones) cannot be deleted.
 
 ### Images
 
