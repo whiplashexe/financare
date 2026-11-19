@@ -509,7 +509,7 @@ describe("POST /transactions: validation and business rules", () => {
     expect((await send([{ name: "x", quantity: 0.001, total_price: 1 }])).status).toBe(201);
   });
 
-  it("400: fields the client may not set, including images for now", async () => {
+  it("400: fields the client may not set", async () => {
     const user = await newUser();
     const account = await createAccount(user);
     const send = (extra: Record<string, unknown>) => create(user, outcome(account.id, extra));
@@ -518,7 +518,6 @@ describe("POST /transactions: validation and business rules", () => {
     expect((await send({ source: "AUTO" })).status).toBe(400);
     expect((await send({ deleted_at: "2026-01-01T00:00:00Z" })).status).toBe(400);
     expect((await send({ parent_transaction_id: "TRANS001" })).status).toBe(400);
-    expect((await send({ images: [] })).status).toBe(400);
   });
 
   it("400: malformed dates", async () => {

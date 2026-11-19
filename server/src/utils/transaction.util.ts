@@ -4,7 +4,9 @@ import { transactionImages } from "../db/schema/transaction.images.js";
 import { transactionItems } from "../db/schema/transaction.items.js";
 import { transactions } from "../db/schema/transactions.js";
 import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
+import { cloudinaryClient } from "../lib/cloudinary.js";
 import { ApiError } from "./api.error.util.js";
+import { loadImages } from "./image.util.js";
 
 export const TRASH_RETENTION_DAYS = 30;
 
@@ -38,6 +40,12 @@ export const transactionSummaryColumns = {
     select count(*) from ${transactionItems}
     where ${transactionItems.transactionId} = ${transactions.id}
   )`.mapWith(Number),
+  thumbnailPublicId: sql<string | null>`(
+    select ${transactionImages.publicId} from ${transactionImages}
+    where ${transactionImages.transactionId} = ${transactions.id}
+    order by ${transactionImages.position}
+    limit 1
+  )`,
 };
 
 export type TransactionRow = {
@@ -69,6 +77,7 @@ export const toTransactionResponse = (
   row: TransactionRow,
   items: ItemRow[],
   adminFee: number | null,
+  images: { id: string; url: string }[],
 ) => ({
   id: row.id,
   type: row.type,
@@ -92,11 +101,15 @@ export const toTransactionResponse = (
     total_price: item.totalPrice,
   })),
   items_total: items.reduce((sum, item) => sum + item.totalPrice, 0),
-  images: [] as { id: string; url: string }[],
+  images,
 });
 
 export const toTransactionSummary = (
-  row: TransactionRow & { imagesCount: number; itemsCount: number },
+  row: TransactionRow & {
+    imagesCount: number;
+    itemsCount: number;
+    thumbnailPublicId: string | null;
+  },
 ) => ({
   id: row.id,
   type: row.type,
@@ -111,7 +124,9 @@ export const toTransactionSummary = (
   source: row.source,
   images_count: row.imagesCount,
   items_count: row.itemsCount,
-  thumbnail_url: null as string | null,
+  thumbnail_url: row.thumbnailPublicId
+    ? cloudinaryClient.thumbnailUrl(row.thumbnailPublicId)
+    : null,
 });
 
 export const loadTransactionDetail = async (
@@ -161,13 +176,16 @@ export const loadTransactionDetail = async (
     adminFee = fee!.total;
   }
 
-  return toTransactionResponse(row, items, adminFee);
+  const images = await loadImages(executor, transactionId);
+
+  return toTransactionResponse(row, items, adminFee, images);
 };
 
 export const toTrashSummary = (
   row: TransactionRow & {
     imagesCount: number;
     itemsCount: number;
+    thumbnailPublicId: string | null;
     deletedAt: Date;
   },
 ) => ({

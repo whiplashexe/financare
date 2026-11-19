@@ -24,7 +24,7 @@ export const transactionImages = pgTable(
     transactionId: varchar("transaction_id", { length: 20 })
       .notNull()
       .references(() => transactions.id, { onDelete: "cascade" }),
-    publicId: varchar("public_id", { length: 20 }),
+    publicId: varchar("public_id", { length: 255 }).notNull().unique(),
     mimeType: varchar("mime_type", { length: 20 }).notNull(),
     size: integer("size").notNull(),
     position: smallint("position").notNull(),

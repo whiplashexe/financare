@@ -57,4 +57,28 @@ transactionRoute.post(
   asyncHandler(TransactionController.restore),
 );
 
+transactionRoute.post(
+  "/:id/images",
+  validate({
+    params: TransactionValidation.PARAMS,
+    body: TransactionValidation.ADD_IMAGE,
+  }),
+  asyncHandler(TransactionController.addImage),
+);
+
+transactionRoute.patch(
+  "/:id/images/order",
+  validate({
+    params: TransactionValidation.PARAMS,
+    body: TransactionValidation.REORDER_IMAGES,
+  }),
+  asyncHandler(TransactionController.reorderImages),
+);
+
+transactionRoute.delete(
+  "/:id/images/:imageId",
+  validate({ params: TransactionValidation.IMAGE_PARAMS }),
+  asyncHandler(TransactionController.removeImage),
+);
+
 export default transactionRoute;

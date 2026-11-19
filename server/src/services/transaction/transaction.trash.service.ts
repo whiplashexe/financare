@@ -1,13 +1,11 @@
 import { and, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { transactionImages } from "../../db/schema/transaction.images.js";
-import { transactionItems } from "../../db/schema/transaction.items.js";
 import { transactions } from "../../db/schema/transactions.js";
 import { TRANSACTION_MESSAGE } from "../../constants/response.message.js";
 import { ApiError } from "../../utils/api.error.util.js";
 import {
   TRASH_RETENTION_DAYS,
-  transactionColumns,
+  transactionSummaryColumns,
 } from "../../utils/transaction.util.js";
 import { TrashQuery } from "../../validations/transaction.validation.js";
 
@@ -40,18 +38,10 @@ export const listTrash = async ({
 
   const rows = await db
     .select({
-      ...transactionColumns,
+      ...transactionSummaryColumns,
       deletedAt: sql<Date>`${transactions.deletedAt}`.mapWith(
         (value) => new Date(value),
       ),
-      imagesCount: sql<number>`(
-        select count(*) from ${transactionImages}
-        where ${transactionImages.transactionId} = ${transactions.id}
-      )`.mapWith(Number),
-      itemsCount: sql<number>`(
-        select count(*) from ${transactionItems}
-        where ${transactionItems.transactionId} = ${transactions.id}
-      )`.mapWith(Number),
     })
     .from(transactions)
     .where(

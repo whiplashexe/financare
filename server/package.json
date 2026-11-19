@@ -25,6 +25,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.23.1",
+    "cloudinary": "^2.11.0",
     "cors": "^2.8.6",
     "drizzle-kit": "^1.0.0-rc.5",
     "drizzle-orm": "^1.0.0-rc.5",

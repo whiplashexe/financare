@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import TransactionService from "../services/transaction/index.js";
 import { ApiResponse } from "../utils/api.response.util.js";
 import { readIdempotencyKey } from "../utils/idempotency.util.js";
-import { TRANSACTION_MESSAGE } from "../constants/response.message.js";
+import {
+  IMAGE_MESSAGE,
+  TRANSACTION_MESSAGE,
+} from "../constants/response.message.js";
 import {
   toTransactionSummary,
   toTrashSummary,
@@ -10,6 +13,8 @@ import {
 import {
   CreateTransactionInput,
   DeleteTransactionQuery,
+  ImageInput,
+  ReorderImagesInput,
   ListTransactionsQuery,
   TrashQuery,
   UpdateTransactionInput,
@@ -96,5 +101,41 @@ export class TransactionController {
       transactionId: req.params.id,
     });
     ApiResponse.ok(res, TRANSACTION_MESSAGE.RESTORED, transaction);
+  };
+
+  static addImage = async (
+    req: Request<{ id: string }, unknown, ImageInput>,
+    res: Response,
+  ) => {
+    const image = await TransactionService.addImage({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+      input: req.body,
+    });
+    ApiResponse.created(res, IMAGE_MESSAGE.ADDED, image);
+  };
+
+  static removeImage = async (
+    req: Request<{ id: string; imageId: string }>,
+    res: Response,
+  ) => {
+    await TransactionService.removeImage({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+      imageId: req.params.imageId,
+    });
+    ApiResponse.noContent(res);
+  };
+
+  static reorderImages = async (
+    req: Request<{ id: string }, unknown, ReorderImagesInput>,
+    res: Response,
+  ) => {
+    const images = await TransactionService.reorderImages({
+      userId: req.user!.id,
+      transactionId: req.params.id,
+      input: req.body,
+    });
+    ApiResponse.ok(res, IMAGE_MESSAGE.REORDERED, images);
   };
 }

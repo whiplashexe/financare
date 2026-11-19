@@ -9,6 +9,7 @@ import templateRoute from "./template.route.js";
 import recurringRoute from "./recurring.route.js";
 import oneTimeRoute from "./onetime.route.js";
 import internalRoute from "./internal.route.js";
+import uploadRoute from "./upload.route.js";
 
 const setupRoutes = (app: Express) => {
   const v1 = Router();
@@ -22,6 +23,7 @@ const setupRoutes = (app: Express) => {
   v1.use("/recurring-plans", recurringRoute);
   v1.use("/one-time-plans", oneTimeRoute);
   v1.use("/internal", internalRoute);
+  v1.use("/uploads", uploadRoute);
   app.use("/api/v1", v1);
 };
 

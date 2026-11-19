@@ -22,6 +22,14 @@ const quantity = z
     message: "quantity allows up to 3 decimals",
   });
 
+export const imageInput = z
+  .object({
+    public_id: z.string().trim().min(1).max(255),
+    mime_type: z.enum(["image/jpeg", "image/png", "image/heic"]),
+    size: z.number().int().min(1).max(5_242_880),
+  })
+  .strict();
+
 const item = z
   .object({
     name: z.string().trim().min(1, "item name is required").max(150),
@@ -59,6 +67,7 @@ export class TransactionValidation {
       plan_id: id.nullable().optional(),
       template_id: id.nullable().optional(),
       items: z.array(item).max(100).optional(),
+      images: z.array(imageInput).max(50).optional(),
     })
     .strict()
     .superRefine((value, ctx) => {
@@ -121,6 +130,26 @@ export class TransactionValidation {
       { message: "source and destination must differ", path: ["to_account_id"] },
     );
 
+  static SIGN = z
+    .object({ count: z.number().int().min(1).max(5) })
+    .strict();
+
+  static ADD_IMAGE = imageInput;
+
+  static REORDER_IMAGES = z
+    .object({
+      ids: z
+        .array(id)
+        .min(1)
+        .max(5)
+        .refine((list) => new Set(list).size === list.length, {
+          message: "ids must not repeat a value",
+        }),
+    })
+    .strict();
+
+  static IMAGE_PARAMS = z.object({ id, imageId: id });
+
   static DELETE_QUERY = z
     .object({
       permanent: z
@@ -179,3 +208,5 @@ export type DeleteTransactionQuery = z.infer<
   typeof TransactionValidation.DELETE_QUERY
 >;
 export type TrashQuery = z.infer<typeof TransactionValidation.TRASH_QUERY>;
+export type ImageInput = z.infer<typeof imageInput>;
+export type ReorderImagesInput = z.infer<typeof TransactionValidation.REORDER_IMAGES>;

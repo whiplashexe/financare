@@ -14,4 +14,9 @@ internalRoute.get(
   asyncHandler(InternalController.markMissedOneTime),
 );
 
+internalRoute.get(
+  "/cron/image-cleanup",
+  asyncHandler(InternalController.cleanupImages),
+);
+
 export default internalRoute;

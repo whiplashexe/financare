@@ -3,6 +3,7 @@ import { db } from "../../db/index.js";
 import { categories } from "../../db/schema/categories.js";
 import { oneTimePlans } from "../../db/schema/one.time.plans.js";
 import { recurringPlans } from "../../db/schema/recurring.plans.js";
+import { transactionImages } from "../../db/schema/transaction.images.js";
 import { transactionItems } from "../../db/schema/transaction.items.js";
 import { transactionTemplates } from "../../db/schema/transaction.templates.js";
 import { transactions } from "../../db/schema/transactions.js";
@@ -13,6 +14,7 @@ import {
 import { ApiError } from "../../utils/api.error.util.js";
 import { accountBalance, findOwnedAccount } from "../../utils/account.util.js";
 import { insertAdminFee } from "../../utils/transaction.fee.util.js";
+import { verifyImages, type VerifiedImage } from "../../utils/image.util.js";
 import {
   findStoredResponse,
   storeResponse,
@@ -30,7 +32,7 @@ export const createInTx = async (
   tx: DbTx,
   userId: string,
   input: CreateTransactionInput,
-  options: { source?: "MANUAL" | "AUTO" } = {},
+  options: { source?: "MANUAL" | "AUTO"; images?: VerifiedImage[] } = {},
 ) => {
   if (input.date && input.date.getTime() > Date.now() + CLOCK_SKEW_MS) {
     throw ApiError.businessRule(TRANSACTION_MESSAGE.FUTURE_DATE);
@@ -159,6 +161,18 @@ export const createInTx = async (
     );
   }
 
+  if (options.images && options.images.length > 0) {
+    await tx.insert(transactionImages).values(
+      options.images.map((image, position) => ({
+        transactionId: created!.id,
+        publicId: image.publicId,
+        mimeType: image.mimeType,
+        size: image.size,
+        position,
+      })),
+    );
+  }
+
   const warnings: Warning[] = [];
   const sourceAfter = await accountBalance(tx, input.account_id);
   if (input.type !== "INCOME" && sourceAfter < 0) {
@@ -195,8 +209,10 @@ export const createTransaction = async ({
   userId: string;
   input: CreateTransactionInput;
   idempotencyKey?: string | undefined;
-}) =>
-  db.transaction(async (tx) => {
+}) => {
+  const images = await verifyImages(userId, input.images ?? []);
+
+  return db.transaction(async (tx) => {
     if (idempotencyKey) {
       const stored = await findStoredResponse(
         tx,
@@ -207,7 +223,7 @@ export const createTransaction = async ({
       if (stored) return { replayed: true as const, data: stored };
     }
 
-    const data = await createInTx(tx, userId, input);
+    const data = await createInTx(tx, userId, input, { images });
 
     if (idempotencyKey) {
       await storeResponse(tx, userId, idempotencyKey, IDEMPOTENCY_ROUTE, data);
@@ -215,3 +231,4 @@ export const createTransaction = async ({
 
     return { replayed: false as const, data };
   });
+};

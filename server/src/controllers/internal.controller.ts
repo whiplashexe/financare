@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import type { Request, Response } from "express";
+import { cleanupOrphanImages } from "../services/image.cleanup.service.js";
 import OneTimeService from "../services/onetime/index.js";
 import RecurringService from "../services/recurring/index.js";
 import { ApiError } from "../utils/api.error.util.js";
@@ -31,5 +32,11 @@ export class InternalController {
     assertCronSecret(req);
     const result = await OneTimeService.markMissed();
     ApiResponse.ok(res, "One-time plans processed", result);
+  };
+
+  static cleanupImages = async (req: Request, res: Response) => {
+    assertCronSecret(req);
+    const result = await cleanupOrphanImages();
+    ApiResponse.ok(res, "Orphan images processed", result);
   };
 }

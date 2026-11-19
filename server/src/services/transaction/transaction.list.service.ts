@@ -1,12 +1,11 @@
 import { and, desc, eq, isNull, or, sql, type SQL } from "drizzle-orm";
 import { db } from "../../db/index.js";
-import { transactionImages } from "../../db/schema/transaction.images.js";
 import { transactionItems } from "../../db/schema/transaction.items.js";
 import { transactions } from "../../db/schema/transactions.js";
 import { users } from "../../db/schema/users.js";
 import { TRANSACTION_MESSAGE } from "../../constants/response.message.js";
 import { ApiError } from "../../utils/api.error.util.js";
-import { transactionColumns } from "../../utils/transaction.util.js";
+import { transactionSummaryColumns } from "../../utils/transaction.util.js";
 import { ListTransactionsQuery } from "../../validations/transaction.validation.js";
 
 type Bound = NonNullable<ListTransactionsQuery["from"]>;
@@ -85,17 +84,7 @@ export const listTransactions = async ({
   ];
 
   const rows = await db
-    .select({
-      ...transactionColumns,
-      imagesCount: sql<number>`(
-        select count(*) from ${transactionImages}
-        where ${transactionImages.transactionId} = ${transactions.id}
-      )`.mapWith(Number),
-      itemsCount: sql<number>`(
-        select count(*) from ${transactionItems}
-        where ${transactionItems.transactionId} = ${transactions.id}
-      )`.mapWith(Number),
-    })
+    .select(transactionSummaryColumns)
     .from(transactions)
     .where(and(...conditions))
     .orderBy(

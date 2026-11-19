@@ -8,3 +8,5 @@ export const FORGOT_PASSWORD_LIMIT = {
   limit: 3,
   windowMs: 15 * 60 * 1000,
 } as const;
+
+export const UPLOAD_SIGN_LIMIT = { limit: 30, windowMs: 60 * 60 * 1000 } as const;

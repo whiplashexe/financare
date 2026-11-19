@@ -378,9 +378,12 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 }
 ```
 
-- The signature is short-lived (± 10 minutes) and bound to `public_id`, `type`, and `folder`.
-- The client uploads to `https://api.cloudinary.com/v1_1/<cloud_name>/image/upload`, then sends the resulting `public_id` to the transaction API.
-- Images that are uploaded but never attached to a transaction are cleaned up by a scheduled job.
+- `count` is required, an integer from 1 to 5 (otherwise `400`, as for unknown fields). The response also has `upload_url`. Each entry of `signatures` is a `public_id` issued by the server, always shaped `financare/<user_id>/<uuid>`, with its own signature.
+- A signature is the SHA-1 Cloudinary expects, computed over `allowed_formats`, `public_id`, `timestamp`, and `type` (and the API secret, which is never sent to the client). The client must upload with exactly those parameters plus `api_key` and `signature` to `upload_url`; a changed parameter makes Cloudinary answer `401`. Its lifetime is the one Cloudinary enforces on `timestamp` (about an hour), not a shorter one chosen by the server.
+- The files are stored with `type: authenticated`, so they cannot be opened without a signed URL. `allowed_formats` is enforced by Cloudinary at upload; the 5 MB limit cannot be set on a signed upload, so the server checks the real size when the image is attached (below).
+- Rate limit: 30 signature requests per hour per user (`429` with `Retry-After`), so the storage cannot be filled with unattached uploads.
+- The client then sends the resulting `public_id` to the transaction API. An image is attached exactly once; a `public_id` that is not shaped like the ones issued for the calling user (including another user's id) is refused like one that was never uploaded.
+- Images that are uploaded but never attached to a transaction are cleaned up by a scheduled job: `GET /internal/cron/image-cleanup` (guarded by `CRON_SECRET` like the other jobs) deletes uploads older than 24 hours that no transaction uses, and reports `{ "scanned", "deleted", "publicIds" }`.
 
 ---
 
@@ -415,7 +418,7 @@ Request: `{ "count": 2 }` (1–5). Response `200`:
 | `tags` | string[] | No | |
 | `plan_id` | string | No | ID of a recurring/one-time plan |
 | `template_id` | string | No | Write-only. ID of the template this transaction was created from; only used to increment the template's `use_count`. Not stored on the transaction |
-| `images` | array | No | Max 5: `{ public_id, mime_type, size }` |
+| `images` | array | No | Max 5: `{ public_id, mime_type, size }`. In the response each item is `{ id, url }` |
 | `items` | array | No | Max 100, `INCOME`/`OUTCOME` only (`400` for `TRANSFER`). Each: `{ name (1–150), quantity (> 0, default 1, up to 3 decimals), unit? (≤ 20), total_price (int ≥ 0) }`. The array order is the display order. Informational: does not change `amount` or balances. The response also includes `items_total` (sum of `total_price`) so the client can show the difference from `amount` |
 | `source` | enum | Read-only | `MANUAL` / `AUTO` |
 
@@ -468,7 +471,7 @@ Notes:
 - `plan_id` is matched against the user's recurring plans, then one-time plans; an unknown id returns `404`. For now it only links the transaction to the plan.
 - `template_id` increments the template's `use_count` and sets `last_used_at`; an unknown id returns `404`.
 - The `NEGATIVE_BALANCE` warning is `{ "code", "account_id", "balance_after" }` and is only given for an outcome or a transfer that leaves the source account below 0.
-- `images` is not accepted yet (`400`); it arrives with the image upload endpoints.
+- `images`: each `public_id` must come from `POST /uploads/sign` for this user. Before anything is written, the server asks Cloudinary for the real size and format of every image and stores **those** values; the `mime_type` and `size` sent by the client are only checked for shape (`mime_type` one of `image/jpeg`, `image/png`, `image/heic`; `size` 1 to 5,242,880). More than 5 images return `422 BUSINESS_RULE` (more than 50, or the same `public_id` twice, `400`). `422` also for an image that was not uploaded or is not the user's, for a file over 5 MB, and for a format that is not allowed (those two files are deleted from Cloudinary). An image already attached to a transaction returns `409`. If the transaction fails, no image is attached. A transfer can have images too. The URLs in a replayed `Idempotency-Key` response are the ones of the first response and may have expired; `GET /transactions/:id` gives fresh ones.
 
 | Condition                            | Response                                                 |
 | ------------------------------------ | -------------------------------------------------------- |
@@ -481,7 +484,7 @@ Notes:
 
 ### GET `/transactions/:id`
 
-Full object; `images[].url` is a signed Cloudinary URL with a short validity (± 1 hour). Includes `items` (in display order), `items_total`, `admin_fee`, `plan_id`, and `parent_transaction_id`. A transaction in the trash, another user's transaction, and an unknown id all return the same `404`.
+Full object; `images[].url` is a signed Cloudinary URL that stops working after one hour (an `expires_at` signed into the URL; after that Cloudinary answers `401`, and a modified URL also answers `401`). Images are listed in display order. The client asks for a fresh URL by calling this endpoint again. Includes `items` (in display order), `items_total`, `admin_fee`, `plan_id`, and `parent_transaction_id`. A transaction in the trash, another user's transaction, and an unknown id all return the same `404`.
 
 ### PATCH `/transactions/:id`
 
@@ -512,7 +515,7 @@ Query: `permanent` (`true` or `false`, default `false`; anything else returns `4
 
 Without `permanent`: soft delete. `deleted_at` is set, the balance is restored immediately, and a transfer carries its linked admin fee along. Deleting a transaction that is already in the trash returns `404`.
 
-With `?permanent=true`: the transaction is removed for good, together with its items, images, and admin fee, whether it is live or in the trash. The files on Cloudinary are deleted with the image feature. A permanently deleted transaction returns `404` afterwards. Transactions in the trash for more than 30 days are removed by a daily job (not built yet); until then they are already treated as gone: hidden from the trash and not restorable.
+With `?permanent=true`: the transaction is removed for good, together with its items, images, and admin fee, whether it is live or in the trash. The image files on Cloudinary are deleted too (after the database commit; if Cloudinary fails, the file is left for the cleanup job). Moving to the trash keeps the files, and a restore brings the images back. A permanently deleted transaction returns `404` afterwards. Transactions in the trash for more than 30 days are removed by a daily job (not built yet); until then they are already treated as gone: hidden from the trash and not restorable.
 
 ### GET `/transactions/trash`
 
@@ -524,9 +527,13 @@ Response `200`: the full transaction object (the balance is applied again, and a
 
 ### Images
 
-- `POST /transactions/:id/images` — Request: `{ "public_id", "mime_type", "size" }`. Response `201` image object. Error `422` if the total is already 5.
-- `DELETE /transactions/:id/images/:imageId` — Response `204`; the file on Cloudinary is deleted.
-- `PATCH /transactions/:id/images/order` — Request: `{ "ids": ["i2", "i1"] }`. Response `200`.
+All three act on a live transaction of the caller only (a trashed, foreign, or unknown transaction returns `404`; an admin fee row returns `422 BUSINESS_RULE`).
+
+- `POST /transactions/:id/images` — Request: `{ "public_id", "mime_type", "size" }`, with the same checks as the `images` of `POST /transactions`. Response `201`: `{ "data": { "id", "url" } }`, added at the end. Error `422` if the total is already 5 (simultaneous requests never exceed 5), `409` if the image is already attached.
+- `DELETE /transactions/:id/images/:imageId` — Response `204`; the file on Cloudinary is deleted after the record, positions stay contiguous so a new image always fits, and an image that is not on this transaction returns `404`.
+- `PATCH /transactions/:id/images/order` — Request: `{ "ids": ["IMG002", "IMG001"] }`, which must list every image of the transaction exactly once (`400` otherwise). Response `200`: `data` is the array of `{ id, url }` in the new order.
+
+In the compact objects of the list and the trash, `images_count` is the real count and `thumbnail_url` is a signed 200x200 JPEG of the first image, or `null`. Unlike `images[].url`, a thumbnail URL does not expire (Cloudinary cannot put an expiry on a transformed delivery URL without its token feature), but it is signed, so it cannot be guessed or changed, and it only shows a small crop.
 
 ---
 

@@ -1,0 +1,75 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "da3fc9f0-b25b-4ca9-8b62-2864fd312db7",
+  "prevIds": [
+    "e65e274e-da44-40f9-a4cd-bae323225c70"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "transaction_image",
+        "public_id"
+      ],
+      "writes": [
+        "s|colprop|public.transaction_image.public_id.notNull",
+        "s|colprop|public.transaction_image.public_id.type",
+        "s|colprop|public.transaction_image.public_id.default"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|col|public.transaction_image.public_id"
+      ],
+      "sqlHash": "0d1d5a363890d372"
+    },
+    {
+      "statementType": "add_unique",
+      "statementTarget": [
+        "table",
+        "public",
+        "transaction_image"
+      ],
+      "writes": [
+        "s|uq|public.transaction_image.transaction_image_public_id_key",
+        "n|uq|public.transaction_image.transaction_image_public_id_key",
+        "e|uq|public.transaction_image.transaction_image_public_id_key",
+        "n|con|public.transaction_image.transaction_image_public_id_key",
+        "n|rel|public.transaction_image_public_id_key"
+      ],
+      "reads": [
+        "n|tbl|public.transaction_image",
+        "n|sch|public",
+        "n|col|public.transaction_image.public_id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "transaction_image",
+        "name": "transaction_image_public_id_key",
+        "nameExplicit": false,
+        "columns": [
+          "public_id"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"transaction_image\",\"public_id\"]",
+      "set": {
+        "type": "varchar(255)",
+        "notNull": true
+      }
+    }
+  ]
+}

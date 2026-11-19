@@ -192,3 +192,19 @@ export const ONE_TIME_MESSAGE = {
     "An account is needed to record the transaction: send account_id or set a source account",
   DUPLICATE_OFFSETS: "reminder_offsets must not repeat a value",
 } as const;
+
+export const IMAGE_MESSAGE = {
+  SIGNED: "Upload signature created successfully",
+  ADDED: "Image added successfully",
+  REMOVED: "Image removed successfully",
+  REORDERED: "Images reordered successfully",
+  LIMIT: "A transaction can have at most 5 images",
+  NOT_UPLOADED: "The image was not uploaded",
+  TOO_LARGE: "The image is larger than 5 MB",
+  BAD_FORMAT: "The image format is not allowed",
+  NOT_FOUND: "Image not found",
+  DUPLICATE: "The same image is listed twice",
+  ORDER_MISMATCH: "ids must list every image of the transaction exactly once",
+  SIGN_LIMIT: "Too many upload signatures requested, please try again later",
+  ALREADY_USED: "The image is already attached to a transaction",
+} as const;
