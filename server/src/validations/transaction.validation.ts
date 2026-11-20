@@ -1,4 +1,5 @@
 import z from "zod";
+import { rangeOrdered } from "../utils/date.range.util.js";
 
 export const MAX_AMOUNT = 999_999_999_999;
 
@@ -45,7 +46,7 @@ const item = z
   })
   .strict();
 
-const dayOrInstant = z.union([
+export const dayOrInstant = z.union([
   z.iso.date().transform((value) => ({ kind: "date" as const, value })),
   instant.transform((value) => ({ kind: "instant" as const, value })),
 ]);
@@ -185,16 +186,10 @@ export class TransactionValidation {
       limit: z.coerce.number().int().min(1).max(100).default(20),
     })
     .strict()
-    .refine(
-      (query) => {
-        const { from, to } = query;
-        if (!from || !to || from.kind !== to.kind) return true;
-        return from.kind === "date"
-          ? from.value <= (to.value as string)
-          : from.value.getTime() <= (to.value as Date).getTime();
-      },
-      { message: "from must not be after to", path: ["from"] },
-    );
+    .refine((query) => rangeOrdered(query.from, query.to), {
+      message: "from must not be after to",
+      path: ["from"],
+    });
 
   static PARAMS = z.object({ id });
 }

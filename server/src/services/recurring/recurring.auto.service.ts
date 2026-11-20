@@ -1,3 +1,7 @@
+import {
+  resolveRecurringReminders,
+  syncRecurringReminders,
+} from "../../utils/reminder.util.js";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { planOccurrences } from "../../db/schema/plan.occurrences.js";
@@ -90,9 +94,12 @@ const processPlan = (planId: string, userId: string): Promise<PlanResult> =>
       }
 
       const next = await advancePlan(tx, plan, dueDate);
+      await resolveRecurringReminders(tx, planId, dueDate);
       plan = await findOwnedPlan(tx, userId, planId);
       if (next === null) break;
     }
+
+    await syncRecurringReminders(tx, planId);
 
     return { planId, recorded };
   });

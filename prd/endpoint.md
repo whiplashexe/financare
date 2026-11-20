@@ -847,16 +847,29 @@ Object: `{ "id", "plan_type": "RECURRING" | "ONE_TIME", "plan_id", "due_date", "
 }
 ```
 
-- `recent_transactions`: the 5 most recent. `upcoming_reminders`: the next 7 days.
-- Transfers are not included in `month_summary`.
+All endpoints of this section require authentication and only ever read the caller's data. Everything is computed on every call from the live data.
+
+- `total_balance`: active accounts with `include_in_total`, the same figure as `GET /accounts`. `accounts`: the **active** accounts only, as `{ id, name, type, current_balance, include_in_total }`, in creation order. The server fills the balances even when `hide_balance` is on; hiding is done by the client.
+- `month_summary`: `{ month, income, outcome, net }` for the current calendar month **in the user's timezone** (`month` is `YYYY-MM`, `net = income - outcome`). Transfers are not included, a transfer's admin fee is counted as outcome, and the trash is left out.
+- `recent_transactions`: the 5 most recent by `date` (trashed ones excluded), as the compact objects of `GET /transactions`.
+- `upcoming_reminders`: what falls due from today up to 7 days ahead (both ends included), soonest first then by name, at most 20. It lists `ACTIVE` recurring plans by their `next_due_date` and `PLANNED` one-time plans by their `date`. Each item is `{ plan_type: "RECURRING" | "ONE_TIME", plan_id, name, due, type, amount, funding }`; `amount` is the plan amount (the `target_amount` for a one-time plan), and `funding` is `{ available, shortfall, sufficient }` for a one-time plan and for a recurring outcome (checked against its account), and `null` for a recurring income. These come straight from the plans for now: they are not read from the `reminder` table, which belongs to the notification feature.
+- `action_needed`: what is waiting for the user, oldest first, at most 20. Each item is `{ kind, plan_type, plan_id, name, due }` with `kind`: `RECURRING_DUE` (an `ACTIVE` plan without `auto_record` whose `next_due_date` is today or earlier), `ACCOUNT_CHANGE_NEEDED` (an `ACTIVE` recurring plan whose account was archived), or `ONE_TIME_MISSED` (a `MISSED` one-time plan). An item disappears once the user confirms, skips, reschedules, or changes the account.
 
 ### Reports
 
 - `outcome-by-category` → `[ { "category_id", "name", "total", "percent" } ]`
 - `monthly-trend` → `[ { "month": "2026-11", "income", "outcome" } ]`
-- `account-flow` → `[ { "account_id", "income", "outcome", "transfer_in", "transfer_out" } ]`
+- `account-flow` → `[ { "account_id", "name", "income", "outcome", "transfer_in", "transfer_out" } ]`
 
-Transfers only appear in `account-flow`; admin fees are counted as outcome in the "Admin Fee" category.
+Transfers only appear in `account-flow`; admin fees are counted as outcome in the "Admin Fee" category. Trashed transactions are never counted. Response `200` with `data` as the array shown. Unknown query parameters return `400`.
+
+**Range** (`outcome-by-category` and `account-flow`): `from` and `to` follow the rules of `GET /transactions`: an ISO 8601 instant with an offset (exact, inclusive) or a date-only `YYYY-MM-DD` read in the user's timezone (`to` includes the whole day). With neither given, the range is the current month in the user's timezone; with only one, the other end is open. A bad value or `from` after `to` returns `400`.
+
+**`outcome-by-category`**: outcome only, grouped by category and sorted by `total`, biggest first (ties by name). `percent` is the share of the range's total outcome, rounded to one decimal. Outcome without a category is one group with `category_id: null` and `name: "Uncategorized"`. No outcome in the range gives `[]`.
+
+**`monthly-trend`**: `months` from 1 to 24 (default 6, otherwise `400`), the current month included, oldest first. Months are calendar months in the user's timezone, and a month without transactions is listed with zeros, so the array always has exactly `months` entries.
+
+**`account-flow`**: for every account, `income` and `outcome` of its own transactions and `transfer_in` and `transfer_out` of the transfers it received or sent (a transfer shows on both accounts); a transfer's admin fee is part of the source account's `outcome`. Every active account is listed, with zeros if it had no activity; an archived account is listed only if it had activity in the range. `account_id` narrows it to one account (`404` for an unknown or foreign one).
 
 ---
 
@@ -874,6 +887,28 @@ Triggered by the scheduler (cron/queue) and protected by an internal secret, not
 | Clean up tokens           | Daily        | Delete expired refresh tokens                                                             |
 | Balance consistency check | Periodic     | Compare computed balance against the cache if present                                     |
 | Delete account            | Per queue    | Deletes user data and their Cloudinary folder                                             |
+
+Built so far, each as `GET` with `Authorization: Bearer <CRON_SECRET>` (the secret must be at least 16 characters, otherwise the endpoint always answers `401`):
+
+- `/internal/cron/recurring-auto-record`: auto-record (see Recurring Plans).
+- `/internal/cron/one-time-plans-missed`: mark missed (see One-Time Plans).
+- `/internal/cron/image-cleanup`: clean up orphan images (see Image Upload).
+- `/internal/cron/trash-purge`: permanently deletes transactions trashed more than 30 days ago, including their Cloudinary files.
+- `/internal/cron/expired-cleanup`: removes expired refresh tokens, password reset tokens, idempotency keys (older than 24 hours) and rate limit rows.
+- `/internal/cron/account-purge`: permanently deletes accounts marked as deleted (transactions, plans, accounts, user) and the Cloudinary folder `financare/<user_id>/`.
+- `/internal/cron/reminders`: delivers due reminders (see Reminders).
+- `/internal/cron/tick`: frequent job, runs recurring auto-record and reminder delivery. Should run every minute.
+- `/internal/cron/daily`: daily job, runs mark missed, trash purge, expired cleanup, image cleanup and account purge. One failing step does not stop the others; the response reports each step.
+
+Scheduling: `vercel.json` registers only `/internal/cron/daily` (`0 17 * * *`, 00:00 WIB), which is allowed on the Hobby plan. `/internal/cron/tick` needs a one-minute schedule, which Vercel only offers on Pro; on Hobby call it from an external scheduler (any service that can send a `GET` with the bearer header). Until it is scheduled, reminders are not delivered and auto-record only runs when called manually.
+
+Reminder delivery notes (not verified against real services; push uses the FCM HTTP v1 API configured with `FCM_SERVICE_ACCOUNT`, email uses Resend configured with `RESEND_API_KEY` and `MAIL_FROM`; both are optional and the features degrade without them):
+
+- Reminders are created when a plan is created, updated, resumed or when the user's timezone or send time changes; one per `reminder_offsets` entry at `notif_send_time` in the user's timezone. Pausing, completing or cancelling a plan removes unsent reminders.
+- Due reminders are grouped into one notification per user per run, with `reminder_ids` and deep link `financare://action-needed`.
+- Quiet hours defer delivery; push is used when enabled and a device exists, otherwise email when `email_fallback` is on, otherwise the reminder is `SKIPPED`.
+- A failed attempt is retried with exponential backoff (1, 2, 4, 8 minutes); the fifth failed attempt marks it `FAILED`. Tokens rejected by FCM are deleted.
+- With `hide_balance` on, notification text has no balance figures.
 
 ---
 

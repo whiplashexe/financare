@@ -6,19 +6,8 @@ import { users } from "../../db/schema/users.js";
 import { TRANSACTION_MESSAGE } from "../../constants/response.message.js";
 import { ApiError } from "../../utils/api.error.util.js";
 import { transactionSummaryColumns } from "../../utils/transaction.util.js";
+import { lowerBound, upperBound } from "../../utils/date.range.util.js";
 import { ListTransactionsQuery } from "../../validations/transaction.validation.js";
-
-type Bound = NonNullable<ListTransactionsQuery["from"]>;
-
-const lowerBound = (bound: Bound, timezone: string): SQL =>
-  bound.kind === "date"
-    ? sql`${transactions.date} >= (${bound.value}::date)::timestamp at time zone ${timezone}`
-    : sql`${transactions.date} >= ${bound.value.toISOString()}::timestamptz`;
-
-const upperBound = (bound: Bound, timezone: string): SQL =>
-  bound.kind === "date"
-    ? sql`${transactions.date} < ((${bound.value}::date + 1)::timestamp at time zone ${timezone})`
-    : sql`${transactions.date} <= ${bound.value.toISOString()}::timestamptz`;
 
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, (m) => `\\${m}`);
 
@@ -74,8 +63,8 @@ export const listTransactions = async ({
           )
         )`
       : undefined,
-    query.from ? lowerBound(query.from, timezone) : undefined,
-    query.to ? upperBound(query.to, timezone) : undefined,
+    query.from ? lowerBound(transactions.date, query.from, timezone) : undefined,
+    query.to ? upperBound(transactions.date, query.to, timezone) : undefined,
     query.cursor
       ? sql`(${transactions.date}, length(${transactions.id}), ${transactions.id}) < (
           select t.date, length(t.id), t.id from ${transactions} t where t.id = ${query.cursor}

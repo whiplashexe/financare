@@ -1,3 +1,4 @@
+import { syncRecurringReminders } from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { categories } from "../../db/schema/categories.js";
@@ -63,6 +64,8 @@ export const createPlan = async ({
       nextDueDate: input.start_date,
     })
     .returning({ id: recurringPlans.id });
+
+  await syncRecurringReminders(db, created!.id);
 
   return findOwnedPlan(db, userId, created!.id);
 };

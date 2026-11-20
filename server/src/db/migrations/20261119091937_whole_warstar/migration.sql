@@ -1,0 +1,1 @@
+ALTER TABLE "reminder" RENAME COLUMN "chanel" TO "channel";

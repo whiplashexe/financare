@@ -1,3 +1,7 @@
+import {
+  clearRecurringReminders,
+  syncRecurringReminders,
+} from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { recurringPlans } from "../../db/schema/recurring.plans.js";
@@ -39,6 +43,8 @@ export const pausePlan = async ({
       .set({ status: "PAUSED" })
       .where(eq(recurringPlans.id, planId));
 
+    await clearRecurringReminders(tx, planId);
+
     return findOwnedPlan(tx, userId, planId);
   });
 
@@ -67,6 +73,8 @@ export const resumePlan = async ({
         nextDueDate: ended ? plan.nextDueDate : nextDueDate,
       })
       .where(eq(recurringPlans.id, planId));
+
+    await syncRecurringReminders(tx, planId);
 
     return findOwnedPlan(tx, userId, planId);
   });

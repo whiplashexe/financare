@@ -43,6 +43,7 @@ export type CloudinaryClient = {
   sign(userId: string, count: number): UploadSignature;
   verify(publicIds: string[]): Promise<Map<string, UploadedAsset>>;
   remove(publicIds: string[]): Promise<void>;
+  removeByPrefix(prefix: string): Promise<void>;
   imageUrl(publicId: string, mimeType: string): string;
   thumbnailUrl(publicId: string): string;
   listAll(prefix: string): Promise<ListedAsset[]>;
@@ -124,6 +125,23 @@ export const cloudinaryClient: CloudinaryClient = {
         });
       } catch (error) {
         logger.warn("cloudinary delete failed", { error: String(error) });
+      }
+    }
+  },
+
+  async removeByPrefix(prefix) {
+    configure();
+
+    for (let round = 0; round < MAX_LIST_PAGES; round++) {
+      try {
+        const result = await cloudinary.api.delete_resources_by_prefix(prefix, {
+          type: "authenticated",
+          resource_type: "image",
+        });
+        if (!result.partial) return;
+      } catch (error) {
+        logger.warn("cloudinary delete by prefix failed", { error: String(error) });
+        return;
       }
     }
   },

@@ -7,6 +7,7 @@ const original = { ...cloudinaryClient };
 export const fakeCloudinary = {
   assets: new Map<string, Asset>(),
   removed: [] as string[],
+  removedPrefixes: [] as string[],
 
   install() {
     Object.assign(cloudinaryClient, {
@@ -20,6 +21,12 @@ export const fakeCloudinary = {
         for (const id of ids) {
           this.removed.push(id);
           this.assets.delete(id);
+        }
+      },
+      removeByPrefix: async (prefix: string) => {
+        this.removedPrefixes.push(prefix);
+        for (const id of [...this.assets.keys()]) {
+          if (id.startsWith(prefix)) this.assets.delete(id);
         }
       },
       imageUrl: (publicId: string, mimeType: string) =>
@@ -39,6 +46,7 @@ export const fakeCloudinary = {
   reset() {
     this.assets.clear();
     this.removed.length = 0;
+    this.removedPrefixes.length = 0;
   },
 
   upload(publicId: string, options: { bytes?: number; format?: string; ageHours?: number } = {}) {

@@ -1,3 +1,4 @@
+import { rescheduleUserReminders } from "../../utils/reminder.util.js";
 import { and, eq, isNull } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { users } from "../../db/schema/users.js";
@@ -23,5 +24,8 @@ export const updateProfile = async ({
     .returning(profileColumns);
 
   if (!row) throw ApiError.unauthorized(AUTH_MESSAGE.TOKEN_INVALID);
+
+  if (input.timezone !== undefined) await rescheduleUserReminders(db, userId);
+
   return row;
 };

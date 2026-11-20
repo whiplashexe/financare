@@ -1,3 +1,7 @@
+import {
+  clearOneTimeReminders,
+  scheduleMissedFollowUp,
+} from "../../utils/reminder.util.js";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { oneTimePlans } from "../../db/schema/one.time.plans.js";
@@ -17,6 +21,11 @@ export const markMissedPlans = async () => {
       ),
     )
     .returning({ id: oneTimePlans.id });
+
+  for (const row of rows) {
+    await clearOneTimeReminders(db, row.id);
+    await scheduleMissedFollowUp(db, row.id);
+  }
 
   return { missed: rows.length, planIds: rows.map((row) => row.id) };
 };

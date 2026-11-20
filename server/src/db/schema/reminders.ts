@@ -50,7 +50,7 @@ export const reminders = pgTable(
     dueDate: date("due_date", { mode: "string" }).notNull(),
     scheduledAt: timestamp("scheduled_at", { withTimezone: true }).notNull(),
     sentAt: timestamp("sent_at", { withTimezone: true }),
-    channel: reminderChannelEnum("chanel").notNull().default("PUSH"),
+    channel: reminderChannelEnum("channel").notNull().default("PUSH"),
     status: reminderStatusEnum("status").notNull().default("SCHEDULED"),
     attempts: integer("attempts").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })

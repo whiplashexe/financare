@@ -1,0 +1,39 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "b7ea719e-c7c1-4742-95e2-e62db07a21f7",
+  "prevIds": [
+    "8b547705-06da-468b-a496-af24949e2daa"
+  ],
+  "footprints": [
+    {
+      "statementType": "rename_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "reminder",
+        "chanel"
+      ],
+      "writes": [
+        "s|col|public.reminder.chanel",
+        "n|col|public.reminder.chanel",
+        "s|col|public.reminder.channel",
+        "n|col|public.reminder.channel"
+      ],
+      "reads": [
+        "n|tbl|public.reminder",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "rename",
+      "key": "columns\u0000[\"public\",\"reminder\",\"chanel\"]",
+      "set": {
+        "name": "channel"
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { syncOneTimeReminders } from "../../utils/reminder.util.js";
 import { db } from "../../db/index.js";
 import { oneTimePlans } from "../../db/schema/one.time.plans.js";
 import {
@@ -42,6 +43,8 @@ export const createOneTime = async ({
       reminderOffsets: input.reminder_offsets,
     })
     .returning({ id: oneTimePlans.id });
+
+  await syncOneTimeReminders(db, created!.id);
 
   return presentOneTime(db, userId, created!.id);
 };

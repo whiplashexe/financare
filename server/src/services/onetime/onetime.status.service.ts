@@ -1,3 +1,7 @@
+import {
+  clearOneTimeReminders,
+  resolveOneTimeReminders,
+} from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { oneTimePlans } from "../../db/schema/one.time.plans.js";
@@ -71,6 +75,9 @@ export const completeOneTime = async ({
       .set({ status: "DONE" })
       .where(eq(oneTimePlans.id, planId));
 
+    await clearOneTimeReminders(tx, planId);
+    await resolveOneTimeReminders(tx, planId);
+
     return { plan: await presentOneTime(tx, userId, planId), ...recorded };
   });
 
@@ -93,6 +100,9 @@ export const cancelOneTime = async ({
         .update(oneTimePlans)
         .set({ status: "CANCELLED" })
         .where(eq(oneTimePlans.id, planId));
+
+      await clearOneTimeReminders(tx, planId);
+      await resolveOneTimeReminders(tx, planId);
     }
 
     return presentOneTime(tx, userId, planId);

@@ -1,3 +1,4 @@
+import { syncRecurringReminders } from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { categories } from "../../db/schema/categories.js";
@@ -95,6 +96,8 @@ export const updatePlan = async ({
         ...(input.auto_record !== undefined && { autoRecord: input.auto_record }),
       })
       .where(eq(recurringPlans.id, planId));
+
+    await syncRecurringReminders(tx, planId);
 
     return findOwnedPlan(tx, userId, planId);
   });

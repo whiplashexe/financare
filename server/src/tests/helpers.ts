@@ -9,9 +9,10 @@ import { accounts } from "../db/schema/accounts.js";
 import { transactions } from "../db/schema/transactions.js";
 import { recurringPlans } from "../db/schema/recurring.plans.js";
 import { oneTimePlans } from "../db/schema/one.time.plans.js";
+import { reminders } from "../db/schema/reminders.js";
 import { transactionTemplates } from "../db/schema/transaction.templates.js";
 import { generateOpaqueToken } from "../utils/token.util.js";
-import { eq, inArray, like } from "drizzle-orm";
+import { and, eq, inArray, like } from "drizzle-orm";
 
 const octet = () => Math.floor(Math.random() * 254) + 1;
 
@@ -253,3 +254,42 @@ export const oneTimeRow = async (id: string) => {
     .where(eq(oneTimePlans.id, id));
   return row!;
 };
+
+export const insertReminder = async (options: {
+  userId: string;
+  recurringPlanId?: string;
+  oneTimePlanId?: string;
+  dueDate: string;
+  scheduledAt?: Date;
+  status?: "SCHEDULED" | "SENT" | "ACTED" | "SNOOZED" | "SKIPPED" | "FAILED";
+  attempts?: number;
+}) => {
+  const [row] = await db
+    .insert(reminders)
+    .values({
+      userId: options.userId,
+      recurringPlanId: options.recurringPlanId ?? null,
+      oneTimePlanId: options.oneTimePlanId ?? null,
+      dueDate: options.dueDate,
+      scheduledAt: options.scheduledAt ?? new Date(Date.now() - 60_000),
+      status: options.status ?? "SCHEDULED",
+      attempts: options.attempts ?? 0,
+    })
+    .returning({ id: reminders.id });
+  return row!.id;
+};
+
+export const reminderRow = async (id: string) => {
+  const [row] = await db.select().from(reminders).where(eq(reminders.id, id));
+  return row!;
+};
+
+export const remindersOfPlan = (plan: { recurringPlanId?: string; oneTimePlanId?: string }) =>
+  db
+    .select()
+    .from(reminders)
+    .where(
+      plan.recurringPlanId
+        ? eq(reminders.recurringPlanId, plan.recurringPlanId)
+        : and(eq(reminders.oneTimePlanId, plan.oneTimePlanId!)),
+    );

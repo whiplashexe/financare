@@ -208,3 +208,10 @@ export const IMAGE_MESSAGE = {
   SIGN_LIMIT: "Too many upload signatures requested, please try again later",
   ALREADY_USED: "The image is already attached to a transaction",
 } as const;
+
+export const REMINDER_MESSAGE = {
+  LISTED: "Reminders fetched successfully",
+  SNOOZED: "Reminder snoozed successfully",
+  NOT_FOUND: "Reminder not found",
+  NOT_SNOOZABLE: "This reminder can no longer be snoozed",
+} as const;

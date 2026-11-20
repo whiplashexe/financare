@@ -1,3 +1,7 @@
+import {
+  resolveRecurringReminders,
+  syncRecurringReminders,
+} from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { planOccurrences } from "../../db/schema/plan.occurrences.js";
@@ -109,6 +113,8 @@ export const confirmOccurrence = async ({
     });
 
     const nextDueDate = await advancePlan(tx, plan, dueDate);
+    await resolveRecurringReminders(tx, planId, dueDate);
+    await syncRecurringReminders(tx, planId);
     const data = { ...created, next_due_date: nextDueDate };
 
     if (idempotencyKey) {
@@ -137,5 +143,9 @@ export const skipOccurrence = async ({
       transactionId: null,
     });
 
-    return { next_due_date: await advancePlan(tx, plan, dueDate) };
+    const nextDueDate = await advancePlan(tx, plan, dueDate);
+    await resolveRecurringReminders(tx, planId, dueDate);
+    await syncRecurringReminders(tx, planId);
+
+    return { next_due_date: nextDueDate };
   });

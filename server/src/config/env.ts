@@ -16,6 +16,12 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().min(1),
   CLOUDINARY_API_KEY: z.string().min(1),
   CLOUDINARY_API_SECRET: z.string().min(1),
+
+  CRON_SECRET: z.string().optional(),
+  FCM_SERVICE_ACCOUNT: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
+  APP_RESET_URL: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -1,3 +1,4 @@
+import { syncOneTimeReminders } from "../../utils/reminder.util.js";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { oneTimePlans } from "../../db/schema/one.time.plans.js";
@@ -72,6 +73,8 @@ export const updateOneTime = async ({
         }),
       })
       .where(eq(oneTimePlans.id, planId));
+
+    await syncOneTimeReminders(tx, planId);
 
     return presentOneTime(tx, userId, planId);
   });
