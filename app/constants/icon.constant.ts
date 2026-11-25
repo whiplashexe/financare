@@ -1,0 +1,37 @@
+import {
+  Activity,
+  Add,
+  BankIcon,
+  Calendar,
+  CreditCard,
+  Eye,
+  EyeClosedFreeIcons,
+  Home,
+  Login,
+  Logout,
+  Profile,
+  SignIn,
+  SmartPhone01FreeIcons,
+  TransactionIcon,
+  Wallet,
+} from '@hugeicons/core-free-icons';
+
+export const ICONS = {
+  Login: Login,
+  Register: SignIn,
+  Logout: Logout,
+  Password: {
+    Open: Eye,
+    Close: EyeClosedFreeIcons,
+  },
+  Home: Home,
+  Account: CreditCard,
+  Profile: Profile,
+  Add: Add,
+  Transaction: TransactionIcon,
+  Plan: Calendar,
+  Statistic: Activity,
+  Bank: BankIcon,
+  Ewallet: SmartPhone01FreeIcons,
+  Cash: Wallet,
+};
