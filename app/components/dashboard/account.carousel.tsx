@@ -1,8 +1,10 @@
+import { HugeIcon } from '@/components/ui/hugeicon';
 import { Text } from '@/components/ui/text';
 import { ICONS } from '@/constants/icon.constant';
 import { Account, AccountType } from '@/lib/api/accounts';
+import { formatMoney } from '@/lib/format';
 import { Link } from 'expo-router';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 const TYPE_ICON = {
   BANK: ICONS.Bank,
@@ -35,7 +37,7 @@ export const AccountCarousel = ({ accounts, hidden }: Props) => {
 
   return (
     <View className="gap-4">
-      <View className="flex-row items-center justify-center px-6">
+      <View className="flex-row items-center justify-between px-6">
         <Text className="font-grotesk-bold text-xl">Account</Text>
         <Link href="/accounts" asChild>
           <Pressable hitSlop={8}>
@@ -53,7 +55,34 @@ export const AccountCarousel = ({ accounts, hidden }: Props) => {
           </Link>
         </View>
       ) : (
-        <View></View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={cardWidth + 12}
+          decelerationRate="fast"
+          contentContainerStyle={{ paddingHorizontal: 24, gap: 12 }}>
+          {accounts.map((account) => (
+            <View
+              key={account.id}
+              style={{ width: cardWidth }}
+              className="gap-4 rounded-3xl border border-border bg-card p-5">
+              <View className="h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                <HugeIcon icon={TYPE_ICON[account.type]} size={24} />
+              </View>
+              <View className="gap-1">
+                <Text className="font-grotesk-bold text-lg" numberOfLines={1}>
+                  {account.name}
+                </Text>
+                <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+                  {subtitle({ account })}
+                </Text>
+              </View>
+              <Text className="font-grotesk-bold text-lg" numberOfLines={1}>
+                {formatMoney({ amount: account.current_balance, hidden })}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
       )}
     </View>
   );

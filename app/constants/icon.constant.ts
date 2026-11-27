@@ -1,6 +1,7 @@
 import {
   Activity,
   Add,
+  ArrowLeft,
   BankIcon,
   Calendar,
   CreditCard,
@@ -34,4 +35,7 @@ export const ICONS = {
   Bank: BankIcon,
   Ewallet: SmartPhone01FreeIcons,
   Cash: Wallet,
+  Arrow: {
+    Left: ArrowLeft,
+  },
 };

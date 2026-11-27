@@ -1,11 +1,13 @@
 import { AccountCarousel } from '@/components/dashboard/account.carousel';
+import { MonthSummary } from '@/components/dashboard/month.summary';
 import { useTabBarSpace } from '@/components/tabs';
+import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAuth } from '@/lib/auth/auth.context';
 import { formatMoney } from '@/lib/format';
 import { useAccounts } from '@/lib/hooks/use.accounts';
 import { useDashboard } from '@/lib/hooks/use.dashboard';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
@@ -42,16 +44,21 @@ const HomeScreen = () => {
             </View>
           </View>
           <AccountCarousel accounts={accounts.data?.accounts ?? []} hidden={hidden} />
-        </ScrollView>
-        {/* <View className="gap-4 p-6">
-          <Text className="font-grotesk-bold text-2xl">Halo, {user?.name}</Text>
-          <View className="gap-1 rounded-3xl border border-border bg-card p-4">
-            <Text className="text-sm text-muted-foreground">Total balance</Text>
-            <Text className="font-grotesk-bold text-3xl">
-              {formatMoney({ amount: data?.total_balance ?? 0, hidden })}
-            </Text>
+          <View className="px-6">
+            {dashboard.data ? (
+              <MonthSummary summary={dashboard.data.month_summary} hidden={hidden} />
+            ) : dashboard.error ? (
+              <View className="items-center gap-3 rounded-3xl border border-border p-5">
+                <Text className="text-muted-foreground">Failed to load monthly summary</Text>
+                <Button size="sm" variant="outline" onPress={() => dashboard.refetch()}>
+                  <Text>Try again</Text>
+                </Button>
+              </View>
+            ) : (
+              <ActivityIndicator />
+            )}
           </View>
-        </View> */}
+        </ScrollView>
       </SafeAreaView>
     </View>
   );

@@ -1,4 +1,3 @@
-import { useTabBarSpace } from '@/components/tabs';
 import { Button } from '@/components/ui/button';
 import { HugeIcon } from '@/components/ui/hugeicon';
 import { Text } from '@/components/ui/text';
@@ -23,7 +22,6 @@ const AccountsScreen = () => {
   const { user } = useAuth();
   const { data, refetch, isRefetching } = useAccounts();
   const archive = useArchiveAccount();
-  const space = useTabBarSpace();
   const hidden = user?.preferences.hide_balance ?? false;
 
   const confirmArchive = (account: Account) => {
@@ -50,17 +48,22 @@ const AccountsScreen = () => {
 
   return (
     <View className="flex-1 bg-background">
-      <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <FlatList
           data={data?.accounts ?? []}
           keyExtractor={(item) => item.id}
           refreshing={isRefetching}
           onRefresh={refetch}
-          contentContainerStyle={{ padding: 24, gap: 12, paddingBottom: space }}
+          contentContainerStyle={{ padding: 24, gap: 12 }}
           ListHeaderComponent={
             <View className="mb-3 gap-4">
               <View className="flex-row items-center justify-between">
-                <Text className="font-grotesk-bold text-2xl">Account</Text>
+                <View className="flex-row items-center gap-2">
+                  <Pressable hitSlop={8} onPress={() => router.back()}>
+                    <HugeIcon icon={ICONS.Arrow.Left} size={24} />
+                  </Pressable>
+                  <Text className="font-grotesk-bold text-2xl">Account</Text>
+                </View>
                 <Button size="sm" onPress={() => router.push('/new-account')}>
                   <HugeIcon icon={ICONS.Add} />
                   <Text>Add</Text>
