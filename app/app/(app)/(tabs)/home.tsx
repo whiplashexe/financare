@@ -2,7 +2,9 @@ import { AccountCarousel } from '@/components/dashboard/account.carousel';
 import { MonthSummary } from '@/components/dashboard/month.summary';
 import { useTabBarSpace } from '@/components/tabs';
 import { Button } from '@/components/ui/button';
+import { HugeIcon } from '@/components/ui/hugeicon';
 import { Text } from '@/components/ui/text';
+import { ICONS } from '@/constants/icon.constant';
 import { useAuth } from '@/lib/auth/auth.context';
 import { formatMoney } from '@/lib/format';
 import { useAccounts } from '@/lib/hooks/use.accounts';
@@ -35,7 +37,15 @@ const HomeScreen = () => {
             paddingBottom: space,
           }}>
           <View className="gap-4 px-6">
-            <Text className="font-grotesk-bold text-2xl">Hallo, {user?.name}</Text>
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-muted-foreground">Hallo</Text>
+                <Text className="font-grotesk-bold text-xl">{user?.name}</Text>
+              </View>
+              <Button size="icon">
+                <HugeIcon icon={ICONS.Password.Open} />
+              </Button>
+            </View>
             <View className="gap-1 rounded-3xl border border-border bg-card p-5">
               <Text className="text-sm text-muted-foreground">Total Balance</Text>
               <Text className="font-grotesk-bold text-3xl">

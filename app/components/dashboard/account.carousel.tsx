@@ -38,7 +38,9 @@ export const AccountCarousel = ({ accounts, hidden }: Props) => {
   return (
     <View className="gap-4">
       <View className="flex-row items-center justify-between px-6">
-        <Text className="font-grotesk-bold text-xl">Account</Text>
+        <Text className="font-grotesk-bold text-xl">
+          <HugeIcon icon={ICONS.Account} /> Account
+        </Text>
         <Link href="/accounts" asChild>
           <Pressable hitSlop={8}>
             <Text className="font-grotesk-medium text-muted-foreground">Manage</Text>
@@ -65,19 +67,20 @@ export const AccountCarousel = ({ accounts, hidden }: Props) => {
             <View
               key={account.id}
               style={{ width: cardWidth }}
-              className="gap-4 rounded-3xl border border-border bg-card p-5">
-              <View className="h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                <HugeIcon icon={TYPE_ICON[account.type]} size={24} />
+              className="relative gap-4 rounded-3xl border border-border bg-primary p-5">
+              <View className="absolute bottom-0 right-0 h-40 w-40 translate-x-1/4 translate-y-1/3 rounded-full bg-background/10"></View>
+              <View className="h-12 w-12 items-center justify-center rounded-xl bg-muted-foreground/30">
+                <HugeIcon className="text-background" icon={TYPE_ICON[account.type]} size={24} />
               </View>
               <View className="gap-1">
-                <Text className="font-grotesk-bold text-lg" numberOfLines={1}>
+                <Text className="font-grotesk-semibold text-background" numberOfLines={1}>
                   {account.name}
                 </Text>
                 <Text className="text-sm text-muted-foreground" numberOfLines={1}>
                   {subtitle({ account })}
                 </Text>
               </View>
-              <Text className="font-grotesk-bold text-lg" numberOfLines={1}>
+              <Text className="font-grotesk-bold text-lg text-background" numberOfLines={1}>
                 {formatMoney({ amount: account.current_balance, hidden })}
               </Text>
             </View>
