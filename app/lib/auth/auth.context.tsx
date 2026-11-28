@@ -12,6 +12,7 @@ import * as Device from 'expo-device';
 import { request, restoreSession, setSessionLostHandler } from '@/lib/api/client';
 import { tokens } from '@/lib/auth/token.store';
 import { queryClient } from '@/lib/query';
+import { updatedPReferences, updatePreferences } from '@/lib/api/profile';
 
 export type User = {
   id: string;
@@ -50,6 +51,7 @@ type AuthContextValue = {
     name: string;
   }) => Promise<void>;
   signOut: () => Promise<void>;
+  setHideBalance: ({ hide }: { hide: boolean }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -146,9 +148,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     markedSignedOut();
   }, [markedSignedOut]);
 
+  const setHideBalance = useCallback(async ({ hide }: { hide: boolean }) => {
+    const apply = (value: boolean) =>
+      setUser((current) =>
+        current
+          ? { ...current, preferences: { ...current.preferences, hide_balance: value } }
+          : current
+      );
+    apply(hide);
+    try {
+      await updatePreferences({ hide_balance: hide });
+    } catch (error) {
+      apply(!hide);
+      throw error;
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ status, user, signIn, signUp, signOut }),
-    [status, user, signIn, signUp, signOut]
+    () => ({ status, user, signIn, signUp, signOut, setHideBalance }),
+    [status, user, signIn, signUp, signOut, setHideBalance]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
